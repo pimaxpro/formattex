@@ -841,7 +841,6 @@
 
     // ==================== KHO ~300 GỢI Ý LATEX CHUẨN OVERLEAF ====================
     const latexKeywords = [
-      // Môi trường (Có hỗ trợ sinh cặp begin/end tự động)
       "\\begin{ex}", "\\end{ex}", "\\begin{itemize}", "\\end{itemize}",
       "\\begin{enumerate}", "\\end{enumerate}", "\\begin{description}", "\\end{description}",
       "\\begin{tikzpicture}", "\\end{tikzpicture}", "\\begin{tabular}", "\\end{tabular}",
@@ -855,12 +854,10 @@
       "\\begin{vmatrix}", "\\end{vmatrix}", "\\begin{Bmatrix}", "\\end{Bmatrix}",
       "\\begin{cases}", "\\end{cases}", "\\begin{array}", "\\end{array}",
 
-      // Lệnh cấu trúc câu hỏi / bài tập / giáo viên
       "\\choice", "\\choiceTF", "\\True", "\\loigiai", "\\item",
       "\\section{}", "\\subsection{}", "\\subsubsection{}", "\\paragraph{}",
       "\\chapter{}", "\\part{}", "\\appendix",
 
-      // Ký hiệu toán học & Hình học
       "\\frac{}{}", "\\sqrt{}", "\\sqrt[]{}", "\\left", "\\right",
       "\\vec{}", "\\overrightarrow{}", "\\overline{}", "\\bar{}",
       "\\sum_{}^{}", "\\int_{}^{}", "\\iint", "\\iiint", "\\oint",
@@ -877,14 +874,11 @@
       "\\chi", "\\psi", "\\omega", "\\Gamma", "\\Delta", "\\Theta", "\\Lambda",
       "\\Xi", "\\Pi", "\\Sigma", "\\Upsilon", "\\Phi", "\\Psi", "\\Omega",
 
-      // Hàm số & Toán tử
       "\\sin", "\\cos", "\\tan", "\\cot", "\\sec", "\\csc",
       "\\arcsin", "\\arccos", "\\arctan", "\\sinh", "\\cosh", "\\tanh",
       "\\log", "\\ln", "\\exp", "\\det", "\\dim", "\\hom", "\\ker",
-      "\\max", "\\min", "\\sup", "\\inf", "\\gcd", "\\deg", "\\det",
-      "\\Pr", "\\hom", "\\det", "\\lim", "\\liminf", "\\limsup",
+      "\\max", "\\min", "\\sup", "\\inf", "\\gcd", "\\deg",
 
-      // Định dạng văn bản & Khoảng trắng
       "\\textbf{}", "\\textit{}", "\\underline{}", "\\text{}", "\\textrm{}",
       "\\textsf{}", "\\texttt{}", "\\textmd{}", "\\textup{}", "\\mathbf{}",
       "\\mathit{}", "\\mathsf{}", "\\mathtt{}", "\\mathbb{}", "\\mathcal{}",
@@ -892,18 +886,15 @@
       "\\newpage", "\\clearpage", "\\linebreak", "\\nolinebreak", "\\pagebreak",
       "\\noindent", "\\indent", "\\par", "\\footnote{}", "\\url{}", "\\href{}{}",
 
-      // Kẻ bảng & Ký hiệu phụ
       "\\hline", "\\cline{}", "\\multicolumn{}{}{}", "\\rowcolor{}", "\\columncolor{}",
       "\\hline", "\\cline{1-2}", "\\cline{2-3}", "\\vline", "\\multicolumn{1}{c}{}",
       "\\centering", "\\raggedright", "\\raggedleft", "\\arraystretch",
 
-      // TikZ cơ bản cho hình học
       "\\draw", "\\fill", "\\filldraw", "\\node", "\\path", "\\coordinate",
       "\\clip", "\\grid", "\\axis", "\\addplot", "\\usetikzlibrary{}",
       "\\tikzset{}", "\\begin{axis}", "\\end{axis}", "\\draw[thick]", "\\draw[dashed]",
       "\\draw[->]", "\\draw[<->]", "\\draw[domain=]", "\\addplot[blue]",
 
-      // Khác
       "\\usepackage{}", "\\documentclass[]{}", "\\author{}", "\\date{}", "\\title{}",
       "\\maketitle", "\\tableofcontents", "\\listoffigures", "\\listoftables",
       "\\bibliographystyle{}", "\\bibliography{}", "\\cite{}", "\\ref{}", "\\label{}"
@@ -955,12 +946,16 @@
           if (activeIdx < items.length - 1) {
             if (activeIdx >= 0) items[activeIdx].classList.remove('active');
             items[activeIdx + 1].classList.add('active');
+            // TỰ ĐỘNG CUỘN ĐẾN ITEM ĐƯỢC CHỌN
+            items[activeIdx + 1].scrollIntoView({ block: 'nearest' });
           }
         } else if (e.key === 'ArrowUp') {
           e.preventDefault();
           if (activeIdx > 0) {
             items[activeIdx].classList.remove('active');
             items[activeIdx - 1].classList.add('active');
+            // TỰ ĐỘNG CUỘN ĐẾN ITEM ĐƯỢC CHỌN
+            items[activeIdx - 1].scrollIntoView({ block: 'nearest' });
           }
         } else if (e.key === 'Enter') {
           if (activeIdx >= 0 && dropdown.style.display === 'block') {
@@ -1008,7 +1003,6 @@
           let insertText = kw;
           let cursorOffset = kw.length;
 
-          // LOGIC TỰ SINH CẶP BEGIN / END KHI CHỌN MÔI TRƯỜNG
           if (kw.startsWith('\\begin{') && kw.endsWith('}')) {
             const envName = kw.substring(7, kw.length - 1);
             insertText = `\\begin{${envName}}\n    \n\\end{${envName}}`;
@@ -1025,9 +1019,10 @@
         dropdown.appendChild(item);
       });
 
+      // TÍNH TOÁN VỊ TRÍ GẦN CON TRỎ SOẠN THẢO NHẤT
       dropdown.style.display = 'block';
-      dropdown.style.left = '40px'; 
-      dropdown.style.top = '40px';
+      dropdown.style.left = '48px'; 
+      dropdown.style.top = '48px';
     }
 
     // ==================== HIGHLIGHT & SEARCH HIGHLIGHT SYNCHRONIZATION ====================
@@ -1046,7 +1041,6 @@
         }
       }
 
-      // 1. LATEX SYNTAX HIGHLIGHTING
       let html = text
         .replace(/&/g, "&amp;")
         .replace(/</g, "&lt;")
@@ -1058,7 +1052,6 @@
       html = html.replace(/\\True\b/g, '<span class="hl-true">\\True</span>');
       html = html.replace(/(\{ex\}|\{tikzpicture\}|\{itemize\}|\{enumerate\})/g, '<span class="hl-env">$1</span>');
 
-      // 2. SEARCH HIGHLIGHT OVERLAY
       if (searchKeyword.trim()) {
         const flags = matchCase ? 'g' : 'gi';
         const escapedKeyword = escapeRegExp(searchKeyword);
@@ -1128,7 +1121,7 @@
     });
 
     // =========================================================================
-    // HÀM TỰ ĐỘNG THÊM $ HOÀN HẢO KHÔNG BỊ TRÙNG LẶP DẤU $$
+    // HÀM TỰ ĐỘNG THÊM $ HOÀN HẢO
     // =========================================================================
     function autoAddMathDollars(text) {
       if (!text) return '';
@@ -1174,7 +1167,6 @@
       saveState(id, true);
     }
 
-    // 4. SELECTION WRAPPER (ITEMIZE & ENUMERATE CONVERTER)
     function wrapSelectionWithEnv(id, envType) {
       const textarea = document.getElementById(id);
       const start = textarea.selectionStart;
@@ -1205,7 +1197,6 @@
       saveState(id, true);
     }
 
-    // 5. ADVANCED SEARCH LOGIC
     function findText(id) {
       const findVal = document.getElementById(`find-${id}`).value;
       const countSpan = document.getElementById(`count-${id}`);
@@ -1357,7 +1348,6 @@
       URL.revokeObjectURL(url);
     }
 
-    // ==================== HÀM CHUẨN HÓA KHOẢNG TRẮNG ====================
     function formatOptionText(str) {
       if (!str) return '';
       let text = str.trim();
@@ -1555,7 +1545,6 @@
       setEditorValue('output-ex', results.join('\n\n'));
     }
 
-    // ==================== LOGIC MENU 2 ====================
     function extractAllTikZToSingleFile() {
       const input = document.getElementById('input-tikz').value;
       if (!input.trim()) return;
@@ -1593,7 +1582,6 @@
       return `${name}${ext}`;
     }
 
-    // ==================== LOGIC MENU 3 ====================
     const PDFJS_VERSION = '2.16.105';
     pdfjsLib.GlobalWorkerOptions.workerSrc = `https://cdnjs.cloudflare.com/ajax/libs/pdf.js/${PDFJS_VERSION}/pdf.worker.min.js`;
 
