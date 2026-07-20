@@ -18,7 +18,7 @@
         <i data-lucide="file-code-2" class="w-8 h-8 text-blue-400"></i>
         <h1 class="text-xl font-bold tracking-wide">LaTeX Standardizer</h1>
       </div>
-      <span class="text-xs text-slate-400 bg-slate-700 px-3 py-1 rounded-full">Chuẩn hóa \begin{ex} dạng cây & Fix Missing Question Text</span>
+      <span class="text-xs text-slate-400 bg-slate-700 px-3 py-1 rounded-full">Tự động xóa [MÃ], Nhận diện "Chọn ý A/B/C/D" & \True</span>
     </div>
   </header>
 
@@ -95,7 +95,7 @@
   </main>
 
   <footer class="bg-slate-800 border-t border-slate-700 py-3 text-center text-xs text-slate-400">
-    LaTeX Standardizer — Đã sửa lỗi mất nội dung đề bài
+    LaTeX Standardizer — Đã cập nhật thuật toán xóa nhiễu & gán \True tự động
   </footer>
 
   <script>
@@ -185,18 +185,25 @@
       const input = document.getElementById('input-text').value;
       if (!input.trim()) return;
 
+      // Phân tách các khối câu hỏi dựa trên "Câu X"
       const questionBlocks = input.split(/(?=(?:^|\n)\s*Câu\s+\d+)/i).filter(b => b.trim());
       let results = [];
 
       questionBlocks.forEach(block => {
         let content = block.trim();
 
-        // 1. Loại bỏ tiền tố "Câu X" kèm mã định danh [MÃ_ĐỊNH_DANH] hoặc (điểm) nếu có
-        content = content.replace(/^Câu\s+\d+\s*(?:\[[^\]]*\]|\([^\)]*\))?\s*[:\.-]*/i, '').trim();
+        // 1. Loại bỏ tiền tố "Câu X", mã định danh dạng [AECK], [MÃ] hoặc (điểm)
+        content = content.replace(/^Câu\s+\d+\s*[\.\:-]*/i, '').trim();
+        content = content.replace(/^\[[^\]]*\]\s*/i, '').trim(); // Xóa mã dạng [AECK]
+        content = content.replace(/^\([^\)]*\)\s*/i, '').trim();
 
-        // 2. Bóc tách Lời giải
+        // 2. Tách Lời giải & Tìm đáp án đúng (Hỗ trợ "Chọn ý A", "Chọn B", "Đáp án C"...)
         let questionPart = content;
         let solutionPart = "";
+        let trueAnswerKey = null;
+
+        // Bắt các mẫu "Chọn ý A", "Chọn đáp án A", "Chọn A", "Đáp án A" ở cuối câu/lời giải
+        const choicePickRegex = /(?:Chọn\s*(?:ý|đáp\s*án)?|Đáp\s*án)\s*([A-D])\.?/i;
 
         const solutionRegex = /(?:Lời giải|Hướng dẫn giải)\s*[\n\r:]*([\s\S]*$)/i;
         const matchSolution = content.match(solutionRegex);
@@ -204,31 +211,30 @@
         if (matchSolution) {
           solutionPart = matchSolution[1].trim();
           questionPart = content.substring(0, matchSolution.index).trim();
-        }
-
-        // 3. Tìm đáp án đúng (A, B, C, D)
-        let trueAnswerKey = null;
-        const answerKeyRegex = /(?:Chọn|Đáp án|Chọn đáp án)\s+([A-D])/i;
-        
-        let answerKeyMatch = solutionPart.match(answerKeyRegex);
-
-        if (!answerKeyMatch) {
-          answerKeyMatch = questionPart.match(answerKeyRegex);
-          if (answerKeyMatch) {
-            trueAnswerKey = answerKeyMatch[1].toUpperCase();
-            const textIdx = questionPart.search(/(?:Theo giả thiết|Do đó|Lời giải|Chọn đáp án)/i);
-            if (textIdx !== -1 && textIdx > questionPart.search(/(?:^|\n|\s)[A-D]\./)) {
-              solutionPart = questionPart.substring(textIdx).trim();
-              questionPart = questionPart.substring(0, textIdx).trim();
-            }
+          
+          let pickMatch = solutionPart.match(choicePickRegex);
+          if (pickMatch) {
+            trueAnswerKey = pickMatch[1].toUpperCase();
           }
         } else {
-          trueAnswerKey = answerKeyMatch[1].toUpperCase();
+          // Thử tìm mẫu "Chọn ý A" nằm ở cuối đoạn text
+          let pickMatch = questionPart.match(choicePickRegex);
+          if (pickMatch) {
+            trueAnswerKey = pickMatch[1].toUpperCase();
+            
+            // Nếu phát hiện câu chọn nằm cuối, bóc nó thành lời giải
+            const pickIndex = questionPart.search(choicePickRegex);
+            if (pickIndex !== -1) {
+              solutionPart = questionPart.substring(pickIndex).trim();
+              questionPart = questionPart.substring(0, pickIndex).trim();
+            }
+          }
         }
 
-        solutionPart = solutionPart.replace(/(?:Chọn|Đáp án|Chọn đáp án)\s+[A-D]\.?\s*/gi, '').trim();
+        // Làm sạch cụm "Chọn ý A" khỏi nội dung lời giải
+        solutionPart = solutionPart.replace(/(?:Chọn\s*(?:ý|đáp\s*án)?|Đáp\s*án)\s*[A-D]\.?\s*/gi, '').trim();
 
-        // 4. Bóc tách 4 phương án A, B, C, D
+        // 3. Bóc tách 4 phương án A, B, C, D
         const choiceRegex = /(?:^|\n|\s)(?:[◯⃝\s]*)([A-D])\.\s*([\s\S]*?)(?=(?:(?:\n|\s)[◯⃝\s]*[A-D]\.|$))/g;
         
         let choices = {};
@@ -247,13 +253,13 @@
           choices[key] = choiceVal;
         }
 
-        // Đề bài câu hỏi (Lấy toàn bộ từ đầu đến trước điểm xuất hiện phương án A.)
+        // Đề bài câu hỏi
         let mainQuestion = lastChoiceIndex !== -1 ? questionPart.substring(0, lastChoiceIndex).trim() : questionPart;
         
         // Tự động bọc $ cho các đối tượng toán trong đề bài
         mainQuestion = autoWrapMath(mainQuestion);
 
-        // 5. DỰNG KHỐI \begin{ex} DẠNG CÂY
+        // 4. DỰNG KHỐI \begin{ex} DẠNG CÂY
         let exCode = `\\begin{ex}\n`;
         exCode += `    ${mainQuestion}\n`;
         exCode += `    \\choice\n`;
