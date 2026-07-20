@@ -84,7 +84,6 @@
       font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
       font-size: 0.875rem;
       line-height: 1.5rem;
-      /* Đổi từ pre thành pre-wrap để tự động xuống dòng khi hết chiều ngang */
       white-space: pre-wrap; 
       word-break: break-word;
       tab-size: 4;
@@ -929,6 +928,11 @@
     function fixMathSpacing(str) {
       if (!str) return '';
       let text = str;
+
+      // 1. Chuẩn hóa khoảng trắng đầu/cuối bên trong công thức toán $...$
+      text = text.replace(/\$\s*([^\$]+?)\s*\$/g, (m, p1) => `$${p1.trim()}$`);
+
+      // 2. Xử lý khoảng trắng văn bản bên ngoài với khối toán
       const parts = text.split(/(\$[^\$]+\$)/g);
       for (let i = 0; i < parts.length; i++) {
         if (!parts[i].startsWith('$')) {
@@ -939,12 +943,14 @@
         }
       }
       text = parts.join('');
-      text = text.replace(/\$\s*([^\$]+?)\s*\$/g, (m, p1) => `$${p1.trim()}$`);
+
+      // 3. Đảm bảo khoảng trắng chuẩn giữa từ văn bản và công thức toán
       text = text.replace(/([a-zA-ZÀ-ỹ0-9])\$([^\$]+)\$/g, (match, p1, p2) => `${p1} $${p2}$`);
       text = text.replace(/\$([^\$]+)\$([a-zA-ZÀ-ỹ0-9])/g, (match, p1, p2) => `$${p1}$ ${p2}`);
       text = text.replace(/[ \t]+/g, ' ');
       text = text.replace(/\s+([\.,;\)])/g, '$1');
       text = text.replace(/([\(\[])\s+/g, '$1');
+
       return text.trim();
     }
 
@@ -1024,7 +1030,8 @@
         });
 
         if (solutionPart) {
-          const indentedSolution = solutionPart.split('\n').map(line => line ? `        ${line}` : '').join('\n');
+          let cleanSol = fixMathSpacing(solutionPart);
+          const indentedSolution = cleanSol.split('\n').map(line => line ? `        ${line}` : '').join('\n');
           exCode += `    \\loigiai{\n${indentedSolution}\n    }\n`;
         } else {
           exCode += `    \\loigiai{\n\n    }\n`;
@@ -1100,7 +1107,8 @@
         });
 
         if (solutionPart) {
-          const indentedSolution = solutionPart.split('\n').map(line => line ? `        ${line}` : '').join('\n');
+          let cleanSol = fixMathSpacing(solutionPart);
+          const indentedSolution = cleanSol.split('\n').map(line => line ? `        ${line}` : '').join('\n');
           exCode += `    \\loigiai{\n${indentedSolution}\n    }\n`;
         } else {
           exCode += `    \\loigiai{\n\n    }\n`;
