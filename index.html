@@ -198,24 +198,32 @@
     <!-- ================================================================= -->
     <section id="menu-section-1" class="space-y-4">
       
-      <!-- Sub-menu Switcher -->
+      <!-- Sub-menu Switcher (Đã thêm CN 3) -->
       <div class="bg-white p-3 border border-slate-200 shadow-sm flex flex-col sm:flex-row justify-between items-center gap-3">
-        <div class="flex bg-slate-100 p-1 border border-slate-200 w-full sm:w-auto">
+        <div class="flex bg-slate-100 p-1 border border-slate-200 w-full sm:w-auto overflow-x-auto">
           <button 
             id="sub-btn-1" 
             onclick="switchSubMode(1)" 
-            class="flex-1 sm:flex-none px-4 py-1.5 text-xs font-semibold transition flex items-center justify-center space-x-2 bg-slate-800 text-white"
+            class="px-3 py-1.5 text-xs font-semibold transition flex items-center justify-center space-x-1.5 bg-slate-800 text-white whitespace-nowrap"
           >
             <i data-lucide="check-square" class="w-3.5 h-3.5"></i>
-            <span>CN 1: Trắc nghiệm 4 Lựa chọn (\choice)</span>
+            <span>CN 1: \choice</span>
           </button>
           <button 
             id="sub-btn-2" 
             onclick="switchSubMode(2)" 
-            class="flex-1 sm:flex-none px-4 py-1.5 text-xs font-semibold transition flex items-center justify-center space-x-2 text-slate-600 hover:text-slate-900"
+            class="px-3 py-1.5 text-xs font-semibold transition flex items-center justify-center space-x-1.5 text-slate-600 hover:text-slate-900 whitespace-nowrap"
           >
             <i data-lucide="list-checks" class="w-3.5 h-3.5"></i>
-            <span>CN 2: Trắc nghiệm Đúng/Sai (\choiceTF)</span>
+            <span>CN 2: \choiceTF</span>
+          </button>
+          <button 
+            id="sub-btn-3" 
+            onclick="switchSubMode(3)" 
+            class="px-3 py-1.5 text-xs font-semibold transition flex items-center justify-center space-x-1.5 text-slate-600 hover:text-slate-900 whitespace-nowrap"
+          >
+            <i data-lucide="pen-tool" class="w-3.5 h-3.5"></i>
+            <span>CN 3: \shortans</span>
           </button>
         </div>
         <span id="sub-mode-desc" class="text-xs text-slate-600 font-medium">
@@ -284,7 +292,6 @@
               <button onclick="applyAutoMath('output-ex')" class="bg-amber-100 hover:bg-amber-200 text-amber-900 p-1.5 h-7 w-7 flex items-center justify-center border border-amber-300 transition" title="Tự động bọc $ cho đoạn bôi đen">
                 <i data-lucide="variable" class="w-4 h-4 text-amber-700"></i>
               </button>
-              <!-- NÚT CHUYỂN ARRAY SANG ALIGNED MỚI -->
               <button onclick="convertArrayToAligned('output-ex')" class="bg-blue-100 hover:bg-blue-200 text-blue-900 p-1.5 h-7 w-7 flex items-center justify-center border border-blue-300 transition" title="Chuyển toàn bộ array thành aligned và căn lề dấu =">
                 <i data-lucide="columns-2" class="w-4 h-4 text-blue-700"></i>
               </button>
@@ -827,26 +834,34 @@
       subModeEx = mode;
       const btn1 = document.getElementById('sub-btn-1');
       const btn2 = document.getElementById('sub-btn-2');
+      const btn3 = document.getElementById('sub-btn-3');
       const desc = document.getElementById('sub-mode-desc');
       const label = document.getElementById('btn-ex-label');
 
+      // Reset style cả 3 nút
+      [btn1, btn2, btn3].forEach(b => {
+        b.className = "px-3 py-1.5 text-xs font-semibold transition flex items-center justify-center space-x-1.5 text-slate-600 hover:text-slate-900 whitespace-nowrap";
+      });
+
       if (mode === 1) {
-        btn1.className = "flex-1 sm:flex-none px-4 py-1.5 text-xs font-semibold transition flex items-center justify-center space-x-2 bg-slate-800 text-white";
-        btn2.className = "flex-1 sm:flex-none px-4 py-1.5 text-xs font-semibold transition flex items-center justify-center space-x-2 text-slate-600 hover:text-slate-900";
+        btn1.className = "px-3 py-1.5 text-xs font-semibold transition flex items-center justify-center space-x-1.5 bg-slate-800 text-white whitespace-nowrap";
         desc.innerHTML = "Chế độ: <b>Trắc nghiệm 4 phương án (A, B, C, D)</b>";
         label.innerText = "Chuẩn Hóa Ngay (CN 1)";
-      } else {
-        btn2.className = "flex-1 sm:flex-none px-4 py-1.5 text-xs font-semibold transition flex items-center justify-center space-x-2 bg-slate-800 text-white";
-        btn1.className = "flex-1 sm:flex-none px-4 py-1.5 text-xs font-semibold transition flex items-center justify-center space-x-2 text-slate-600 hover:text-slate-900";
+      } else if (mode === 2) {
+        btn2.className = "px-3 py-1.5 text-xs font-semibold transition flex items-center justify-center space-x-1.5 bg-slate-800 text-white whitespace-nowrap";
         desc.innerHTML = "Chế độ: <b>Trắc nghiệm Đúng/Sai (a, b, c, d)</b>";
         label.innerText = "Chuẩn Hóa Ngay (CN 2)";
+      } else {
+        btn3.className = "px-3 py-1.5 text-xs font-semibold transition flex items-center justify-center space-x-1.5 bg-slate-800 text-white whitespace-nowrap";
+        desc.innerHTML = "Chế độ: <b>Trắc nghiệm trả lời ngắn (\\shortans)</b>";
+        label.innerText = "Chuẩn Hóa Ngay (CN 3)";
       }
     }
 
     // SEARCH STATE TRACKER
     const searchStates = {};
 
-    // ==================== KHO ~300 GỢI Ý LATEX CHUẨN OVERLEAF ====================
+    // ==================== KHO GỢI Ý LATEX ====================
     const latexKeywords = [
       "\\begin{ex}", "\\end{ex}", "\\begin{itemize}", "\\end{itemize}",
       "\\begin{enumerate}", "\\end{enumerate}", "\\begin{description}", "\\end{description}",
@@ -860,8 +875,9 @@
       "\\begin{pmatrix}", "\\end{pmatrix}", "\\begin{bmatrix}", "\\end{bmatrix}",
       "\\begin{vmatrix}", "\\end{vmatrix}", "\\begin{Bmatrix}", "\\end{Bmatrix}",
       "\\begin{cases}", "\\end{cases}", "\\begin{array}", "\\end{array}",
+      "\\begin{aligned}", "\\end{aligned}",
 
-      "\\choice", "\\choiceTF", "\\True", "\\loigiai", "\\item",
+      "\\choice", "\\choiceTF", "\\True", "\\loigiai", "\\item", "\\shortans{}",
       "\\section{}", "\\subsection{}", "\\subsubsection{}", "\\paragraph{}",
       "\\chapter{}", "\\part{}", "\\appendix",
 
@@ -1052,7 +1068,7 @@
 
       html = html.replace(/(\%[^\n]*)/g, '<span class="hl-comment">$1</span>');
       html = html.replace(/(\$(?:[^\$\\]|\\.)*\$)/g, '<span class="hl-math">$1</span>');
-      html = html.replace(/\\(begin|end|choice|choiceTF|loigiai|item)\b/g, '<span class="hl-keyword">\\$1</span>');
+      html = html.replace(/\\(begin|end|choice|choiceTF|loigiai|item|shortans)\b/g, '<span class="hl-keyword">\\$1</span>');
       html = html.replace(/\\True\b/g, '<span class="hl-true">\\True</span>');
       html = html.replace(/(\{ex\}|\{tikzpicture\}|\{itemize\}|\{enumerate\})/g, '<span class="hl-env">$1</span>');
 
@@ -1125,32 +1141,23 @@
     });
 
     // =========================================================================
-    // HÀM CHUYỂN ĐỔI ARRAY THÀNH ALIGNED & TỰ ĐỘNG THÊM DẤU & VÀO DẤU =
+    // HÀM CHUYỂN ĐỔI ARRAY THÀNH ALIGNED
     // =========================================================================
     function convertArrayToAligned(id) {
       const textarea = document.getElementById(id);
       if (!textarea) return;
 
       let text = textarea.value;
-
-      // Regex tìm môi trường array kèm theo các option rườm rà như {l}, {cl}, {c|c|c},...
-      // VD: \begin{array}{l} ... \end{array} hoặc \begin{array}{c|c} ... \end{array}
       const arrayRegex = /\\begin\{array\}\s*\{[^}]*\}([\s\S]*?)\\end\{array\}/g;
 
       text = text.replace(arrayRegex, (match, innerContent) => {
-        // Tách các dòng bên trong array (phân tách bởi dấu \\)
         let lines = innerContent.split('\\\\');
         
         let processedLines = lines.map(line => {
           let trimmed = line.trim();
           if (!trimmed) return '';
-
-          // Xóa bỏ các ký tự căn lề thủ công cũ nếu có (vd & cũ)
           trimmed = trimmed.replace(/&/g, '').trim();
-
-          // Tự động thêm dấu & vào trước dấu bằng (=) đầu tiên trong dòng nếu chưa có
           if (trimmed.includes('=')) {
-            // Thay dấu = đầu tiên bằng &=
             trimmed = trimmed.replace('=', '&=');
           }
           return `    ${trimmed}`;
@@ -1432,11 +1439,14 @@
       return str;
     }
 
+    // ==================== BỘ XỬ LÝ CHÍNH (XỬ LÝ CẢ 3 CHỨC NĂNG) ====================
     function processExEnvironment() {
       if (subModeEx === 1) processMode1();
-      else processMode2();
+      else if (subModeEx === 2) processMode2();
+      else processMode3();
     }
 
+    // Chức năng 1: \choice
     function processMode1() {
       const input = document.getElementById('input-ex').value;
       if (!input.trim()) return;
@@ -1513,6 +1523,7 @@
       setEditorValue('output-ex', results.join('\n\n'));
     }
 
+    // Chức năng 2: \choiceTF
     function processMode2() {
       const input = document.getElementById('input-ex').value;
       if (!input.trim()) return;
@@ -1574,6 +1585,60 @@
           let isTrue = (tfPattern && tfPattern[index]) ? '\\True ' : '';
           exCode += `    {${isTrue}${optionText}}\n`;
         });
+
+        if (solutionPart) {
+          let cleanSol = fixMathSpacing(solutionPart);
+          const indentedSolution = cleanSol.split('\n').map(line => line ? `        ${line}` : '').join('\n');
+          exCode += `    \\loigiai{\n${indentedSolution}\n    }\n`;
+        } else {
+          exCode += `    \\loigiai{\n\n    }\n`;
+        }
+
+        exCode += `\\end{ex}`;
+        results.push(exCode);
+      });
+
+      setEditorValue('output-ex', results.join('\n\n'));
+    }
+
+    // Chức năng 3: \shortans
+    function processMode3() {
+      const input = document.getElementById('input-ex').value;
+      if (!input.trim()) return;
+
+      const questionBlocks = input.split(/(?=(?:^|\n)\s*Câu\s+\d+)/i).filter(b => b.trim());
+      let results = [];
+
+      questionBlocks.forEach(block => {
+        let content = cleanHeaderPrefix(block);
+        let questionPart = content;
+        let solutionPart = "";
+
+        const solutionHeaderRegex = /(?:Lời\s*giải|Hướng\s*dẫn\s*giải)[\.\s:]*/i;
+        const solMatch = content.match(solutionHeaderRegex);
+
+        if (solMatch) {
+          questionPart = content.substring(0, solMatch.index).trim();
+          solutionPart = content.substring(solMatch.index + solMatch[0].length).trim();
+        }
+
+        // Trích xuất đáp án ngắn từ dòng "Đáp án. [value]" hoặc "Đáp số. [value]"
+        let shortAnswerValue = "";
+        const shortAnsHeaderRegex = /(?:Đáp\s*án|Đáp\s*số)[\.\s:]*([^\n]+)/i;
+        const ansMatch = questionPart.match(shortAnsHeaderRegex) || solutionPart.match(shortAnsHeaderRegex);
+
+        if (ansMatch) {
+          shortAnswerValue = ansMatch[1].trim();
+          // Xóa dòng đáp án đó ra khỏi phần nội dung câu hỏi/lời giải
+          questionPart = questionPart.replace(shortAnsHeaderRegex, '').trim();
+          solutionPart = solutionPart.replace(shortAnsHeaderRegex, '').trim();
+        }
+
+        let mainQuestion = fixMathSpacing(questionPart);
+
+        let exCode = `\\begin{ex}\n`;
+        exCode += `    ${mainQuestion}\n\n`;
+        exCode += `    \\shortans{${shortAnswerValue}}\n`;
 
         if (solutionPart) {
           let cleanSol = fixMathSpacing(solutionPart);
@@ -1726,7 +1791,7 @@
             const offsetX = (targetWidth - viewport.width) / 2;
             const offsetY = (targetHeight - viewport.height) / 2;
 
-            statusDiv.textContent = `Đang xuất trang ${i} / ${totalPages} (${targetWidth}x${targetHeight} px)...`;
+            statusDiv.textContent = `Đang xuất trang ${i} / ${totalPages} (${targetWidth}x{targetHeight} px)...`;
             await page.render({
               canvasContext: ctx,
               viewport: viewport,
@@ -1736,7 +1801,7 @@
             canvas.width = Math.round(viewport.width);
             canvas.height = Math.round(viewport.height);
 
-            statusDiv.textContent = `Đang xuất trang ${i} / ${totalPages} (${canvas.width}x${canvas.height} px)...`;
+            statusDiv.textContent = `Đang xuất trang ${i} / ${totalPages} (${canvas.width}x{canvas.height} px)...`;
             await page.render({
               canvasContext: ctx,
               viewport: viewport
