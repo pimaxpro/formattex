@@ -232,7 +232,15 @@
               <i data-lucide="file-output" class="w-4 h-4 text-slate-600"></i>
               Kết quả chuẩn hóa:
             </span>
-            <div class="flex items-center space-x-2">
+            <div class="flex items-center space-x-1.5">
+              <!-- Nút chuyển đổi Itemize & Enumerate -->
+              <button onclick="wrapSelectionWithEnv('output-ex', 'itemize')" class="bg-slate-100 hover:bg-slate-200 text-slate-800 px-2 h-7 flex items-center gap-1 border border-slate-200 transition font-mono font-medium text-[11px]" title="Chuyển đoạn bôi đen thành \\begin{itemize}">
+                <i data-lucide="list" class="w-3.5 h-3.5 text-slate-600"></i> itemize
+              </button>
+              <button onclick="wrapSelectionWithEnv('output-ex', 'enumerate')" class="bg-slate-100 hover:bg-slate-200 text-slate-800 px-2 h-7 flex items-center gap-1 border border-slate-200 transition font-mono font-medium text-[11px]" title="Chuyển đoạn bôi đen thành \\begin{enumerate}">
+                <i data-lucide="list-ordered" class="w-3.5 h-3.5 text-slate-600"></i> enumerate
+              </button>
+              <span class="text-slate-300">|</span>
               <button onclick="copyToClipboard('output-ex')" class="text-slate-700 hover:bg-slate-100 px-2.5 h-7 flex items-center gap-1 border border-slate-200 transition">
                 <i data-lucide="copy" class="w-3 h-3"></i> Copy
               </button>
@@ -250,7 +258,6 @@
                 <input type="text" id="find-output-ex" placeholder="Tìm kiếm..." oninput="findText('output-ex')" class="w-full bg-white border border-slate-200 px-2 py-1 outline-none focus:border-slate-400">
               </div>
 
-              <!-- Prev / Next Buttons & Count Indicator -->
               <div class="flex items-center space-x-1 border border-slate-200 bg-white px-1 py-0.5">
                 <button onclick="navigateSearch('output-ex', -1)" title="Tìm trước" class="hover:bg-slate-100 p-1 rounded">
                   <i data-lucide="chevron-left" class="w-3.5 h-3.5 text-slate-600"></i>
@@ -261,7 +268,6 @@
                 </button>
               </div>
 
-              <!-- Match Case Option -->
               <label class="flex items-center space-x-1 cursor-pointer select-none text-slate-600">
                 <input type="checkbox" id="match-case-output-ex" onchange="findText('output-ex')" class="rounded border-slate-300">
                 <span>Match case</span>
@@ -358,7 +364,14 @@
               <i data-lucide="file-check" class="w-4 h-4 text-slate-600"></i>
               File gốc (Đã gỡ TikZ):
             </span>
-            <div class="flex items-center space-x-2">
+            <div class="flex items-center space-x-1.5">
+              <button onclick="wrapSelectionWithEnv('output-main', 'itemize')" class="bg-slate-100 hover:bg-slate-200 text-slate-800 px-2 h-7 flex items-center gap-1 border border-slate-200 transition font-mono font-medium text-[11px]">
+                <i data-lucide="list" class="w-3.5 h-3.5 text-slate-600"></i> itemize
+              </button>
+              <button onclick="wrapSelectionWithEnv('output-main', 'enumerate')" class="bg-slate-100 hover:bg-slate-200 text-slate-800 px-2 h-7 flex items-center gap-1 border border-slate-200 transition font-mono font-medium text-[11px]">
+                <i data-lucide="list-ordered" class="w-3.5 h-3.5 text-slate-600"></i> enumerate
+              </button>
+              <span class="text-slate-300">|</span>
               <button onclick="copyToClipboard('output-main')" class="text-slate-700 hover:bg-slate-100 px-2.5 h-7 flex items-center gap-1 border border-slate-200 transition">
                 <i data-lucide="copy" class="w-3 h-3"></i> Copy
               </button>
@@ -663,17 +676,16 @@
 
       html = html.replace(/(\%[^\n]*)/g, '<span class="hl-comment">$1</span>');
       html = html.replace(/(\$(?:[^\$\\]|\\.)*\$)/g, '<span class="hl-math">$1</span>');
-      html = html.replace(/\\(begin|end|choice|choiceTF|loigiai)\b/g, '<span class="hl-keyword">\\$1</span>');
+      html = html.replace(/\\(begin|end|choice|choiceTF|loigiai|item)\b/g, '<span class="hl-keyword">\\$1</span>');
       html = html.replace(/\\True\b/g, '<span class="hl-true">\\True</span>');
-      html = html.replace(/(\{ex\}|\{tikzpicture\})/g, '<span class="hl-env">$1</span>');
+      html = html.replace(/(\{ex\}|\{tikzpicture\}|\{itemize\}|\{enumerate\})/g, '<span class="hl-env">$1</span>');
 
-      // 2. SEARCH HIGHLIGHT OVERLAY (SAFE INSERTION)
+      // 2. SEARCH HIGHLIGHT OVERLAY
       if (searchKeyword.trim()) {
         const flags = matchCase ? 'g' : 'gi';
         const escapedKeyword = escapeRegExp(searchKeyword);
         const searchRegex = new RegExp(escapedKeyword, flags);
 
-        // Splitting HTML into tags and text nodes to highlight ONLY visible text
         const parts = html.split(/(<[^>]+>)/g);
         let matchCounter = 0;
 
@@ -721,7 +733,39 @@
       handleInput(id);
     }
 
-    // 3. ADVANCED SEARCH LOGIC (PREV / NEXT / MATCH CASE / AUTO SCROLL)
+    // 3. SELECTION WRAPPER (ITEMIZE & ENUMERATE CONVERTER)
+    function wrapSelectionWithEnv(id, envType) {
+      const textarea = document.getElementById(id);
+      const start = textarea.selectionStart;
+      const end = textarea.selectionEnd;
+      const fullText = textarea.value;
+
+      if (start === end) {
+        // Nếu không bôi đen, chèn khung rỗng ngay con trỏ
+        const emptyEnv = `\\begin{${envType}}\n\\item \n\\end{${envType}}`;
+        textarea.setRangeText(emptyEnv, start, end, 'select');
+      } else {
+        const selectedText = fullText.substring(start, end);
+        const lines = selectedText.split('\n');
+
+        const convertedLines = lines.map(line => {
+          let cleanedLine = line.trim();
+          if (!cleanedLine) return '';
+          // Loại bỏ các ký tự gạch đầu dòng thô: -, *, +, 1., 2), \item,...
+          cleanedLine = cleanedLine.replace(/^(?:\\item\s*|[\-\*\+]\s*|\d+[\.\)]\s*)/, '').trim();
+          return `\\item ${cleanedLine}`;
+        });
+
+        const formattedContent = convertedLines.filter(l => l !== '').join('\n');
+        const wrappedText = `\\begin{${envType}}\n${formattedContent}\n\\end{${envType}}`;
+
+        textarea.setRangeText(wrappedText, start, end, 'select');
+      }
+
+      handleInput(id);
+    }
+
+    // 4. ADVANCED SEARCH LOGIC
     function findText(id) {
       const findVal = document.getElementById(`find-${id}`).value;
       const countSpan = document.getElementById(`count-${id}`);
@@ -790,10 +834,9 @@
       const textarea = document.getElementById(id);
       const match = state.matches[state.activeMatchIndex];
 
-      // Scroll textarea to line containing the match
       const textBefore = textarea.value.substring(0, match.index);
       const lineNumber = textBefore.split('\n').length;
-      const lineHeight = 24; // 1.5rem = 24px
+      const lineHeight = 24;
 
       textarea.scrollTop = (lineNumber - 3) * lineHeight;
       syncScroll(id);
