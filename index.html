@@ -234,6 +234,11 @@
               Kết quả chuẩn hóa:
             </span>
             <div class="flex items-center space-x-1.5">
+              <!-- Nút tự động thêm $ cho đoạn bôi đen -->
+              <button onclick="applyAutoMath('output-ex')" class="bg-amber-100 hover:bg-amber-200 text-amber-900 px-2 h-7 flex items-center gap-1 border border-amber-300 transition font-mono font-bold text-[11px]" title="Bọc $ cho số, kí tự toán, tên điểm trong đoạn bôi đen">
+                <i data-lucide="variable" class="w-3.5 h-3.5 text-amber-700"></i> $ Math
+              </button>
+              <span class="text-slate-300">|</span>
               <button onclick="wrapSelectionWithEnv('output-ex', 'itemize')" class="bg-slate-100 hover:bg-slate-200 text-slate-800 px-2 h-7 flex items-center gap-1 border border-slate-200 transition font-mono font-medium text-[11px]" title="Chuyển đoạn bôi đen thành \\begin{itemize}">
                 <i data-lucide="list" class="w-3.5 h-3.5 text-slate-600"></i> itemize
               </button>
@@ -365,6 +370,10 @@
               File gốc (Đã gỡ TikZ):
             </span>
             <div class="flex items-center space-x-1.5">
+              <button onclick="applyAutoMath('output-main')" class="bg-amber-100 hover:bg-amber-200 text-amber-900 px-2 h-7 flex items-center gap-1 border border-amber-300 transition font-mono font-bold text-[11px]" title="Bọc $ cho số, kí tự toán, tên điểm trong đoạn bôi đen">
+                <i data-lucide="variable" class="w-3.5 h-3.5 text-amber-700"></i> $ Math
+              </button>
+              <span class="text-slate-300">|</span>
               <button onclick="wrapSelectionWithEnv('output-main', 'itemize')" class="bg-slate-100 hover:bg-slate-200 text-slate-800 px-2 h-7 flex items-center gap-1 border border-slate-200 transition font-mono font-medium text-[11px]">
                 <i data-lucide="list" class="w-3.5 h-3.5 text-slate-600"></i> itemize
               </button>
@@ -732,7 +741,61 @@
       handleInput(id);
     }
 
-    // 3. SELECTION WRAPPER (ITEMIZE & ENUMERATE CONVERTER)
+    // 3. AUTO MATH DOLLARS WRAPPER
+    function autoAddMathDollars(text) {
+      if (!text) return '';
+      
+      // Tách văn bản thành các mảng nằm trong và nằm ngoài dấu $ để không tác động vào khối toán đã có
+      const parts = text.split(/(\$[^\$]+\$)/g);
+
+      for (let i = 0; i < parts.length; i++) {
+        if (!parts[i].startsWith('$')) {
+          let str = parts[i];
+
+          // 1. Nhận diện các biểu thức hình học, khoảng toán học, gán số (VD: AC=2, AD=5, (2;3), (C))
+          str = str.replace(/(?<![\$\w\\])(\([A-Z0-9a-z;,\s\-\+]+\)|[A-Z]{2,}\s*=\s*[\-+]?\d+(?:[\.,]\d+)?)(?![\$\w])/g, ' $$$1$$ ');
+
+          // 2. Nhận diện tên điểm, tên đường tròn, tâm (VD: tam giác ABC, đường tròn tâm O, cô A)
+          str = str.replace(/(?<=tam\s+giác|đường\s+tròn|tâm|cô|ông|điểm|mặt\s+phẳng|đường\s+thẳng)\s+([A-Z]{1,3}\b)/gi, ' $$$1$$');
+
+          // 3. Nhận diện các số, số thập phân có dấu phẩy/chấm, phần trăm (VD: 385, 4; 82000; 9,5\%)
+          str = str.replace(/(?<![\$\w\\])(\d+(?:\s*[\.,]\s*\d+)?\s*(?:\\%)?)(?![\$\w\\])/g, ' $$$1$$ ');
+
+          // 4. Nhận diện biến đơn số thực/biến số đứng sau các từ khóa (VD: số thực m, biến x)
+          str = str.replace(/(?<=số\s+thực|biến|hàm\s+số|tham\s+số)\s+([a-z])\b/gi, ' $$$1$$');
+
+          // Sửa khoảng trắng thừa vừa chèn
+          str = str.replace(/\$\s*([^\$]+?)\s*\$/g, '$$$1$$');
+          parts[i] = str;
+        }
+      }
+
+      let result = parts.join('');
+
+      // Tối ưu khoảng trắng xung quanh khối toán $
+      result = fixMathSpacing(result);
+      return result;
+    }
+
+    function applyAutoMath(id) {
+      const textarea = document.getElementById(id);
+      const start = textarea.selectionStart;
+      const end = textarea.selectionEnd;
+      const fullText = textarea.value;
+
+      if (start === end) {
+        alert("Vui lòng bôi đen đoạn văn bản cần tự động thêm dấu $!");
+        return;
+      }
+
+      const selectedText = fullText.substring(start, end);
+      const processedText = autoAddMathDollars(selectedText);
+
+      textarea.setRangeText(processedText, start, end, 'select');
+      handleInput(id);
+    }
+
+    // 4. SELECTION WRAPPER (ITEMIZE & ENUMERATE CONVERTER)
     function wrapSelectionWithEnv(id, envType) {
       const textarea = document.getElementById(id);
       const start = textarea.selectionStart;
@@ -762,7 +825,7 @@
       handleInput(id);
     }
 
-    // 4. ADVANCED SEARCH LOGIC
+    // 5. ADVANCED SEARCH LOGIC
     function findText(id) {
       const findVal = document.getElementById(`find-${id}`).value;
       const countSpan = document.getElementById(`count-${id}`);
@@ -929,10 +992,8 @@
       if (!str) return '';
       let text = str;
 
-      // 1. Chuẩn hóa khoảng trắng đầu/cuối bên trong công thức toán $...$
       text = text.replace(/\$\s*([^\$]+?)\s*\$/g, (m, p1) => `$${p1.trim()}$`);
 
-      // 2. Xử lý khoảng trắng văn bản bên ngoài với khối toán
       const parts = text.split(/(\$[^\$]+\$)/g);
       for (let i = 0; i < parts.length; i++) {
         if (!parts[i].startsWith('$')) {
@@ -944,7 +1005,6 @@
       }
       text = parts.join('');
 
-      // 3. Đảm bảo khoảng trắng chuẩn giữa từ văn bản và công thức toán
       text = text.replace(/([a-zA-ZÀ-ỹ0-9])\$([^\$]+)\$/g, (match, p1, p2) => `${p1} $${p2}$`);
       text = text.replace(/\$([^\$]+)\$([a-zA-ZÀ-ỹ0-9])/g, (match, p1, p2) => `$${p1}$ ${p2}`);
       text = text.replace(/[ \t]+/g, ' ');
