@@ -1,1 +1,233 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>LaTeX ex Standardizer</title>
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Lucide Icons -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+</head>
+<body class="bg-slate-900 text-slate-100 min-h-screen font-sans flex flex-col">
 
+  <!-- Header -->
+  <header class="bg-slate-800 border-b border-slate-700 py-4 px-6 shadow-md">
+    <div class="max-w-7xl mx-auto flex justify-between items-center">
+      <div class="flex items-center space-x-3">
+        <i data-lucide="file-code-2" class="w-8 h-8 text-blue-400"></i>
+        <h1 class="text-xl font-bold tracking-wide">LaTeX Standardizer</h1>
+      </div>
+      <span class="text-xs text-slate-400 bg-slate-700 px-3 py-1 rounded-full">Chuẩn hóa môi trường \begin{ex}</span>
+    </div>
+  </header>
+
+  <!-- Main Content -->
+  <main class="flex-1 max-w-7xl w-full mx-auto p-4 md:p-6 space-y-4 flex flex-col">
+    
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 flex-1">
+      
+      <!-- BOX 1: INPUT TEXT -->
+      <div class="flex flex-col space-y-2">
+        <div class="flex justify-between items-center text-sm font-semibold text-slate-300">
+          <div class="flex items-center space-x-2">
+            <i data-lucide="file-input" class="w-4 h-4 text-blue-400"></i>
+            <span>Box 1: Text thô cần chuẩn hóa</span>
+          </div>
+          <div class="flex items-center space-x-3">
+            <label class="cursor-pointer text-xs bg-slate-800 hover:bg-slate-700 text-blue-400 px-2.5 py-1 rounded border border-slate-700 transition flex items-center space-x-1">
+              <i data-lucide="upload" class="w-3 h-3"></i>
+              <span>Tải file</span>
+              <input type="file" accept=".tex,.txt" class="hidden" onchange="loadFile(event)">
+            </label>
+            <button onclick="clearInput()" class="text-xs text-red-400 hover:underline flex items-center space-x-1">
+              <i data-lucide="trash-2" class="w-3 h-3"></i>
+              <span>Xóa</span>
+            </button>
+          </div>
+        </div>
+        <textarea 
+          id="input-text" 
+          class="w-full flex-1 min-h-[500px] bg-slate-950 border border-slate-800 rounded-lg p-4 font-mono text-sm text-slate-200 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 resize-none shadow-inner" 
+          placeholder="Paste đoạn text đề thi / bài tập thô vào đây..."
+        ></textarea>
+      </div>
+
+      <!-- BOX 2: OUTPUT RESULT -->
+      <div class="flex flex-col space-y-2">
+        <div class="flex justify-between items-center text-sm font-semibold text-slate-300">
+          <div class="flex items-center space-x-2">
+            <i data-lucide="file-output" class="w-4 h-4 text-emerald-400"></i>
+            <span>Box 2: Kết quả chuẩn hóa (\begin{ex})</span>
+          </div>
+          <div class="flex items-center space-x-3">
+            <button onclick="copyToClipboard()" class="text-xs text-blue-400 hover:underline flex items-center space-x-1">
+              <i data-lucide="copy" class="w-3 h-3"></i>
+              <span>Copy</span>
+            </button>
+            <button onclick="downloadResult()" class="text-xs text-emerald-400 hover:underline flex items-center space-x-1">
+              <i data-lucide="download" class="w-3 h-3"></i>
+              <span>Tải .tex</span>
+            </button>
+          </div>
+        </div>
+        <textarea 
+          id="output-text" 
+          readonly 
+          class="w-full flex-1 min-h-[500px] bg-slate-950 border border-slate-800 rounded-lg p-4 font-mono text-sm text-emerald-400 focus:outline-none resize-none shadow-inner" 
+          placeholder="Kết quả chuẩn hóa sẽ xuất hiện tại đây..."
+        ></textarea>
+      </div>
+
+    </div>
+
+    <!-- Action Bar -->
+    <div class="flex justify-end pt-2">
+      <button 
+        onclick="processToExEnvironment()" 
+        class="bg-blue-600 hover:bg-blue-500 text-white font-medium px-6 py-2.5 rounded-lg transition flex items-center space-x-2 shadow-lg shadow-blue-600/20"
+      >
+        <i data-lucide="wand-2" class="w-4 h-4"></i>
+        <span>Chuẩn Hóa Ngay</span>
+      </button>
+    </div>
+
+  </main>
+
+  <footer class="bg-slate-800 border-t border-slate-700 py-3 text-center text-xs text-slate-400">
+    LaTeX Standardizer — GitHub Pages Ready
+  </footer>
+
+  <script>
+    lucide.createIcons();
+
+    // Tải nội dung từ file .tex/.txt vào Box 1
+    function loadFile(event) {
+      const file = event.target.files[0];
+      if (!file) return;
+
+      const reader = new FileReader();
+      reader.onload = function(e) {
+        document.getElementById('input-text').value = e.target.result;
+      };
+      reader.readAsText(file);
+    }
+
+    // Xóa dữ liệu Box 1
+    function clearInput() {
+      document.getElementById('input-text').value = '';
+      document.getElementById('output-text').value = '';
+    }
+
+    // Copy kết quả ở Box 2
+    function copyToClipboard() {
+      const textarea = document.getElementById('output-text');
+      if (!textarea.value) return;
+      textarea.select();
+      navigator.clipboard.writeText(textarea.value);
+      alert('Đã copy kết quả vào bộ nhớ tạm!');
+    }
+
+    // Tải file kết quả .tex
+    function downloadResult() {
+      const text = document.getElementById('output-text').value;
+      if (!text) return;
+      const blob = new Blob([text], { type: 'text/plain;charset=utf-8' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = 'chuan_hoa_ex.tex';
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+    }
+
+    // THUẬT TOÁN BÓC TÁCH & CHUẨN HÓA LATEX SANG EX
+    function processToExEnvironment() {
+      const input = document.getElementById('input-text').value;
+      if (!input.trim()) return;
+
+      // Phân tách các khối câu hỏi dựa trên từ khóa "Câu X"
+      const questionBlocks = input.split(/(?=(?:^|\n)\s*Câu\s+\d+)/i).filter(b => b.trim());
+      
+      let results = [];
+
+      questionBlocks.forEach(block => {
+        let content = block.trim();
+
+        // 1. Loại bỏ các tiền tố Câu, mã định danh, số điểm nhiễu
+        content = content.replace(/^Câu\s+\d+[^:\n]*[:\s-]*/i, '');
+        content = content.replace(/^\[[^\]]+\]\s*/, '');
+        content = content.replace(/^\([^\)]+\)\s*/, '');
+
+        // 2. Bóc tách Lời giải (nếu có)
+        let questionPart = content;
+        let solutionPart = "";
+
+        const solutionRegex = /(?:Lời giải|Hướng dẫn giải)\s*[\n\r:]*([\s\S]*$)/i;
+        const matchSolution = content.match(solutionRegex);
+
+        if (matchSolution) {
+          solutionPart = matchSolution[1].trim();
+          questionPart = content.substring(0, matchSolution.index).trim();
+        }
+
+        // 3. Tìm ký tự đáp án đúng (A, B, C, D) từ lời giải hoặc cuối câu hỏi
+        let trueAnswerKey = null;
+        const answerKeyRegex = /(?:Chọn|Đáp án|Chọn đáp án)\s+([A-D])/i;
+        
+        let answerKeyMatch = solutionPart.match(answerKeyRegex);
+
+        if (!answerKeyMatch) {
+          answerKeyMatch = questionPart.match(answerKeyRegex);
+          if (answerKeyMatch) {
+            trueAnswerKey = answerKeyMatch[1].toUpperCase();
+            const textIdx = questionPart.search(/(?:Theo giả thiết|Do đó|Lời giải|Chọn đáp án)/i);
+            if (textIdx !== -1 && textIdx > questionPart.search(/[A-D]\./)) {
+              solutionPart = questionPart.substring(textIdx).trim();
+              questionPart = questionPart.substring(0, textIdx).trim();
+            }
+          }
+        } else {
+          trueAnswerKey = answerKeyMatch[1].toUpperCase();
+        }
+
+        // Xóa dòng "Chọn đáp án X." dư thừa khỏi lời giải
+        solutionPart = solutionPart.replace(/(?:Chọn|Đáp án|Chọn đáp án)\s+[A-D]\.?\s*/gi, '').trim();
+
+        // 4. Bóc tách 4 phương án A, B, C, D
+        const choiceRegex = /(?:[◯⃝\s]*)([A-D])\.\s*([\s\S]*?)(?=(?:[◯⃝\s]*[A-D]\.|$))/g;
+        
+        let choices = {};
+        let matches;
+        let lastChoiceIndex = -1;
+
+        while ((matches = choiceRegex.exec(questionPart)) !== null) {
+          if (lastChoiceIndex === -1) lastChoiceIndex = matches.index;
+          const key = matches[1].toUpperCase();
+          choices[key] = matches[2].trim();
+        }
+
+        // Đề bài câu hỏi
+        let mainQuestion = lastChoiceIndex !== -1 ? questionPart.substring(0, lastChoiceIndex).trim() : questionPart;
+
+        // 5. Dựng khối \begin{ex}
+        let exCode = `\\begin{ex}\n${mainQuestion}\n\\choice\n`;
+
+        ['A', 'B', 'C', 'D'].forEach(key => {
+          let optionText = choices[key] || '';
+          let isTrue = (key === trueAnswerKey) ? '\\True ' : '';
+          exCode += `{${isTrue}${optionText}}\n`;
+        });
+
+        exCode += `\\loigiai{\n${solutionPart}\n}\n\\end{ex}`;
+
+        results.push(exCode);
+      });
+
+      document.getElementById('output-text').value = results.join('\n\n');
+    }
+  </script>
+</body>
+</html>
