@@ -47,7 +47,7 @@
     <!-- Mode Description Bar -->
     <div id="mode-description" class="bg-slate-800/60 border border-slate-700/60 rounded-lg p-3 text-xs text-slate-300 flex items-center justify-between">
       <span id="desc-text">Đang ở <b>Chức năng 1</b>: Chuyển đổi đề trắc nghiệm dạng 4 phương án A, B, C, D sang <code>\choice</code></span>
-      <span class="text-xs text-slate-400 bg-slate-700 px-2.5 py-0.5 rounded-full">v2.5 - Fix Math-Text Spacing</span>
+      <span class="text-xs text-slate-400 bg-slate-700 px-2.5 py-0.5 rounded-full">v2.6 - Fixed Regex Group Conflict</span>
     </div>
 
     <div class="grid grid-cols-1 md:grid-cols-2 gap-4 flex-1">
@@ -120,7 +120,7 @@
   </main>
 
   <footer class="bg-slate-800 border-t border-slate-700 py-3 text-center text-xs text-slate-400">
-    LaTeX Standardizer — Đã tự động phân tách khoảng trắng chuẩn giữa $ và chữ
+    LaTeX Standardizer — Đã sửa hoàn toàn lỗi thay thế $1$ và $2$
   </footer>
 
   <script>
@@ -186,11 +186,11 @@
       URL.revokeObjectURL(url);
     }
 
-    // TỰ ĐỘNG BỌC $ VÀ TẠO KHOẢNG TRẮNG CHUẨN GIỮA MÔI TRƯỜNG TOÁN & VĂN BẢN
+    // TỰ ĐỘNG BỌC $ VÀ TẠO KHOẢNG TRẮNG CHUẨN
     function autoWrapMath(text) {
       if (!text) return '';
 
-      // 1. Bóc tách các đoạn đã có $...$ và chưa có $
+      // Tách các đoạn đã nằm trong $...$
       const parts = text.split(/(\$[^\$]+\$)/g);
 
       for (let i = 0; i < parts.length; i++) {
@@ -209,14 +209,14 @@
 
       let result = parts.join('');
 
-      // 2. CHUẨN HÓA KHOẢNG TRẮNG XUNG QUANH DẤU $
-      // Thêm khoảng trắng trước dấu $ mở nếu đứng ngay sau chữ/số
-      result = result.replace(/([a-zA-ZÀ-ỹ0-9])\$([^\$]+)\$/g, '$1 $$2$');
+      // DÙNG CALLBACK ĐỂ TRÁNH LỖI PHÁT SINH $1 VÀ $2 CỦA JAVASCRIPT REGEX
+      // 1. Thêm khoảng trắng trước $ mở nếu đứng ngay sau chữ/số
+      result = result.replace(/([a-zA-ZÀ-ỹ0-9])\$([^\$]+)\$/g, (match, p1, p2) => `${p1} $${p2}$`);
 
-      // Thêm khoảng trắng sau dấu $ đóng nếu đứng ngay trước chữ/số (Ví dụ: $(C)$cắt -> $(C)$ cắt)
-      result = result.replace(/\$([^\$]+)\$([a-zA-ZÀ-ỹ0-9])/g, '$$1$ $2');
+      // 2. Thêm khoảng trắng sau $ đóng nếu đứng ngay trước chữ/số
+      result = result.replace(/\$([^\$]+)\$([a-zA-ZÀ-ỹ0-9])/g, (match, p1, p2) => `$${p1}$ ${p2}`);
 
-      // 3. Dọn dẹp khoảng trắng dư thừa
+      // Dọn dẹp khoảng trắng dư thừa
       result = result.replace(/[ \t]+/g, ' ');
       result = result.replace(/\s+([\.,;\)])/g, '$1');
       result = result.replace(/([\(\[])\s+/g, '$1');
@@ -224,7 +224,6 @@
       return result.trim();
     }
 
-    // Chuẩn hóa khoảng trắng bên trong dấu $ (không chứa cách thừa sát mép $)
     function fixMathSpacing(str) {
       if (!str) return '';
       let res = autoWrapMath(str);
@@ -233,9 +232,9 @@
       res = res.replace(/\$\s+([^$]+)\s+\$/g, (m, p1) => `$${p1.trim()}$`);
       res = res.replace(/\$\s+/g, '$').replace(/\s+\$/g, '$');
 
-      // Đảm bảo lại một lần nữa khoảng trắng bên ngoài dấu $ không bị dính vào chữ
-      res = res.replace(/([a-zA-ZÀ-ỹ0-9])\$([^\$]+)\$/g, '$1 $$2$');
-      res = res.replace(/\$([^\$]+)\$([a-zA-ZÀ-ỹ0-9])/g, '$$1$ $2');
+      // Đảm bảo lại khoảng trắng bên ngoài dấu $ bằng Callback an toàn
+      res = res.replace(/([a-zA-ZÀ-ỹ0-9])\$([^\$]+)\$/g, (match, p1, p2) => `${p1} $${p2}$`);
+      res = res.replace(/\$([^\$]+)\$([a-zA-ZÀ-ỹ0-9])/g, (match, p1, p2) => `$${p1}$ ${p2}`);
 
       return res.trim();
     }
