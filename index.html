@@ -53,7 +53,6 @@
       display: flex;
       overflow: hidden;
     }
-    /* ĐỒNG BỘ CHÍNH XÁC LINE HEIGHT VÀ PADDING CỦA CỘT SỐ DÒNG */
     .line-numbers {
       user-select: none;
       text-align: right;
@@ -247,7 +246,6 @@
               <i data-lucide="file-output" class="w-4 h-4 text-slate-600"></i>
               Kết quả chuẩn hóa:
             </span>
-            <!-- BỘ ICON RỌN GÀNG THEO YÊU CẦU -->
             <div class="flex items-center space-x-1">
               <button id="btn-undo-output-ex" onclick="undo('output-ex')" disabled class="btn-history bg-slate-100 hover:bg-slate-200 text-slate-700 p-1.5 h-7 w-7 flex items-center justify-center border border-slate-200 transition" title="Hoàn tác (Ctrl+Z)">
                 <i data-lucide="undo-2" class="w-3.5 h-3.5"></i>
@@ -305,8 +303,8 @@
                 <input type="text" id="replace-output-ex" placeholder="Thay thế bằng..." class="w-full bg-white border border-slate-200 px-2 py-1 outline-none focus:border-slate-400">
               </div>
               <div class="flex items-center space-x-1">
-                <button onclick="replaceText('output-ex', false)" class="bg-slate-200 hover:bg-slate-300 text-slate-800 px-2.5 py-1 font-medium transition">Thay</button>
-                <button onclick="replaceText('output-ex', true)" class="bg-slate-800 hover:bg-slate-900 text-white px-2.5 py-1 font-medium transition">Thay tất cả</button>
+                <button onclick="replaceText('output-ex', false)" class="bg-slate-200 hover:bg-slate-300 text-slate-800 px-2 py-1 font-medium transition">Thay</button>
+                <button onclick="replaceText('output-ex', true)" class="bg-slate-800 hover:bg-slate-900 text-white px-2 py-1 font-medium transition">Thay tất cả</button>
               </div>
             </div>
           </div>
@@ -548,8 +546,8 @@
               <input type="text" id="replace-output-tikz-single" placeholder="Thay thế bằng..." class="w-full bg-white border border-slate-200 px-2 py-1 outline-none focus:border-slate-400">
             </div>
             <div class="flex items-center space-x-1">
-              <button onclick="replaceText('output-tikz-single', false)" class="bg-slate-200 hover:bg-slate-300 text-slate-800 px-2.5 py-1 font-medium transition">Thay</button>
-              <button onclick="replaceText('output-tikz-single', true)" class="bg-slate-800 hover:bg-slate-900 text-white px-2.5 py-1 font-medium transition">Thay tất cả</button>
+              <button onclick="replaceText('output-tikz-single', false)" class="bg-slate-200 hover:bg-slate-300 text-slate-800 px-2 py-1 font-medium transition">Thay</button>
+              <button onclick="replaceText('output-tikz-single', true)" class="bg-slate-800 hover:bg-slate-900 text-white px-2 py-1 font-medium transition">Thay tất cả</button>
             </div>
           </div>
         </div>
@@ -641,7 +639,7 @@
 
         <div id="status" class="text-center text-xs text-slate-600 font-semibold"></div>
         <div id="download-container" class="text-center hidden">
-          <button id="download-btn" class="bg-slate-800 text-white px-6 py-2.5 text-xs font-semibold hover:bg-slate-900 transition shadow flex items-center justify-center space-x-2 mx-auto">
+          <button id="download-btn" class="bg-slate-800 text-white px-6 py-2.5 text-xs font-semibold hover:bg-emerald-700 transition shadow flex items-center justify-center space-x-2 mx-auto">
             <i data-lucide="download" class="w-4 h-4"></i>
             <span>Tải File ZIP Ảnh</span>
           </button>
@@ -902,34 +900,39 @@
     });
 
     // =========================================================================
-    // HÀM TỰ ĐỘNG THÊM $ HOÀN HẢO (ĐÃ KHẮC PHỤC TRIỆT ĐỂ 100% LỖI DÍNH $$ VA SÓT $)
+    // HÀM TỰ ĐỘNG THÊM $ CHUẨN XÁC KHÔNG LỖI DÍNH CHỮ HAY $$ TRÙNG LẶP
     // =========================================================================
     function autoAddMathDollars(text) {
       if (!text) return '';
-      
+
       const excludeList = ['VCB', 'VND', 'VNĐ', 'THPT', 'SGD', 'BGD', 'SGK', 'HCM', 'HN', 'VN', 'USD', 'STT', 'NXB', 'KHTN', 'GDĐT'];
 
-      // BƯỚC 1: Xóa toàn bộ các dấu $ cũ/dư thừa để xử lý lại từ đầu sạch sẽ
-      let cleanText = text.replace(/\$+/g, ' ');
+      // Tách văn bản thành các đoạn nằm ngoài và trong dấu $ đã có sẵn
+      const parts = text.split(/(\$(?:\\.|[^$])+\$)/g);
 
-      // BƯỚC 2: Bọc $ cho các đối tượng toán học
-      // 2.1. Biểu thức dạng A=1, B=2, (1; 2)...
-      cleanText = cleanText.replace(/(?<![\p{L}\p{N}\\])(\([A-Z0-9a-z;,\s\-\+]+\)|[A-Z]{2,}\s*=\s*[\-+]?\d+(?:[\.,]\d+)?)(?![\p{L}\p{N}])/gu, ' $$$1$$ ');
-      
-      // 2.2. Tên đi kèm từ khóa (tam giác ABC, điểm M...)
-      cleanText = cleanText.replace(/(?<=tam\s+giác|đường\s+tròn|tâm|cô|ông|điểm|mặt\s+phẳng|đường\s+thẳng|đoạn|cạnh|góc|đỉnh)\s+([A-Z]{1,4})(?![\p{L}\p{N}])/gu, ' $$$1$$ ');
+      for (let i = 0; i < parts.length; i++) {
+        if (!parts[i].startsWith('$')) {
+          let str = parts[i];
 
-      // 2.3. Số & phần trăm (13, 0.6, 90%)
-      cleanText = cleanText.replace(/(?<![\p{L}\p{N}\\])(\d+(?:\s*[\.,]\s*\d+)?\s*(?:\\%)?)(?![\p{L}\p{N}\\])/gu, ' $$$1$$ ');
+          // 1. Bọc $ cho biểu thức toán học dạng A=2, (1;2)...
+          str = str.replace(/(?<![\$\w\\])(\([A-Z0-9a-z;,\s\-\+]+\)|[A-Z]{2,}\s*=\s*[\-+]?\d+(?:[\.,]\d+)?)(?![\$\w])/g, '$$$1$$');
 
-      // 2.4. Mọi cụm 1-4 chữ in hoa độc lập (M, AB, ABC) trừ blacklist
-      cleanText = cleanText.replace(/(?<![\p{L}\p{N}\\])([A-Z]{1,4})(?![\p{L}\p{N}])/gu, (match, p1) => {
-        if (excludeList.includes(p1)) return match;
-        return ` $${p1}$ `;
-      });
+          // 2. Bọc $ cho số và phần trăm
+          str = str.replace(/(?<![\$\w\\])(\d+(?:\s*[\.,]\s*\d+)?\s*(?:\\%)?)(?![\$\w\\])/g, '$$$1$$');
 
-      // BƯỚC 3: Dọn dẹp khoảng trắng & Ép khoảng cách chuẩn
-      return fixMathSpacing(cleanText);
+          // 3. Bọc $ cho tên đỉnh tam giác/đoạn thẳng độc lập (ABC, M, AB)
+          str = str.replace(/(?<![\p{L}\p{N}\\])([A-Z]{1,4})(?![\p{L}\p{N}])/gu, (match, p1) => {
+            if (excludeList.includes(p1)) return match;
+            return `$${p1}$`;
+          });
+
+          parts[i] = str;
+        }
+      }
+
+      let result = parts.join('');
+      // Dùng hàm fixMathSpacing để giãn cách ngoài và thu gọn sát vách trong
+      return fixMathSpacing(result);
     }
 
     function applyAutoMath(id) {
@@ -1134,7 +1137,7 @@
       URL.revokeObjectURL(url);
     }
 
-    // ==================== LOGIC CHUẨN HÓA KHOẢNG TRẮNG ====================
+    // ==================== HÀM CHUẨN HÓA KHOẢNG TRẮNG ====================
     function formatOptionText(str) {
       if (!str) return '';
       let text = str.trim();
@@ -1150,22 +1153,22 @@
       if (!str) return '';
       let text = str;
 
-      // 1. Loại bỏ các dấu $ dư thừa liên tiếp (như $$) về đúng 1 dấu $
+      // 1. Xóa sạch dấu $ trùng lặp (vd: $$$ABC$$ -> $ABC$)
       text = text.replace(/\$+/g, '$');
 
-      // 2. Ép trim() xóa sạch khoảng trắng sát vách BÊN TRONG $...$
+      // 2. Ép trim() bên trong khối $...$
       text = text.replace(/\$((?:\\.|[^$])+)\$/g, (m, inner) => `$${inner.trim()}$`);
 
-      // 3. Ép cách 1 dấu space chuẩn ở BÊN NGOÀI dấu $
+      // 3. Đảm bảo khoảng cách chuẩn ở bên ngoài dấu $
       text = text.replace(/([\p{L}\p{N}:,;\.\?!])\$/gu, '$1 $');
       text = text.replace(/\$([\p{L}\p{N}])/gu, '$ $1');
 
-      // 4. Xóa khoảng trắng thừa giữa các dấu câu
+      // 4. Dọn dẹp khoảng trắng kép
       text = text.replace(/[ \t]+/g, ' ');
       text = text.replace(/\s+([\.,;\)])/g, '$1');
       text = text.replace(/([\(\[])\s+/g, '$1');
 
-      // 5. Cú chốt: Đảm bảo kín kẽ sát vách bên trong $
+      // 5. Cú chốt kiểm tra lại vách trong
       text = text.replace(/\$((?:\\.|[^$])+)\$/g, (m, inner) => `$${inner.trim()}$`);
 
       return text.trim();
