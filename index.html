@@ -284,6 +284,10 @@
               <button onclick="applyAutoMath('output-ex')" class="bg-amber-100 hover:bg-amber-200 text-amber-900 p-1.5 h-7 w-7 flex items-center justify-center border border-amber-300 transition" title="Tự động bọc $ cho đoạn bôi đen">
                 <i data-lucide="variable" class="w-4 h-4 text-amber-700"></i>
               </button>
+              <!-- NÚT CHUYỂN ARRAY SANG ALIGNED MỚI -->
+              <button onclick="convertArrayToAligned('output-ex')" class="bg-blue-100 hover:bg-blue-200 text-blue-900 p-1.5 h-7 w-7 flex items-center justify-center border border-blue-300 transition" title="Chuyển toàn bộ array thành aligned và căn lề dấu =">
+                <i data-lucide="columns-2" class="w-4 h-4 text-blue-700"></i>
+              </button>
               <button onclick="wrapSelectionWithEnv('output-ex', 'itemize')" class="bg-slate-100 hover:bg-slate-200 text-slate-800 p-1.5 h-7 w-7 flex items-center justify-center border border-slate-200 transition" title="Chuyển thành môi trường \\begin{itemize}">
                 <i data-lucide="list" class="w-4 h-4 text-slate-600"></i>
               </button>
@@ -435,6 +439,9 @@
               <span class="text-slate-300">|</span>
               <button onclick="applyAutoMath('output-main')" class="bg-amber-100 hover:bg-amber-200 text-amber-900 p-1.5 h-7 w-7 flex items-center justify-center border border-amber-300 transition" title="Tự động bọc $ cho đoạn bôi đen">
                 <i data-lucide="variable" class="w-4 h-4 text-amber-700"></i>
+              </button>
+              <button onclick="convertArrayToAligned('output-main')" class="bg-blue-100 hover:bg-blue-200 text-blue-900 p-1.5 h-7 w-7 flex items-center justify-center border border-blue-300 transition" title="Chuyển toàn bộ array thành aligned và căn lề dấu =">
+                <i data-lucide="columns-2" class="w-4 h-4 text-blue-700"></i>
               </button>
               <button onclick="wrapSelectionWithEnv('output-main', 'itemize')" class="bg-slate-100 hover:bg-slate-200 text-slate-800 p-1.5 h-7 w-7 flex items-center justify-center border border-slate-200 transition" title="Chuyển thành môi trường \\begin{itemize}">
                 <i data-lucide="list" class="w-4 h-4 text-slate-600"></i>
@@ -946,7 +953,6 @@
           if (activeIdx < items.length - 1) {
             if (activeIdx >= 0) items[activeIdx].classList.remove('active');
             items[activeIdx + 1].classList.add('active');
-            // TỰ ĐỘNG CUỘN ĐẾN ITEM ĐƯỢC CHỌN
             items[activeIdx + 1].scrollIntoView({ block: 'nearest' });
           }
         } else if (e.key === 'ArrowUp') {
@@ -954,7 +960,6 @@
           if (activeIdx > 0) {
             items[activeIdx].classList.remove('active');
             items[activeIdx - 1].classList.add('active');
-            // TỰ ĐỘNG CUỘN ĐẾN ITEM ĐƯỢC CHỌN
             items[activeIdx - 1].scrollIntoView({ block: 'nearest' });
           }
         } else if (e.key === 'Enter') {
@@ -1019,7 +1024,6 @@
         dropdown.appendChild(item);
       });
 
-      // TÍNH TOÁN VỊ TRÍ GẦN CON TRỎ SOẠN THẢO NHẤT
       dropdown.style.display = 'block';
       dropdown.style.left = '48px'; 
       dropdown.style.top = '48px';
@@ -1100,7 +1104,7 @@
       const linesDiv = document.getElementById(`lines-${id}`);
 
       hlDiv.scrollTop = textarea.scrollTop;
-      linesDiv.scrollTop = textarea.scrollTop;
+      hlDiv.scrollTop = textarea.scrollTop;
     }
 
     function setEditorValue(id, value) {
@@ -1119,6 +1123,47 @@
         }
       });
     });
+
+    // =========================================================================
+    // HÀM CHUYỂN ĐỔI ARRAY THÀNH ALIGNED & TỰ ĐỘNG THÊM DẤU & VÀO DẤU =
+    // =========================================================================
+    function convertArrayToAligned(id) {
+      const textarea = document.getElementById(id);
+      if (!textarea) return;
+
+      let text = textarea.value;
+
+      // Regex tìm môi trường array kèm theo các option rườm rà như {l}, {cl}, {c|c|c},...
+      // VD: \begin{array}{l} ... \end{array} hoặc \begin{array}{c|c} ... \end{array}
+      const arrayRegex = /\\begin\{array\}\s*\{[^}]*\}([\s\S]*?)\\end\{array\}/g;
+
+      text = text.replace(arrayRegex, (match, innerContent) => {
+        // Tách các dòng bên trong array (phân tách bởi dấu \\)
+        let lines = innerContent.split('\\\\');
+        
+        let processedLines = lines.map(line => {
+          let trimmed = line.trim();
+          if (!trimmed) return '';
+
+          // Xóa bỏ các ký tự căn lề thủ công cũ nếu có (vd & cũ)
+          trimmed = trimmed.replace(/&/g, '').trim();
+
+          // Tự động thêm dấu & vào trước dấu bằng (=) đầu tiên trong dòng nếu chưa có
+          if (trimmed.includes('=')) {
+            // Thay dấu = đầu tiên bằng &=
+            trimmed = trimmed.replace('=', '&=');
+          }
+          return `    ${trimmed}`;
+        });
+
+        const formattedBody = processedLines.filter(l => l !== '').join(' \\\\\n');
+        return `\\begin{aligned}\n${formattedBody}\n\\end{aligned}`;
+      });
+
+      textarea.value = text;
+      handleInput(id, false);
+      saveState(id, true);
+    }
 
     // =========================================================================
     // HÀM TỰ ĐỘNG THÊM $ HOÀN HẢO
@@ -1545,6 +1590,7 @@
       setEditorValue('output-ex', results.join('\n\n'));
     }
 
+    // ==================== LOGIC MENU 2 ====================
     function extractAllTikZToSingleFile() {
       const input = document.getElementById('input-tikz').value;
       if (!input.trim()) return;
