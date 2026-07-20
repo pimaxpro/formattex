@@ -295,9 +295,9 @@
               <button onclick="convertArrayToAligned('output-ex')" class="bg-blue-100 hover:bg-blue-200 text-blue-900 p-1.5 h-7 w-7 flex items-center justify-center border border-blue-300 transition" title="Chuyển toàn bộ array thành aligned và căn lề dấu =">
                 <i data-lucide="columns-2" class="w-4 h-4 text-blue-700"></i>
               </button>
-              <!-- NÚT CHỔI QUÉT DỌN DẸP KHOẢNG TRẮNG & DÒNG TRỐNG -->
+              <!-- NÚT CHỔI QUÉT RÕ RÀNG -->
               <button onclick="applyCleanSpacingTool('output-ex')" class="bg-emerald-100 hover:bg-emerald-200 text-emerald-900 p-1.5 h-7 w-7 flex items-center justify-center border border-emerald-300 transition" title="Dọn dẹp dòng trống thừa & khoảng trắng trước dấu câu">
-                <i data-lucide="broom" class="w-4 h-4 text-emerald-700"></i>
+                <svg class="w-4 h-4 text-emerald-700" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m2 22 10-10"/><path d="M9.5 12.5 14 17"/><path d="m15 11 3 3"/><path d="m17 7 2 2"/><path d="M19 2l3 3-7 7-3-3z"/></svg>
               </button>
               <button onclick="wrapSelectionWithEnv('output-ex', 'itemize')" class="bg-slate-100 hover:bg-slate-200 text-slate-800 p-1.5 h-7 w-7 flex items-center justify-center border border-slate-200 transition" title="Chuyển thành môi trường \\begin{itemize}">
                 <i data-lucide="list" class="w-4 h-4 text-slate-600"></i>
@@ -454,9 +454,8 @@
               <button onclick="convertArrayToAligned('output-main')" class="bg-blue-100 hover:bg-blue-200 text-blue-900 p-1.5 h-7 w-7 flex items-center justify-center border border-blue-300 transition" title="Chuyển toàn bộ array thành aligned và căn lề dấu =">
                 <i data-lucide="columns-2" class="w-4 h-4 text-blue-700"></i>
               </button>
-              <!-- NÚT CHỔI QUÉT DỌN DẸP KHOẢNG TRẮNG & DÒNG TRỐNG -->
               <button onclick="applyCleanSpacingTool('output-main')" class="bg-emerald-100 hover:bg-emerald-200 text-emerald-900 p-1.5 h-7 w-7 flex items-center justify-center border border-emerald-300 transition" title="Dọn dẹp dòng trống thừa & khoảng trắng trước dấu câu">
-                <i data-lucide="broom" class="w-4 h-4 text-emerald-700"></i>
+                <svg class="w-4 h-4 text-emerald-700" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m2 22 10-10"/><path d="M9.5 12.5 14 17"/><path d="m15 11 3 3"/><path d="m17 7 2 2"/><path d="M19 2l3 3-7 7-3-3z"/></svg>
               </button>
               <button onclick="wrapSelectionWithEnv('output-main', 'itemize')" class="bg-slate-100 hover:bg-slate-200 text-slate-800 p-1.5 h-7 w-7 flex items-center justify-center border border-slate-200 transition" title="Chuyển thành môi trường \\begin{itemize}">
                 <i data-lucide="list" class="w-4 h-4 text-slate-600"></i>
@@ -1127,7 +1126,7 @@
       const linesDiv = document.getElementById(`lines-${id}`);
 
       hlDiv.scrollTop = textarea.scrollTop;
-      hlDiv.scrollTop = textarea.scrollTop;
+      linesDiv.scrollTop = textarea.scrollTop;
     }
 
     function setEditorValue(id, value) {
@@ -1147,19 +1146,33 @@
       });
     });
 
-    // ==================== HÀM DỌN DẸP DÒNG TRỐNG & KÝ TỰ DẤU CÂU ====================
+    // ==================== HÀM DỌN DẸP DÒNG TRỐNG & DẤU CÂU (KHẮC PHỤC TRIỆT ĐỂ) ====================
     function cleanTextSpacingAndLines(text) {
       if (!text) return '';
 
+      // 1. Xóa khoảng trắng thừa trước các dấu câu "?", ",", ".", "!"
       let cleaned = text.replace(/\s+([\?\,\.\!])/g, '$1');
-      cleaned = cleaned.replace(/\n\s*\n\s*\n+/g, '\n\n');
 
-      cleaned = cleaned.replace(/([^\n])\n*(\\begin\{[^}]+\})/g, '$1\n\n$2');
-      cleaned = cleaned.replace(/(\\end\{[^}]+\})\n*([^\n])/g, '$1\n\n$2');
+      // 2. Tách dòng, loại bỏ hoàn toàn các dòng trống (kể cả dòng chứa khoảng trắng ẩn)
+      let lines = cleaned.split('\n');
+      let filteredLines = [];
+      for (let i = 0; i < lines.length; i++) {
+        let line = lines[i];
+        if (line.trim() !== '') {
+          filteredLines.push(line.trimEnd());
+        }
+      }
 
-      cleaned = cleaned.replace(/\n\s*\n\s*\n+/g, '\n\n');
+      // 3. Ghép lại và đảm bảo các môi trường \begin và \end luôn cách nhau đúng 1 dòng trắng
+      let resultText = filteredLines.join('\n');
 
-      return cleaned.trim();
+      resultText = resultText.replace(/([^\n])\n+(\\begin\{[^}]+\})/g, '$1\n\n$2');
+      resultText = resultText.replace(/(\\end\{[^}]+\})\n+([^\n])/g, '$1\n\n$2');
+
+      // Gom các dòng trống thừa phát sinh (nếu có) thành 1 dòng trống đơn chuẩn xác
+      resultText = resultText.replace(/\n\s*\n\s*\n+/g, '\n\n');
+
+      return resultText.trim();
     }
 
     function applyCleanSpacingTool(id) {
