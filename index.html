@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>PimaX Tool Beta — Bộ Công Cụ LaTeX & PDF Toàn Diện</title>
+  <title>PimaX Tool Beta — Bộ Công Của LaTeX & PDF Toàn Diện</title>
   <!-- Tailwind CSS -->
   <script src="https://cdn.tailwindcss.com"></script>
   <!-- Lucide Icons -->
@@ -198,7 +198,7 @@
     <!-- ================================================================= -->
     <section id="menu-section-1" class="space-y-4">
       
-      <!-- Sub-menu Switcher (Đã thêm CN 3) -->
+      <!-- Sub-menu Switcher -->
       <div class="bg-white p-3 border border-slate-200 shadow-sm flex flex-col sm:flex-row justify-between items-center gap-3">
         <div class="flex bg-slate-100 p-1 border border-slate-200 w-full sm:w-auto overflow-x-auto">
           <button 
@@ -838,7 +838,6 @@
       const desc = document.getElementById('sub-mode-desc');
       const label = document.getElementById('btn-ex-label');
 
-      // Reset style cả 3 nút
       [btn1, btn2, btn3].forEach(b => {
         b.className = "px-3 py-1.5 text-xs font-semibold transition flex items-center justify-center space-x-1.5 text-slate-600 hover:text-slate-900 whitespace-nowrap";
       });
@@ -1140,9 +1139,29 @@
       });
     });
 
-    // =========================================================================
-    // HÀM CHUYỂN ĐỔI ARRAY THÀNH ALIGNED
-    // =========================================================================
+    // ==================== HÀM DỌN DẸP DÒNG TRỐNG & KÝ TỰ DẤU CÂU ====================
+    function cleanTextSpacingAndLines(text) {
+      if (!text) return '';
+
+      // 1. Xóa khoảng trắng thừa đứng trước các dấu câu "?", ",", ".", "!"
+      let cleaned = text.replace(/\s+([\?\,\.\!])/g, '$1');
+
+      // 2. Xóa các dòng trống liên tiếp thành 1 dòng trống đơn
+      cleaned = cleaned.replace(/\n\s*\n\s*\n+/g, '\n\n');
+
+      // 3. Đảm bảo các môi trường \begin và \end luôn cách nhau đúng 1 dòng trắng
+      // Đảm bảo có 1 dòng trống trước \begin
+      cleaned = cleaned.replace(/([^\n])\n*(\\begin\{[^}]+\})/g, '$1\n\n$2');
+      // Đảm bảo có 1 dòng trống sau \end
+      cleaned = cleaned.replace(/(\\end\{[^}]+\})\n*([^\n])/g, '$1\n\n$2');
+
+      // Dọn dẹp lại dòng trống dư thừa phát sinh sau khi format môi trường
+      cleaned = cleaned.replace(/\n\s*\n\s*\n+/g, '\n\n');
+
+      return cleaned.trim();
+    }
+
+    // ==================== HÀM CHUYỂN ĐỔI ARRAY THÀNH ALIGNED ====================
     function convertArrayToAligned(id) {
       const textarea = document.getElementById(id);
       if (!textarea) return;
@@ -1167,14 +1186,15 @@
         return `\\begin{aligned}\n${formattedBody}\n\\end{aligned}`;
       });
 
+      // Áp dụng bộ lọc dọn dẹp dòng trống và dấu câu
+      text = cleanTextSpacingAndLines(text);
+
       textarea.value = text;
       handleInput(id, false);
       saveState(id, true);
     }
 
-    // =========================================================================
-    // HÀM TỰ ĐỘNG THÊM $ HOÀN HẢO
-    // =========================================================================
+    // ==================== HÀM TỰ ĐỘNG THÊM $ HOÀN HẢO ====================
     function autoAddMathDollars(text) {
       if (!text) return '';
 
@@ -1427,6 +1447,9 @@
 
       text = text.replace(/\$((?:\\.|[^$])+)\$/g, (m, inner) => `$${inner.trim()}$`);
 
+      // Tích hợp bộ lọc dọn dẹp khoảng trắng trước dấu câu và chuẩn hóa môi trường
+      text = cleanTextSpacingAndLines(text);
+
       return text.trim();
     }
 
@@ -1439,7 +1462,7 @@
       return str;
     }
 
-    // ==================== BỘ XỬ LÝ CHÍNH (XỬ LÝ CẢ 3 CHỨC NĂNG) ====================
+    // ==================== BỘ XỬ LÝ CHÍNH (XỬ LÝ 3 CHỨC NĂNG) ====================
     function processExEnvironment() {
       if (subModeEx === 1) processMode1();
       else if (subModeEx === 2) processMode2();
@@ -1520,7 +1543,7 @@
         results.push(exCode);
       });
 
-      setEditorValue('output-ex', results.join('\n\n'));
+      setEditorValue('output-ex', cleanTextSpacingAndLines(results.join('\n\n')));
     }
 
     // Chức năng 2: \choiceTF
@@ -1598,7 +1621,7 @@
         results.push(exCode);
       });
 
-      setEditorValue('output-ex', results.join('\n\n'));
+      setEditorValue('output-ex', cleanTextSpacingAndLines(results.join('\n\n')));
     }
 
     // Chức năng 3: \shortans
@@ -1622,14 +1645,12 @@
           solutionPart = content.substring(solMatch.index + solMatch[0].length).trim();
         }
 
-        // Trích xuất đáp án ngắn từ dòng "Đáp án. [value]" hoặc "Đáp số. [value]"
         let shortAnswerValue = "";
         const shortAnsHeaderRegex = /(?:Đáp\s*án|Đáp\s*số)[\.\s:]*([^\n]+)/i;
         const ansMatch = questionPart.match(shortAnsHeaderRegex) || solutionPart.match(shortAnsHeaderRegex);
 
         if (ansMatch) {
           shortAnswerValue = ansMatch[1].trim();
-          // Xóa dòng đáp án đó ra khỏi phần nội dung câu hỏi/lời giải
           questionPart = questionPart.replace(shortAnsHeaderRegex, '').trim();
           solutionPart = solutionPart.replace(shortAnsHeaderRegex, '').trim();
         }
@@ -1652,7 +1673,7 @@
         results.push(exCode);
       });
 
-      setEditorValue('output-ex', results.join('\n\n'));
+      setEditorValue('output-ex', cleanTextSpacingAndLines(results.join('\n\n')));
     }
 
     // ==================== LOGIC MENU 2 ====================
@@ -1679,8 +1700,8 @@
         return `% [Đã bóc tách hình TikZ số ${count}]`;
       });
 
-      setEditorValue('output-main', modifiedMainContent);
-      setEditorValue('output-tikz-single', combinedTikZContent.trim());
+      setEditorValue('output-main', cleanTextSpacingAndLines(modifiedMainContent));
+      setEditorValue('output-tikz-single', cleanTextSpacingAndLines(combinedTikZContent.trim()));
 
       document.getElementById('tikz-count-badge').textContent = `${matches.length} hình TikZ`;
       document.getElementById('single-tikz-container').classList.remove('hidden');
@@ -1791,7 +1812,7 @@
             const offsetX = (targetWidth - viewport.width) / 2;
             const offsetY = (targetHeight - viewport.height) / 2;
 
-            statusDiv.textContent = `Đang xuất trang ${i} / ${totalPages} (${targetWidth}x{targetHeight} px)...`;
+            statusDiv.textContent = `Đang xuất trang ${i} / ${totalPages} (${targetWidth}x${targetHeight} px)...`;
             await page.render({
               canvasContext: ctx,
               viewport: viewport,
@@ -1801,7 +1822,7 @@
             canvas.width = Math.round(viewport.width);
             canvas.height = Math.round(viewport.height);
 
-            statusDiv.textContent = `Đang xuất trang ${i} / ${totalPages} (${canvas.width}x{canvas.height} px)...`;
+            statusDiv.textContent = `Đang xuất trang ${i} / ${totalPages} (${canvas.width}x${canvas.height} px)...`;
             await page.render({
               canvasContext: ctx,
               viewport: viewport
