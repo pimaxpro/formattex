@@ -18,7 +18,7 @@
         <i data-lucide="file-code-2" class="w-8 h-8 text-blue-400"></i>
         <h1 class="text-xl font-bold tracking-wide">LaTeX Standardizer</h1>
       </div>
-      <span class="text-xs text-slate-400 bg-slate-700 px-3 py-1 rounded-full">Chuẩn hóa môi trường \begin{ex}</span>
+      <span class="text-xs text-slate-400 bg-slate-700 px-3 py-1 rounded-full">Chuẩn hóa \begin{ex} dạng cây & Lọc dấu chấm</span>
     </div>
   </header>
 
@@ -58,7 +58,7 @@
         <div class="flex justify-between items-center text-sm font-semibold text-slate-300">
           <div class="flex items-center space-x-2">
             <i data-lucide="file-output" class="w-4 h-4 text-emerald-400"></i>
-            <span>Box 2: Kết quả chuẩn hóa (\begin{ex})</span>
+            <span>Box 2: Kết quả chuẩn hóa dạng cây (\begin{ex})</span>
           </div>
           <div class="flex items-center space-x-3">
             <button onclick="copyToClipboard()" class="text-xs text-blue-400 hover:underline flex items-center space-x-1">
@@ -75,7 +75,7 @@
           id="output-text" 
           readonly 
           class="w-full flex-1 min-h-[500px] bg-slate-950 border border-slate-800 rounded-lg p-4 font-mono text-sm text-emerald-400 focus:outline-none resize-none shadow-inner" 
-          placeholder="Kết quả chuẩn hóa sẽ xuất hiện tại đây..."
+          placeholder="Kết quả chuẩn hóa dạng cây sẽ xuất hiện tại đây..."
         ></textarea>
       </div>
 
@@ -95,13 +95,12 @@
   </main>
 
   <footer class="bg-slate-800 border-t border-slate-700 py-3 text-center text-xs text-slate-400">
-    LaTeX Standardizer — GitHub Pages Ready
+    LaTeX Standardizer — Định dạng cây & Xóa dấu chấm phương án
   </footer>
 
   <script>
     lucide.createIcons();
 
-    // Tải nội dung từ file .tex/.txt vào Box 1
     function loadFile(event) {
       const file = event.target.files[0];
       if (!file) return;
@@ -113,13 +112,11 @@
       reader.readAsText(file);
     }
 
-    // Xóa dữ liệu Box 1
     function clearInput() {
       document.getElementById('input-text').value = '';
       document.getElementById('output-text').value = '';
     }
 
-    // Copy kết quả ở Box 2
     function copyToClipboard() {
       const textarea = document.getElementById('output-text');
       if (!textarea.value) return;
@@ -128,7 +125,6 @@
       alert('Đã copy kết quả vào bộ nhớ tạm!');
     }
 
-    // Tải file kết quả .tex
     function downloadResult() {
       const text = document.getElementById('output-text').value;
       if (!text) return;
@@ -143,12 +139,11 @@
       URL.revokeObjectURL(url);
     }
 
-    // THUẬT TOÁN BÓC TÁCH & CHUẨN HÓA LATEX SANG EX
     function processToExEnvironment() {
       const input = document.getElementById('input-text').value;
       if (!input.trim()) return;
 
-      // Phân tách các khối câu hỏi dựa trên từ khóa "Câu X"
+      // Phân tách các khối câu hỏi
       const questionBlocks = input.split(/(?=(?:^|\n)\s*Câu\s+\d+)/i).filter(b => b.trim());
       
       let results = [];
@@ -156,7 +151,7 @@
       questionBlocks.forEach(block => {
         let content = block.trim();
 
-        // 1. Loại bỏ các tiền tố Câu, mã định danh, số điểm nhiễu
+        // 1. Loại bỏ các tiền tố "Câu X", mã định danh, số điểm
         content = content.replace(/^Câu\s+\d+[^:\n]*[:\s-]*/i, '');
         content = content.replace(/^\[[^\]]+\]\s*/, '');
         content = content.replace(/^\([^\)]+\)\s*/, '');
@@ -173,7 +168,7 @@
           questionPart = content.substring(0, matchSolution.index).trim();
         }
 
-        // 3. Tìm ký tự đáp án đúng (A, B, C, D) từ lời giải hoặc cuối câu hỏi
+        // 3. Tìm đáp án đúng (A, B, C, D)
         let trueAnswerKey = null;
         const answerKeyRegex = /(?:Chọn|Đáp án|Chọn đáp án)\s+([A-D])/i;
         
@@ -193,7 +188,7 @@
           trueAnswerKey = answerKeyMatch[1].toUpperCase();
         }
 
-        // Xóa dòng "Chọn đáp án X." dư thừa khỏi lời giải
+        // Xóa cụm "Chọn đáp án X." dư thừa khỏi lời giải
         solutionPart = solutionPart.replace(/(?:Chọn|Đáp án|Chọn đáp án)\s+[A-D]\.?\s*/gi, '').trim();
 
         // 4. Bóc tách 4 phương án A, B, C, D
@@ -206,22 +201,36 @@
         while ((matches = choiceRegex.exec(questionPart)) !== null) {
           if (lastChoiceIndex === -1) lastChoiceIndex = matches.index;
           const key = matches[1].toUpperCase();
-          choices[key] = matches[2].trim();
+          let choiceVal = matches[2].trim();
+          
+          // XÓA DẤU CHẤM Ở CUỐI PHƯƠNG ÁN (NẾU CÓ)
+          choiceVal = choiceVal.replace(/\.\s*$/, '');
+          choices[key] = choiceVal;
         }
 
         // Đề bài câu hỏi
         let mainQuestion = lastChoiceIndex !== -1 ? questionPart.substring(0, lastChoiceIndex).trim() : questionPart;
 
-        // 5. Dựng khối \begin{ex}
-        let exCode = `\\begin{ex}\n${mainQuestion}\n\\choice\n`;
+        // 5. DỰNG KHỐI \begin{ex} DẠNG CÂY (INDENT 4 SPACES)
+        let exCode = `\\begin{ex}\n`;
+        exCode += `    ${mainQuestion}\n`;
+        exCode += `    \\choice\n`;
 
         ['A', 'B', 'C', 'D'].forEach(key => {
           let optionText = choices[key] || '';
           let isTrue = (key === trueAnswerKey) ? '\\True ' : '';
-          exCode += `{${isTrue}${optionText}}\n`;
+          exCode += `    {${isTrue}${optionText}}\n`;
         });
 
-        exCode += `\\loigiai{\n${solutionPart}\n}\n\\end{ex}`;
+        if (solutionPart) {
+          // Nếu có lời giải, thụt lề các dòng bên trong \loigiai
+          const indentedSolution = solutionPart.split('\n').map(line => line ? `        ${line}` : '').join('\n');
+          exCode += `    \\loigiai{\n${indentedSolution}\n    }\n`;
+        } else {
+          exCode += `    \\loigiai{\n\n    }\n`;
+        }
+
+        exCode += `\\end{ex}`;
 
         results.push(exCode);
       });
