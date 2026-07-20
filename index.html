@@ -84,9 +84,10 @@
       font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
       font-size: 0.875rem;
       line-height: 1.5rem;
-      white-space: pre;
+      /* Đổi từ pre thành pre-wrap để tự động xuống dòng khi hết chiều ngang */
+      white-space: pre-wrap; 
+      word-break: break-word;
       tab-size: 4;
-      word-wrap: normal;
       box-sizing: border-box;
     }
     .code-input {
@@ -95,7 +96,8 @@
       caret-color: #0f172a;
       z-index: 2;
       resize: none;
-      overflow: auto;
+      overflow-y: auto;
+      overflow-x: hidden;
     }
     .code-highlight {
       color: #1e293b;
@@ -233,7 +235,6 @@
               Kết quả chuẩn hóa:
             </span>
             <div class="flex items-center space-x-1.5">
-              <!-- Nút chuyển đổi Itemize & Enumerate -->
               <button onclick="wrapSelectionWithEnv('output-ex', 'itemize')" class="bg-slate-100 hover:bg-slate-200 text-slate-800 px-2 h-7 flex items-center gap-1 border border-slate-200 transition font-mono font-medium text-[11px]" title="Chuyển đoạn bôi đen thành \\begin{itemize}">
                 <i data-lucide="list" class="w-3.5 h-3.5 text-slate-600"></i> itemize
               </button>
@@ -723,7 +724,6 @@
       const linesDiv = document.getElementById(`lines-${id}`);
 
       hlDiv.scrollTop = textarea.scrollTop;
-      hlDiv.scrollLeft = textarea.scrollLeft;
       linesDiv.scrollTop = textarea.scrollTop;
     }
 
@@ -741,7 +741,6 @@
       const fullText = textarea.value;
 
       if (start === end) {
-        // Nếu không bôi đen, chèn khung rỗng ngay con trỏ
         const emptyEnv = `\\begin{${envType}}\n\\item \n\\end{${envType}}`;
         textarea.setRangeText(emptyEnv, start, end, 'select');
       } else {
@@ -751,7 +750,6 @@
         const convertedLines = lines.map(line => {
           let cleanedLine = line.trim();
           if (!cleanedLine) return '';
-          // Loại bỏ các ký tự gạch đầu dòng thô: -, *, +, 1., 2), \item,...
           cleanedLine = cleanedLine.replace(/^(?:\\item\s*|[\-\*\+]\s*|\d+[\.\)]\s*)/, '').trim();
           return `\\item ${cleanedLine}`;
         });
