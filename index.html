@@ -110,6 +110,30 @@
       opacity: 0.4;
       cursor: not-allowed;
     }
+
+    /* Autocomplete Dropdown Popup */
+    .autocomplete-dropdown {
+      position: absolute;
+      background: #ffffff;
+      border: 1px solid #cbd5e1;
+      box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+      z-index: 100;
+      max-height: 160px;
+      overflow-y: auto;
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+      font-size: 0.8rem;
+      display: none;
+    }
+    .autocomplete-item {
+      padding: 6px 12px;
+      cursor: pointer;
+      color: #334155;
+    }
+    .autocomplete-item:hover, .autocomplete-item.active {
+      background-color: #f1f5f9;
+      color: #0f172a;
+      font-weight: 600;
+    }
   </style>
 </head>
 <body class="bg-slate-100 text-slate-800 min-h-screen font-sans flex flex-col">
@@ -231,10 +255,12 @@
               <textarea 
                 id="input-ex" 
                 oninput="handleInput('input-ex')" 
+                onkeydown="handleKeyDown(event, 'input-ex')"
                 onscroll="syncScroll('input-ex')"
                 class="code-input custom-scroll"
                 placeholder="Dán nội dung câu hỏi thô vào đây..."
               ></textarea>
+              <div id="autocomplete-input-ex" class="autocomplete-dropdown"></div>
             </div>
           </div>
         </div>
@@ -316,10 +342,12 @@
               <textarea 
                 id="output-ex" 
                 oninput="handleInput('output-ex')" 
+                onkeydown="handleKeyDown(event, 'output-ex')"
                 onscroll="syncScroll('output-ex')"
                 class="code-input custom-scroll"
                 placeholder="Kết quả chuẩn hóa sẽ xuất hiện tại đây..."
               ></textarea>
+              <div id="autocomplete-output-ex" class="autocomplete-dropdown"></div>
             </div>
           </div>
         </div>
@@ -379,10 +407,12 @@
               <textarea 
                 id="input-tikz" 
                 oninput="handleInput('input-tikz')" 
+                onkeydown="handleKeyDown(event, 'input-tikz')"
                 onscroll="syncScroll('input-tikz')"
                 class="code-input custom-scroll"
                 placeholder="Dán nội dung LaTeX chứa TikZ vào đây..."
               ></textarea>
+              <div id="autocomplete-input-tikz" class="autocomplete-dropdown"></div>
             </div>
           </div>
         </div>
@@ -451,8 +481,8 @@
                 <input type="text" id="replace-output-main" placeholder="Thay thế bằng..." class="w-full bg-white border border-slate-200 px-2 py-1 outline-none focus:border-slate-400">
               </div>
               <div class="flex items-center space-x-1">
-                <button onclick="replaceText('output-main', false)" class="bg-slate-200 hover:bg-slate-300 text-slate-800 px-2.5 py-1 font-medium transition">Thay</button>
-                <button onclick="replaceText('output-main', true)" class="bg-slate-800 hover:bg-slate-900 text-white px-2.5 py-1 font-medium transition">Thay tất cả</button>
+                <button onclick="replaceText('output-main', false)" class="bg-slate-200 hover:bg-slate-300 text-slate-800 px-2 py-1 font-medium transition">Thay</button>
+                <button onclick="replaceText('output-main', true)" class="bg-slate-800 hover:bg-slate-900 text-white px-2 py-1 font-medium transition">Thay tất cả</button>
               </div>
             </div>
           </div>
@@ -464,10 +494,12 @@
               <textarea 
                 id="output-main" 
                 oninput="handleInput('output-main')" 
+                onkeydown="handleKeyDown(event, 'output-main')"
                 onscroll="syncScroll('output-main')"
                 class="code-input custom-scroll"
                 placeholder="File gốc sau khi gỡ các khối TikZ sẽ hiển thị ở đây..."
               ></textarea>
+              <div id="autocomplete-output-main" class="autocomplete-dropdown"></div>
             </div>
           </div>
         </div>
@@ -559,10 +591,12 @@
             <textarea 
               id="output-tikz-single" 
               oninput="handleInput('output-tikz-single')" 
+              onkeydown="handleKeyDown(event, 'output-tikz-single')"
               onscroll="syncScroll('output-tikz-single')"
               class="code-input custom-scroll"
               placeholder="Code các hình TikZ sẽ gom vào đây..."
             ></textarea>
+            <div id="autocomplete-output-tikz-single" class="autocomplete-dropdown"></div>
           </div>
         </div>
       </div>
@@ -639,7 +673,7 @@
 
         <div id="status" class="text-center text-xs text-slate-600 font-semibold"></div>
         <div id="download-container" class="text-center hidden">
-          <button id="download-btn" class="bg-slate-800 text-white px-6 py-2.5 text-xs font-semibold hover:bg-emerald-700 transition shadow flex items-center justify-center space-x-2 mx-auto">
+          <button id="download-btn" class="bg-slate-800 text-white px-6 py-2.5 text-xs font-semibold hover:bg-slate-900 transition shadow flex items-center justify-center space-x-2 mx-auto">
             <i data-lucide="download" class="w-4 h-4"></i>
             <span>Tải File ZIP Ảnh</span>
           </button>
@@ -804,7 +838,135 @@
     // SEARCH STATE TRACKER
     const searchStates = {};
 
-    // 2. HIGHLIGHT & SEARCH HIGHLIGHT SYNCHRONIZATION
+    // ==================== AUTOCOMPLETE & TAB INDENT SYSTEM ====================
+    const latexKeywords = [
+      "\\begin{ex}", "\\end{ex}",
+      "\\begin{itemize}", "\\end{itemize}",
+      "\\begin{enumerate}", "\\end{enumerate}",
+      "\\begin{tikzpicture}", "\\end{tikzpicture}",
+      "\\choice", "\\choiceTF", "\\True", "\\loigiai",
+      "\\item", "\\frac{}{}", "\\sqrt{}", "\\left", "\\right",
+      "\\vec{}", "\\overrightarrow{}", "\\overline{}", "\\bar{}",
+      "\\begin{tabular}", "\\end{tabular}", "\\hline"
+    ];
+
+    function handleKeyDown(e, id) {
+      const textarea = document.getElementById(id);
+      const dropdown = document.getElementById(`autocomplete-${id}`);
+
+      // 1. XỬ LÝ PHÍM TAB (Thụt lề)
+      if (e.key === 'Tab') {
+        e.preventDefault();
+        const start = textarea.selectionStart;
+        const end = textarea.selectionEnd;
+
+        if (dropdown && dropdown.style.display === 'block') {
+          // Nếu popup gợi ý đang mở, dùng Tab để chọn gợi ý đầu tiên
+          const activeItem = dropdown.querySelector('.autocomplete-item.active') || dropdown.querySelector('.autocomplete-item');
+          if (activeItem) {
+            activeItem.click();
+            return;
+          }
+        }
+
+        if (start === end) {
+          // Chèn 4 khoảng trắng tại con trỏ
+          textarea.setRangeText('    ', start, end, 'end');
+        } else {
+          // Thụt lề nhiều dòng khi bôi đen
+          const value = textarea.value;
+          const lineStart = value.lastIndexOf('\n', start - 1) + 1;
+          const selectedText = value.substring(lineStart, end);
+          const lines = selectedText.split('\n');
+          
+          if (e.shiftKey) {
+            // Shift + Tab: Thụt lùi
+            const indented = lines.map(l => l.startsWith('    ') ? l.substring(4) : (l.startsWith('\t') ? l.substring(1) : l)).join('\n');
+            textarea.setRangeText(indented, lineStart, end, 'select');
+          } else {
+            // Tab: Thụt tiến
+            const indented = lines.map(l => '    ' + l).join('\n');
+            textarea.setRangeText(indented, lineStart, end, 'select');
+          }
+        }
+        handleInput(id);
+        return;
+      }
+
+      // 2. ĐIỀU HƯỚNG GỢI Ý KHI DROPDOWN MỞ
+      if (dropdown && dropdown.style.display === 'block') {
+        const items = dropdown.querySelectorAll('.autocomplete-item');
+        let activeIdx = Array.from(items).findIndex(el => el.classList.contains('active'));
+
+        if (e.key === 'ArrowDown') {
+          e.preventDefault();
+          if (activeIdx < items.length - 1) {
+            if (activeIdx >= 0) items[activeIdx].classList.remove('active');
+            items[activeIdx + 1].classList.add('active');
+          }
+        } else if (e.key === 'ArrowUp') {
+          e.preventDefault();
+          if (activeIdx > 0) {
+            items[activeIdx].classList.remove('active');
+            items[activeIdx - 1].classList.add('active');
+          }
+        } else if (e.key === 'Enter') {
+          if (activeIdx >= 0) {
+            e.preventDefault();
+            items[activeIdx].click();
+          }
+        } else if (e.key === 'Escape') {
+          dropdown.style.display = 'none';
+        }
+      }
+    }
+
+    function updateAutocomplete(id) {
+      const textarea = document.getElementById(id);
+      const dropdown = document.getElementById(`autocomplete-${id}`);
+      if (!dropdown) return;
+
+      const cursorPos = textarea.selectionStart;
+      const textBefore = textarea.value.substring(0, cursorPos);
+      const match = textBefore.match(/\\[a-zA-Z]*$/);
+
+      if (!match || match[0].length <= 1) {
+        dropdown.style.display = 'none';
+        return;
+      }
+
+      const query = match[0].toLowerCase();
+      const filtered = latexKeywords.filter(kw => kw.toLowerCase().startsWith(query));
+
+      if (filtered.length === 0 || (filtered.length === 1 && filtered[0].toLowerCase() === query)) {
+        dropdown.style.display = 'none';
+        return;
+      }
+
+      // Render danh sách gợi ý
+      dropdown.innerHTML = '';
+      filtered.forEach((kw, idx) => {
+        const item = document.createElement('div');
+        item.className = `autocomplete-item ${idx === 0 ? 'active' : ''}`;
+        item.textContent = kw;
+        item.onclick = () => {
+          const start = textarea.selectionStart;
+          const replaceStart = start - query.length;
+          textarea.setRangeText(kw, replaceStart, start, 'end');
+          dropdown.style.display = 'none';
+          handleInput(id);
+          textarea.focus();
+        };
+        dropdown.appendChild(item);
+      });
+
+      // Đặt vị trí popup ngay dưới con trỏ soạn thảo
+      dropdown.style.display = 'block';
+      dropdown.style.left = '40px'; 
+      dropdown.style.top = '40px';
+    }
+
+    // ==================== HIGHLIGHT & SEARCH HIGHLIGHT SYNCHRONIZATION ====================
     function highlightText(text, id) {
       if (!text) return '';
       
@@ -868,6 +1030,8 @@
       linesDiv.innerHTML = Array.from({length: lineCount}, (_, i) => i + 1).join('\n');
       syncScroll(id);
 
+      updateAutocomplete(id);
+
       if (recordHistory) {
         saveState(id);
       }
@@ -900,27 +1064,20 @@
     });
 
     // =========================================================================
-    // HÀM TỰ ĐỘNG THÊM $ CHUẨN XÁC KHÔNG LỖI DÍNH CHỮ HAY $$ TRÙNG LẶP
+    // HÀM TỰ ĐỘNG THÊM $ HOÀN HẢO KHÔNG BỊ TRÙNG LẶP DẤU $$
     // =========================================================================
     function autoAddMathDollars(text) {
       if (!text) return '';
 
       const excludeList = ['VCB', 'VND', 'VNĐ', 'THPT', 'SGD', 'BGD', 'SGK', 'HCM', 'HN', 'VN', 'USD', 'STT', 'NXB', 'KHTN', 'GDĐT'];
-
-      // Tách văn bản thành các đoạn nằm ngoài và trong dấu $ đã có sẵn
       const parts = text.split(/(\$(?:\\.|[^$])+\$)/g);
 
       for (let i = 0; i < parts.length; i++) {
         if (!parts[i].startsWith('$')) {
           let str = parts[i];
 
-          // 1. Bọc $ cho biểu thức toán học dạng A=2, (1;2)...
           str = str.replace(/(?<![\$\w\\])(\([A-Z0-9a-z;,\s\-\+]+\)|[A-Z]{2,}\s*=\s*[\-+]?\d+(?:[\.,]\d+)?)(?![\$\w])/g, '$$$1$$');
-
-          // 2. Bọc $ cho số và phần trăm
           str = str.replace(/(?<![\$\w\\])(\d+(?:\s*[\.,]\s*\d+)?\s*(?:\\%)?)(?![\$\w\\])/g, '$$$1$$');
-
-          // 3. Bọc $ cho tên đỉnh tam giác/đoạn thẳng độc lập (ABC, M, AB)
           str = str.replace(/(?<![\p{L}\p{N}\\])([A-Z]{1,4})(?![\p{L}\p{N}])/gu, (match, p1) => {
             if (excludeList.includes(p1)) return match;
             return `$${p1}$`;
@@ -931,7 +1088,6 @@
       }
 
       let result = parts.join('');
-      // Dùng hàm fixMathSpacing để giãn cách ngoài và thu gọn sát vách trong
       return fixMathSpacing(result);
     }
 
@@ -1153,22 +1309,16 @@
       if (!str) return '';
       let text = str;
 
-      // 1. Xóa sạch dấu $ trùng lặp (vd: $$$ABC$$ -> $ABC$)
       text = text.replace(/\$+/g, '$');
-
-      // 2. Ép trim() bên trong khối $...$
       text = text.replace(/\$((?:\\.|[^$])+)\$/g, (m, inner) => `$${inner.trim()}$`);
 
-      // 3. Đảm bảo khoảng cách chuẩn ở bên ngoài dấu $
       text = text.replace(/([\p{L}\p{N}:,;\.\?!])\$/gu, '$1 $');
       text = text.replace(/\$([\p{L}\p{N}])/gu, '$ $1');
 
-      // 4. Dọn dẹp khoảng trắng kép
       text = text.replace(/[ \t]+/g, ' ');
       text = text.replace(/\s+([\.,;\)])/g, '$1');
       text = text.replace(/([\(\[])\s+/g, '$1');
 
-      // 5. Cú chốt kiểm tra lại vách trong
       text = text.replace(/\$((?:\\.|[^$])+)\$/g, (m, inner) => `$${inner.trim()}$`);
 
       return text.trim();
