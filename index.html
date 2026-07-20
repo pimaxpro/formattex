@@ -111,18 +111,19 @@
       cursor: not-allowed;
     }
 
-    /* Autocomplete Dropdown Popup */
+    /* Autocomplete Dropdown Popup - Overleaf Style */
     .autocomplete-dropdown {
       position: absolute;
       background: #ffffff;
       border: 1px solid #cbd5e1;
       box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
       z-index: 100;
-      max-height: 160px;
+      max-height: 180px;
       overflow-y: auto;
       font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
       font-size: 0.8rem;
       display: none;
+      border-radius: 4px;
     }
     .autocomplete-item {
       padding: 6px 12px;
@@ -673,7 +674,7 @@
 
         <div id="status" class="text-center text-xs text-slate-600 font-semibold"></div>
         <div id="download-container" class="text-center hidden">
-          <button id="download-btn" class="bg-slate-800 text-white px-6 py-2.5 text-xs font-semibold hover:bg-slate-900 transition shadow flex items-center justify-center space-x-2 mx-auto">
+          <button id="download-btn" class="bg-slate-800 text-white px-6 py-2.5 text-xs font-semibold hover:bg-emerald-700 transition shadow flex items-center justify-center space-x-2 mx-auto">
             <i data-lucide="download" class="w-4 h-4"></i>
             <span>Tải File ZIP Ảnh</span>
           </button>
@@ -854,14 +855,12 @@
       const textarea = document.getElementById(id);
       const dropdown = document.getElementById(`autocomplete-${id}`);
 
-      // 1. XỬ LÝ PHÍM TAB (Thụt lề)
       if (e.key === 'Tab') {
         e.preventDefault();
         const start = textarea.selectionStart;
         const end = textarea.selectionEnd;
 
         if (dropdown && dropdown.style.display === 'block') {
-          // Nếu popup gợi ý đang mở, dùng Tab để chọn gợi ý đầu tiên
           const activeItem = dropdown.querySelector('.autocomplete-item.active') || dropdown.querySelector('.autocomplete-item');
           if (activeItem) {
             activeItem.click();
@@ -870,21 +869,17 @@
         }
 
         if (start === end) {
-          // Chèn 4 khoảng trắng tại con trỏ
           textarea.setRangeText('    ', start, end, 'end');
         } else {
-          // Thụt lề nhiều dòng khi bôi đen
           const value = textarea.value;
           const lineStart = value.lastIndexOf('\n', start - 1) + 1;
           const selectedText = value.substring(lineStart, end);
           const lines = selectedText.split('\n');
           
           if (e.shiftKey) {
-            // Shift + Tab: Thụt lùi
             const indented = lines.map(l => l.startsWith('    ') ? l.substring(4) : (l.startsWith('\t') ? l.substring(1) : l)).join('\n');
             textarea.setRangeText(indented, lineStart, end, 'select');
           } else {
-            // Tab: Thụt tiến
             const indented = lines.map(l => '    ' + l).join('\n');
             textarea.setRangeText(indented, lineStart, end, 'select');
           }
@@ -893,7 +888,6 @@
         return;
       }
 
-      // 2. ĐIỀU HƯỚNG GỢI Ý KHI DROPDOWN MỞ
       if (dropdown && dropdown.style.display === 'block') {
         const items = dropdown.querySelectorAll('.autocomplete-item');
         let activeIdx = Array.from(items).findIndex(el => el.classList.contains('active'));
@@ -943,7 +937,6 @@
         return;
       }
 
-      // Render danh sách gợi ý
       dropdown.innerHTML = '';
       filtered.forEach((kw, idx) => {
         const item = document.createElement('div');
@@ -960,7 +953,6 @@
         dropdown.appendChild(item);
       });
 
-      // Đặt vị trí popup ngay dưới con trỏ soạn thảo
       dropdown.style.display = 'block';
       dropdown.style.left = '40px'; 
       dropdown.style.top = '40px';
@@ -1064,20 +1056,27 @@
     });
 
     // =========================================================================
-    // HÀM TỰ ĐỘNG THÊM $ HOÀN HẢO KHÔNG BỊ TRÙNG LẶP DẤU $$
+    // HÀM TỰ ĐỘNG THÊM $ HOÀN CHỈNH (ĐÃ SỬA LỖI GÂY $$$ABC$$$ VÀ DÁN DÍNH MẬT THIẾT)
     // =========================================================================
     function autoAddMathDollars(text) {
       if (!text) return '';
 
       const excludeList = ['VCB', 'VND', 'VNĐ', 'THPT', 'SGD', 'BGD', 'SGK', 'HCM', 'HN', 'VN', 'USD', 'STT', 'NXB', 'KHTN', 'GDĐT'];
+      
+      // Tách văn bản để không can thiệp vào các đoạn đã có $...$
       const parts = text.split(/(\$(?:\\.|[^$])+\$)/g);
 
       for (let i = 0; i < parts.length; i++) {
         if (!parts[i].startsWith('$')) {
           let str = parts[i];
 
-          str = str.replace(/(?<![\$\w\\])(\([A-Z0-9a-z;,\s\-\+]+\)|[A-Z]{2,}\s*=\s*[\-+]?\d+(?:[\.,]\d+)?)(?![\$\w])/g, '$$$1$$');
-          str = str.replace(/(?<![\$\w\\])(\d+(?:\s*[\.,]\s*\d+)?\s*(?:\\%)?)(?![\$\w\\])/g, '$$$1$$');
+          // 1. Biểu thức dạng AC=2, AD=5, (2;3)...
+          str = str.replace(/(?<![\$\w\\])(\([A-Z0-9a-z;,\s\-\+]+\)|[A-Z]{2,}\s*=\s*[\-+]?\d+(?:[\.,]\d+)?)(?![\$\w])/g, (m, p1) => `$${p1}$`);
+
+          // 2. Số và phần trăm
+          str = str.replace(/(?<![\$\w\\])(\d+(?:\s*[\.,]\s*\d+)?\s*(?:\\%)?)(?![\$\w\\])/g, (m, p1) => `$${p1}$`);
+
+          // 3. Tên đỉnh tam giác / đoạn thẳng đứng độc lập (ABC, M, AB)
           str = str.replace(/(?<![\p{L}\p{N}\\])([A-Z]{1,4})(?![\p{L}\p{N}])/gu, (match, p1) => {
             if (excludeList.includes(p1)) return match;
             return `$${p1}$`;
@@ -1309,16 +1308,22 @@
       if (!str) return '';
       let text = str;
 
+      // 1. Dọn dẹp các dấu $ trùng lặp
       text = text.replace(/\$+/g, '$');
+
+      // 2. Ép sát vách bên trong $...$
       text = text.replace(/\$((?:\\.|[^$])+)\$/g, (m, inner) => `$${inner.trim()}$`);
 
+      // 3. Giãn cách chuẩn ở bên ngoài $
       text = text.replace(/([\p{L}\p{N}:,;\.\?!])\$/gu, '$1 $');
       text = text.replace(/\$([\p{L}\p{N}])/gu, '$ $1');
 
+      // 4. Dọn dẹp khoảng trắng kép
       text = text.replace(/[ \t]+/g, ' ');
       text = text.replace(/\s+([\.,;\)])/g, '$1');
       text = text.replace(/([\(\[])\s+/g, '$1');
 
+      // 5. Cú chốt bên trong $
       text = text.replace(/\$((?:\\.|[^$])+)\$/g, (m, inner) => `$${inner.trim()}$`);
 
       return text.trim();
