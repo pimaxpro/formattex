@@ -26,31 +26,63 @@
     }
 
     /* LaTeX Syntax Highlighting Colors */
-    .hl-keyword { color: #f43f5e; font-weight: bold; }   /* \begin, \end, \choice, \loigiai */
-    .hl-true { color: #38bdf8; font-weight: bold; }      /* \True */
-    .hl-env { color: #fbbf24; font-weight: bold; }       /* {ex}, {tikzpicture} */
-    .hl-math { color: #4ade80; }                         /* $ ... $ */
-    .hl-comment { color: #94a3b8; font-style: italic; }  /* % comment */
-    .hl-brace { color: #c084fc; }                        /* { } */
+    .hl-keyword { color: #f43f5e; font-weight: bold; }
+    .hl-true { color: #38bdf8; font-weight: bold; }
+    .hl-env { color: #fbbf24; font-weight: bold; }
+    .hl-math { color: #4ade80; }
+    .hl-comment { color: #94a3b8; font-style: italic; }
 
-    /* Code Editor Container Sync */
-    .editor-wrapper {
+    /* Code Editor Overlay Container */
+    .editor-container {
       position: relative;
-      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
-      font-size: 0.875rem;
-      line-height: 1.5rem;
+      flex: 1;
+      background-color: #020617;
+      display: flex;
+      overflow: hidden;
     }
     .line-numbers {
       user-select: none;
       text-align: right;
       color: #64748b;
       padding-right: 0.75rem;
-      border-right: 1px solid #334155;
+      border-right: 1px solid #1e293b;
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+      font-size: 0.875rem;
+      line-height: 1.5rem;
     }
-    .code-area {
+    .editor-area {
+      position: relative;
+      flex: 1;
+      height: 100%;
+    }
+    .code-input, .code-highlight {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      padding: 0.75rem;
+      margin: 0;
+      border: none;
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+      font-size: 0.875rem;
+      line-height: 1.5rem;
       white-space: pre;
       tab-size: 4;
       overflow: auto;
+      word-wrap: normal;
+    }
+    .code-input {
+      color: transparent;
+      background: transparent;
+      caret-color: #f8fafc;
+      z-index: 2;
+      resize: none;
+    }
+    .code-highlight {
+      color: #e2e8f0;
+      z-index: 1;
+      pointer-events: none;
     }
   </style>
 </head>
@@ -62,24 +94,24 @@
       
       <!-- Logo & Brand -->
       <div class="flex items-center space-x-3">
-        <div class="bg-indigo-600 p-2 text-white shadow-md shadow-indigo-600/30">
+        <div class="bg-slate-800 p-2 text-white">
           <i data-lucide="sparkles" class="w-6 h-6"></i>
         </div>
         <div>
           <h1 class="text-xl font-bold tracking-tight text-slate-900 flex items-center gap-2">
             PimaX Tool
-            <span class="text-xs bg-indigo-100 text-indigo-700 px-2 py-0.5 font-semibold border border-indigo-200">Beta</span>
+            <span class="text-xs bg-slate-200 text-slate-800 px-2 py-0.5 font-semibold border border-slate-300">Beta</span>
           </h1>
           <p class="text-xs text-slate-500">Bộ công cụ hỗ trợ chuẩn hóa LaTeX & Xử lý tài liệu</p>
         </div>
       </div>
 
       <!-- MAIN NAVIGATION MENU -->
-      <nav class="flex bg-slate-100 p-1 border border-slate-200 shadow-inner">
+      <nav class="flex bg-slate-100 p-1 border border-slate-200">
         <button 
           id="nav-btn-1" 
           onclick="switchMainMenu(1)" 
-          class="px-4 py-2 text-xs font-semibold transition-all flex items-center space-x-2 bg-white text-indigo-600 shadow-sm"
+          class="px-4 py-2 text-xs font-semibold transition-all flex items-center space-x-2 bg-slate-800 text-white"
         >
           <i data-lucide="file-code-2" class="w-4 h-4"></i>
           <span>Chuẩn Hóa LaTeX</span>
@@ -121,7 +153,7 @@
           <button 
             id="sub-btn-1" 
             onclick="switchSubMode(1)" 
-            class="flex-1 sm:flex-none px-4 py-1.5 text-xs font-semibold transition flex items-center justify-center space-x-2 bg-indigo-600 text-white shadow-sm"
+            class="flex-1 sm:flex-none px-4 py-1.5 text-xs font-semibold transition flex items-center justify-center space-x-2 bg-slate-800 text-white"
           >
             <i data-lucide="check-square" class="w-3.5 h-3.5"></i>
             <span>CN 1: Trắc nghiệm 4 Lựa chọn (\choice)</span>
@@ -135,7 +167,7 @@
             <span>CN 2: Trắc nghiệm Đúng/Sai (\choiceTF)</span>
           </button>
         </div>
-        <span id="sub-mode-desc" class="text-xs text-slate-500 font-medium">
+        <span id="sub-mode-desc" class="text-xs text-slate-600 font-medium">
           Chế độ: <b>Trắc nghiệm 4 phương án (A, B, C, D)</b>
         </span>
       </div>
@@ -145,60 +177,64 @@
         
         <!-- Input Box 1 -->
         <div class="bg-white border border-slate-200 p-4 shadow-sm flex flex-col justify-between h-[580px]">
-          <!-- Header Bar chuẩn hóa chiều cao h-8 -->
           <div class="flex justify-between items-center text-xs font-bold text-slate-700 h-8 mb-3 pb-2 border-b border-slate-100">
             <span class="flex items-center gap-1.5">
-              <i data-lucide="file-input" class="w-4 h-4 text-indigo-600"></i>
+              <i data-lucide="file-input" class="w-4 h-4 text-slate-600"></i>
               Dữ liệu thô đầu vào:
             </span>
             <div class="flex items-center space-x-2">
-              <label class="cursor-pointer bg-slate-100 hover:bg-slate-200 text-indigo-600 px-2.5 h-7 flex items-center transition border border-slate-200 gap-1 text-xs">
+              <label class="cursor-pointer bg-slate-100 hover:bg-slate-200 text-slate-700 px-2.5 h-7 flex items-center transition border border-slate-200 gap-1 text-xs">
                 <i data-lucide="upload" class="w-3 h-3"></i> Tải file
                 <input type="file" accept=".tex,.txt" class="hidden" onchange="loadFile(event, 'input-ex')">
               </label>
-              <button onclick="clearText('input-ex')" class="text-red-500 hover:underline h-7 px-1 flex items-center">Xóa</button>
+              <button onclick="clearText('input-ex')" class="text-slate-600 hover:underline h-7 px-1 flex items-center">Xóa</button>
             </div>
           </div>
 
-          <!-- Editor Wrapper -->
-          <div class="editor-wrapper flex-1 bg-slate-900 border border-slate-800 text-slate-200 flex overflow-hidden">
+          <div class="editor-container border border-slate-800">
             <div id="lines-input-ex" class="line-numbers py-3 pl-3 bg-slate-950 min-w-[40px]">1</div>
-            <textarea 
-              id="input-ex" 
-              oninput="updateEditor('input-ex')" 
-              onscroll="syncScroll('input-ex')"
-              class="code-area custom-scroll flex-1 p-3 bg-transparent text-slate-200 focus:outline-none resize-none border-none"
-              placeholder="Dán nội dung câu hỏi thô vào đây..."
-            ></textarea>
+            <div class="editor-area">
+              <div id="hl-input-ex" class="code-highlight custom-scroll"></div>
+              <textarea 
+                id="input-ex" 
+                oninput="handleInput('input-ex')" 
+                onscroll="syncScroll('input-ex')"
+                class="code-input custom-scroll"
+                placeholder="Dán nội dung câu hỏi thô vào đây..."
+              ></textarea>
+            </div>
           </div>
         </div>
 
         <!-- Output Box 1 -->
         <div class="bg-white border border-slate-200 p-4 shadow-sm flex flex-col justify-between h-[580px]">
-          <!-- Header Bar chuẩn hóa chiều cao h-8 -->
           <div class="flex justify-between items-center text-xs font-bold text-slate-700 h-8 mb-3 pb-2 border-b border-slate-100">
-            <span class="flex items-center gap-1.5 text-emerald-700">
-              <i data-lucide="file-output" class="w-4 h-4 text-emerald-600"></i>
-              Kết quả chuẩn hóa dạng cây (\begin{ex}):
+            <span class="flex items-center gap-1.5">
+              <i data-lucide="file-output" class="w-4 h-4 text-slate-600"></i>
+              Kết quả chuẩn hóa (Có thể sửa trực tiếp):
             </span>
             <div class="flex items-center space-x-2">
-              <button onclick="copyToClipboard('output-ex-hidden')" class="text-indigo-600 hover:bg-indigo-50 px-2.5 h-7 flex items-center gap-1 border border-transparent hover:border-indigo-200 transition">
+              <button onclick="copyToClipboard('output-ex')" class="text-slate-700 hover:bg-slate-100 px-2.5 h-7 flex items-center gap-1 border border-slate-200 transition">
                 <i data-lucide="copy" class="w-3 h-3"></i> Copy
               </button>
-              <button onclick="downloadSingleText('output-ex-hidden', 'chuan_hoa_ex.tex')" class="text-emerald-600 hover:bg-emerald-50 px-2.5 h-7 flex items-center gap-1 border border-transparent hover:border-emerald-200 transition">
+              <button onclick="downloadSingleText('output-ex', 'chuan_hoa_ex.tex')" class="text-slate-700 hover:bg-slate-100 px-2.5 h-7 flex items-center gap-1 border border-slate-200 transition">
                 <i data-lucide="download" class="w-3 h-3"></i> Tải .tex
               </button>
             </div>
           </div>
 
-          <!-- Highlight Output Wrapper -->
-          <div class="editor-wrapper flex-1 bg-slate-950 border border-slate-800 flex overflow-hidden">
-            <div id="lines-output-ex" class="line-numbers py-3 pl-3 bg-slate-900 min-w-[40px]">1</div>
-            <div 
-              id="output-ex" 
-              class="code-area custom-scroll flex-1 p-3 text-slate-200 focus:outline-none"
-            ></div>
-            <textarea id="output-ex-hidden" class="hidden"></textarea>
+          <div class="editor-container border border-slate-800">
+            <div id="lines-output-ex" class="line-numbers py-3 pl-3 bg-slate-950 min-w-[40px]">1</div>
+            <div class="editor-area">
+              <div id="hl-output-ex" class="code-highlight custom-scroll"></div>
+              <textarea 
+                id="output-ex" 
+                oninput="handleInput('output-ex')" 
+                onscroll="syncScroll('output-ex')"
+                class="code-input custom-scroll"
+                placeholder="Kết quả chuẩn hóa sẽ xuất hiện tại đây..."
+              ></textarea>
+            </div>
           </div>
         </div>
 
@@ -207,7 +243,7 @@
       <div class="flex justify-end pt-2">
         <button 
           onclick="processExEnvironment()" 
-          class="bg-indigo-600 hover:bg-indigo-700 text-white font-semibold px-6 py-2.5 transition flex items-center space-x-2 shadow-lg shadow-indigo-600/20"
+          class="bg-slate-800 hover:bg-slate-900 text-white font-semibold px-6 py-2.5 transition flex items-center space-x-2 shadow"
         >
           <i data-lucide="wand-2" class="w-4 h-4"></i>
           <span id="btn-ex-label">Chuẩn Hóa Ngay (CN 1)</span>
@@ -221,7 +257,7 @@
     <section id="menu-section-2" class="hidden space-y-4">
       <div class="bg-white p-4 border border-slate-200 shadow-sm">
         <p class="text-sm text-slate-600">
-          Tự động lọc và tách toàn bộ các khối <code class="text-amber-600 font-bold">\begin{tikzpicture}...\end{tikzpicture}</code> ra khỏi file LaTeX gốc và gom tất cả vào 1 file duy nhất.
+          Tự động lọc và tách toàn bộ các khối <code class="text-slate-900 font-bold">\begin{tikzpicture}...\end{tikzpicture}</code> ra khỏi file LaTeX gốc và gom tất cả vào 1 file duy nhất.
         </p>
       </div>
 
@@ -229,55 +265,64 @@
         
         <!-- Input TikZ -->
         <div class="bg-white border border-slate-200 p-4 shadow-sm flex flex-col justify-between h-[520px]">
-          <!-- Header Bar h-8 -->
           <div class="flex justify-between items-center text-xs font-bold text-slate-700 h-8 mb-3 pb-2 border-b border-slate-100">
             <span class="flex items-center gap-1.5">
-              <i data-lucide="file-text" class="w-4 h-4 text-amber-600"></i>
+              <i data-lucide="file-text" class="w-4 h-4 text-slate-600"></i>
               Code LaTeX gốc:
             </span>
             <div class="flex items-center space-x-2">
-              <label class="cursor-pointer bg-slate-100 hover:bg-slate-200 text-amber-600 px-2.5 h-7 flex items-center transition border border-slate-200 gap-1 text-xs">
+              <label class="cursor-pointer bg-slate-100 hover:bg-slate-200 text-slate-700 px-2.5 h-7 flex items-center transition border border-slate-200 gap-1 text-xs">
                 <i data-lucide="upload" class="w-3 h-3"></i> Tải file
                 <input type="file" accept=".tex,.txt" class="hidden" onchange="loadFile(event, 'input-tikz')">
               </label>
-              <button onclick="clearText('input-tikz')" class="text-red-500 hover:underline h-7 px-1 flex items-center">Xóa</button>
+              <button onclick="clearText('input-tikz')" class="text-slate-600 hover:underline h-7 px-1 flex items-center">Xóa</button>
             </div>
           </div>
 
-          <div class="editor-wrapper flex-1 bg-slate-900 border border-slate-800 text-slate-200 flex overflow-hidden">
+          <div class="editor-container border border-slate-800">
             <div id="lines-input-tikz" class="line-numbers py-3 pl-3 bg-slate-950 min-w-[40px]">1</div>
-            <textarea 
-              id="input-tikz" 
-              oninput="updateEditor('input-tikz')" 
-              onscroll="syncScroll('input-tikz')"
-              class="code-area custom-scroll flex-1 p-3 bg-transparent text-slate-200 focus:outline-none resize-none border-none"
-              placeholder="Dán nội dung LaTeX chứa TikZ vào đây..."
-            ></textarea>
+            <div class="editor-area">
+              <div id="hl-input-tikz" class="code-highlight custom-scroll"></div>
+              <textarea 
+                id="input-tikz" 
+                oninput="handleInput('input-tikz')" 
+                onscroll="syncScroll('input-tikz')"
+                class="code-input custom-scroll"
+                placeholder="Dán nội dung LaTeX chứa TikZ vào đây..."
+              ></textarea>
+            </div>
           </div>
         </div>
 
         <!-- Output Main -->
         <div class="bg-white border border-slate-200 p-4 shadow-sm flex flex-col justify-between h-[520px]">
-          <!-- Header Bar h-8 -->
           <div class="flex justify-between items-center text-xs font-bold text-slate-700 h-8 mb-3 pb-2 border-b border-slate-100">
-            <span class="flex items-center gap-1.5 text-amber-700">
-              <i data-lucide="file-check" class="w-4 h-4 text-amber-600"></i>
-              File gốc (Đã gỡ TikZ):
+            <span class="flex items-center gap-1.5">
+              <i data-lucide="file-check" class="w-4 h-4 text-slate-600"></i>
+              File gốc (Đã gỡ TikZ - Có thể sửa):
             </span>
             <div class="flex items-center space-x-2">
-              <button onclick="copyToClipboard('output-main-hidden')" class="text-indigo-600 hover:bg-indigo-50 px-2.5 h-7 flex items-center gap-1 border border-transparent hover:border-indigo-200 transition">
+              <button onclick="copyToClipboard('output-main')" class="text-slate-700 hover:bg-slate-100 px-2.5 h-7 flex items-center gap-1 border border-slate-200 transition">
                 <i data-lucide="copy" class="w-3 h-3"></i> Copy
               </button>
-              <button onclick="downloadSingleText('output-main-hidden', 'file_goc_no_tikz.tex')" class="text-amber-600 hover:bg-amber-50 px-2.5 h-7 flex items-center gap-1 border border-transparent hover:border-amber-200 transition">
+              <button onclick="downloadSingleText('output-main', 'file_goc_no_tikz.tex')" class="text-slate-700 hover:bg-slate-100 px-2.5 h-7 flex items-center gap-1 border border-slate-200 transition">
                 <i data-lucide="download" class="w-3 h-3"></i> Tải file gốc
               </button>
             </div>
           </div>
 
-          <div class="editor-wrapper flex-1 bg-slate-950 border border-slate-800 flex overflow-hidden">
-            <div id="lines-output-main" class="line-numbers py-3 pl-3 bg-slate-900 min-w-[40px]">1</div>
-            <div id="output-main" class="code-area custom-scroll flex-1 p-3 text-slate-200 focus:outline-none"></div>
-            <textarea id="output-main-hidden" class="hidden"></textarea>
+          <div class="editor-container border border-slate-800">
+            <div id="lines-output-main" class="line-numbers py-3 pl-3 bg-slate-950 min-w-[40px]">1</div>
+            <div class="editor-area">
+              <div id="hl-output-main" class="code-highlight custom-scroll"></div>
+              <textarea 
+                id="output-main" 
+                oninput="handleInput('output-main')" 
+                onscroll="syncScroll('output-main')"
+                class="code-input custom-scroll"
+                placeholder="File gốc sau khi gỡ các khối TikZ sẽ hiển thị ở đây..."
+              ></textarea>
+            </div>
           </div>
         </div>
 
@@ -286,15 +331,15 @@
       <div class="bg-white p-4 border border-slate-200 shadow-sm flex flex-wrap justify-between items-center gap-4">
         <div class="flex items-center space-x-3">
           <label class="text-xs font-semibold text-slate-700">Tên file TikZ tổng:</label>
-          <input type="text" id="file-name-tikz" value="tat_ca_hinh_tikz" class="bg-slate-50 border border-slate-200 px-3 py-1.5 text-xs font-mono focus:outline-none focus:border-amber-500 w-48">
+          <input type="text" id="file-name-tikz" value="tat_ca_hinh_tikz" class="bg-slate-50 border border-slate-200 px-3 py-1.5 text-xs font-mono focus:outline-none focus:border-slate-500 w-48">
           
           <label class="text-xs font-semibold text-slate-700 ml-2">Đuôi file:</label>
-          <select id="file-ext-tikz" class="bg-slate-50 border border-slate-200 text-xs px-2 py-1.5 focus:outline-none focus:border-amber-500">
+          <select id="file-ext-tikz" class="bg-slate-50 border border-slate-200 text-xs px-2 py-1.5 focus:outline-none focus:border-slate-500">
             <option value=".tex" selected>.tex</option>
             <option value=".txt">.txt</option>
           </select>
         </div>
-        <button onclick="extractAllTikZToSingleFile()" class="bg-amber-600 hover:bg-amber-700 text-white font-semibold px-6 py-2.5 transition flex items-center space-x-2 shadow-lg shadow-amber-600/20">
+        <button onclick="extractAllTikZToSingleFile()" class="bg-slate-800 hover:bg-slate-900 text-white font-semibold px-6 py-2.5 transition flex items-center space-x-2 shadow">
           <i data-lucide="scissors" class="w-4 h-4"></i>
           <span>Tách & Gom Vào 1 File</span>
         </button>
@@ -304,26 +349,34 @@
       <div id="single-tikz-container" class="hidden bg-white p-5 border border-slate-200 shadow-sm space-y-3">
         <div class="flex justify-between items-center border-b border-slate-100 pb-3 flex-wrap gap-2">
           <div class="flex items-center space-x-2">
-            <i data-lucide="file-code-2" class="w-5 h-5 text-amber-600"></i>
-            <h3 class="font-bold text-slate-800 text-sm">File chứa toàn bộ hình TikZ</h3>
-            <span id="tikz-count-badge" class="text-xs bg-amber-100 text-amber-700 font-semibold px-2.5 py-0.5">0 hình</span>
+            <i data-lucide="file-code-2" class="w-5 h-5 text-slate-700"></i>
+            <h3 class="font-bold text-slate-800 text-sm">File chứa toàn bộ hình TikZ (Có thể sửa trực tiếp)</h3>
+            <span id="tikz-count-badge" class="text-xs bg-slate-200 text-slate-800 font-semibold px-2.5 py-0.5">0 hình</span>
           </div>
           <div class="flex items-center space-x-3">
-            <button onclick="copyToClipboard('output-tikz-single-hidden')" class="text-xs text-indigo-600 hover:underline flex items-center space-x-1">
+            <button onclick="copyToClipboard('output-tikz-single')" class="text-xs text-slate-700 hover:underline flex items-center space-x-1">
               <i data-lucide="copy" class="w-3 h-3"></i>
               <span>Copy TikZ</span>
             </button>
-            <button onclick="downloadSingleText('output-tikz-single-hidden', getTikZFilename())" class="bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-semibold px-4 py-1.5 transition flex items-center space-x-1.5 shadow">
+            <button onclick="downloadSingleText('output-tikz-single', getTikZFilename())" class="bg-slate-800 hover:bg-slate-900 text-white text-xs font-semibold px-4 py-1.5 transition flex items-center space-x-1.5 shadow">
               <i data-lucide="download" class="w-4 h-4"></i>
               <span>Tải File TikZ Tổng</span>
             </button>
           </div>
         </div>
 
-        <div class="editor-wrapper h-80 bg-slate-950 border border-slate-800 flex overflow-hidden">
-          <div id="lines-output-tikz-single" class="line-numbers py-3 pl-3 bg-slate-900 min-w-[40px]">1</div>
-          <div id="output-tikz-single" class="code-area custom-scroll flex-1 p-3 text-slate-200 focus:outline-none"></div>
-          <textarea id="output-tikz-single-hidden" class="hidden"></textarea>
+        <div class="editor-container h-80 border border-slate-800">
+          <div id="lines-output-tikz-single" class="line-numbers py-3 pl-3 bg-slate-950 min-w-[40px]">1</div>
+          <div class="editor-area">
+            <div id="hl-output-tikz-single" class="code-highlight custom-scroll"></div>
+            <textarea 
+              id="output-tikz-single" 
+              oninput="handleInput('output-tikz-single')" 
+              onscroll="syncScroll('output-tikz-single')"
+              class="code-input custom-scroll"
+              placeholder="Code các hình TikZ sẽ gom vào đây..."
+            ></textarea>
+          </div>
         </div>
       </div>
     </section>
@@ -335,7 +388,7 @@
       <div class="max-w-3xl mx-auto bg-white p-6 sm:p-8 border border-slate-200 shadow-sm space-y-6">
         <div>
           <h2 class="text-lg font-bold text-slate-900 flex items-center gap-2">
-            <i data-lucide="file-image" class="w-5 h-5 text-indigo-600"></i>
+            <i data-lucide="file-image" class="w-5 h-5 text-slate-700"></i>
             Chuyển PDF sang Ảnh (PNG / JPG)
           </h2>
           <p class="text-xs text-slate-500 mt-1">Xuất các trang trong file PDF thành file ảnh chất lượng cao và đóng gói file ZIP.</p>
@@ -344,20 +397,20 @@
         <div class="space-y-4">
           <div>
             <label class="block text-xs font-bold text-slate-700 mb-1">Chọn file PDF:</label>
-            <input type="file" id="pdf-input" accept="application/pdf" class="w-full text-xs text-slate-600 border border-slate-200 p-2.5 bg-slate-50 focus:ring-2 focus:ring-indigo-500 outline-none">
+            <input type="file" id="pdf-input" accept="application/pdf" class="w-full text-xs text-slate-600 border border-slate-200 p-2.5 bg-slate-50 focus:ring-2 focus:ring-slate-500 outline-none">
           </div>
 
           <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
               <label class="block text-xs font-bold text-slate-700 mb-1">Định dạng ảnh xuất:</label>
-              <select id="format-select" class="w-full text-xs border border-slate-200 p-2.5 bg-slate-50 focus:ring-2 focus:ring-indigo-500 outline-none font-medium">
+              <select id="format-select" class="w-full text-xs border border-slate-200 p-2.5 bg-slate-50 focus:ring-2 focus:ring-slate-500 outline-none font-medium">
                 <option value="png" selected>PNG (Sắc nét, không nén)</option>
                 <option value="jpeg">JPG (Dung lượng nhẹ)</option>
               </select>
             </div>
             <div>
               <label class="block text-xs font-bold text-slate-700 mb-1">Kiểu chỉnh độ phân giải:</label>
-              <select id="mode-select" class="w-full text-xs border border-slate-200 p-2.5 bg-slate-50 focus:ring-2 focus:ring-indigo-500 outline-none font-medium">
+              <select id="mode-select" class="w-full text-xs border border-slate-200 p-2.5 bg-slate-50 focus:ring-2 focus:ring-slate-500 outline-none font-medium">
                 <option value="width">Cố định Chiều Rộng</option>
                 <option value="height">Cố định Chiều Cao</option>
                 <option value="exact">Cố định Cả 2</option>
@@ -374,7 +427,7 @@
                 value="1920" 
                 min="100" 
                 max="10000"
-                class="w-full border border-slate-200 p-2 text-xs focus:ring-2 focus:ring-indigo-500 outline-none font-mono"
+                class="w-full border border-slate-200 p-2 text-xs focus:ring-2 focus:ring-slate-500 outline-none font-mono"
                 placeholder="VD: 1920"
               >
             </div>
@@ -386,20 +439,20 @@
                 value="1080" 
                 min="100" 
                 max="10000"
-                class="w-full border border-slate-200 p-2 text-xs focus:ring-2 focus:ring-indigo-500 outline-none font-mono"
+                class="w-full border border-slate-200 p-2 text-xs focus:ring-2 focus:ring-slate-500 outline-none font-mono"
                 placeholder="VD: 1080"
               >
             </div>
           </div>
 
-          <button id="convert-btn" class="w-full bg-indigo-600 text-white py-3 font-semibold hover:bg-indigo-700 transition shadow-lg shadow-indigo-600/20 disabled:bg-slate-300">
+          <button id="convert-btn" class="w-full bg-slate-800 text-white py-3 font-semibold hover:bg-slate-900 transition shadow disabled:bg-slate-300">
             Chuyển Đổi Sang Ảnh
           </button>
         </div>
 
         <div id="status" class="text-center text-xs text-slate-600 font-semibold"></div>
         <div id="download-container" class="text-center hidden">
-          <button id="download-btn" class="bg-emerald-600 text-white px-6 py-2.5 text-xs font-semibold hover:bg-emerald-700 transition shadow-lg shadow-emerald-600/20 flex items-center justify-center space-x-2 mx-auto">
+          <button id="download-btn" class="bg-slate-800 text-white px-6 py-2.5 text-xs font-semibold hover:bg-slate-900 transition shadow flex items-center justify-center space-x-2 mx-auto">
             <i data-lucide="download" class="w-4 h-4"></i>
             <span>Tải File ZIP Ảnh</span>
           </button>
@@ -424,7 +477,7 @@
         const btn = document.getElementById(`nav-btn-${i}`);
         const sec = document.getElementById(`menu-section-${i}`);
         if (i === menuIndex) {
-          btn.className = "px-4 py-2 text-xs font-semibold transition-all flex items-center space-x-2 bg-white text-indigo-600 shadow-sm";
+          btn.className = "px-4 py-2 text-xs font-semibold transition-all flex items-center space-x-2 bg-slate-800 text-white";
           sec.classList.remove('hidden');
         } else {
           btn.className = "px-4 py-2 text-xs font-semibold transition-all flex items-center space-x-2 text-slate-600 hover:text-slate-900";
@@ -442,63 +495,60 @@
       const label = document.getElementById('btn-ex-label');
 
       if (mode === 1) {
-        btn1.className = "flex-1 sm:flex-none px-4 py-1.5 text-xs font-semibold transition flex items-center justify-center space-x-2 bg-indigo-600 text-white shadow-sm";
+        btn1.className = "flex-1 sm:flex-none px-4 py-1.5 text-xs font-semibold transition flex items-center justify-center space-x-2 bg-slate-800 text-white";
         btn2.className = "flex-1 sm:flex-none px-4 py-1.5 text-xs font-semibold transition flex items-center justify-center space-x-2 text-slate-600 hover:text-slate-900";
         desc.innerHTML = "Chế độ: <b>Trắc nghiệm 4 phương án (A, B, C, D)</b>";
         label.innerText = "Chuẩn Hóa Ngay (CN 1)";
       } else {
-        btn2.className = "flex-1 sm:flex-none px-4 py-1.5 text-xs font-semibold transition flex items-center justify-center space-x-2 bg-indigo-600 text-white shadow-sm";
+        btn2.className = "flex-1 sm:flex-none px-4 py-1.5 text-xs font-semibold transition flex items-center justify-center space-x-2 bg-slate-800 text-white";
         btn1.className = "flex-1 sm:flex-none px-4 py-1.5 text-xs font-semibold transition flex items-center justify-center space-x-2 text-slate-600 hover:text-slate-900";
         desc.innerHTML = "Chế độ: <b>Trắc nghiệm Đúng/Sai (a, b, c, d)</b>";
         label.innerText = "Chuẩn Hóa Ngay (CN 2)";
       }
     }
 
-    // 2. LINE NUMBERS & SYNTAX HIGHLIGHTING ENGINE
-    function updateEditor(id) {
-      const textarea = document.getElementById(id);
-      const linesDiv = document.getElementById(`lines-${id}`);
-      const lineCount = textarea.value.split('\n').length;
-      linesDiv.innerHTML = Array.from({length: lineCount}, (_, i) => i + 1).join('<br>');
-    }
-
-    function syncScroll(id) {
-      const textarea = document.getElementById(id);
-      const linesDiv = document.getElementById(`lines-${id}`);
-      linesDiv.scrollTop = textarea.scrollTop;
-    }
-
-    function renderHighlightedCode(containerId, rawCode) {
-      const container = document.getElementById(containerId);
-      const hiddenArea = document.getElementById(`${containerId}-hidden`);
-      const linesDiv = document.getElementById(`lines-${containerId}`);
-
-      hiddenArea.value = rawCode;
-
-      if (!rawCode) {
-        container.innerHTML = `<span class="text-slate-500">Kết quả sẽ xuất hiện tại đây...</span>`;
-        linesDiv.innerHTML = '1';
-        return;
-      }
-
-      // Escape HTML
-      let html = rawCode
+    // 2. EDITOR SYNTAX & SYNC ENGINE
+    function highlightText(text) {
+      if (!text) return '';
+      let html = text
         .replace(/&/g, "&amp;")
         .replace(/</g, "&lt;")
         .replace(/>/g, "&gt;");
 
-      // Highlights
       html = html.replace(/(\%[^\n]*)/g, '<span class="hl-comment">$1</span>');
       html = html.replace(/(\$(?:[^\$\\]|\\.)*\$)/g, '<span class="hl-math">$1</span>');
       html = html.replace(/\\(begin|end|choice|choiceTF|loigiai)\b/g, '<span class="hl-keyword">\\$1</span>');
       html = html.replace(/\\True\b/g, '<span class="hl-true">\\True</span>');
       html = html.replace(/(\{ex\}|\{tikzpicture\})/g, '<span class="hl-env">$1</span>');
 
-      container.innerHTML = html;
+      if (html.endsWith('\n')) html += ' ';
+      return html;
+    }
 
-      // Update Line Numbers
-      const lineCount = rawCode.split('\n').length;
+    function handleInput(id) {
+      const textarea = document.getElementById(id);
+      const hlDiv = document.getElementById(`hl-${id}`);
+      const linesDiv = document.getElementById(`lines-${id}`);
+
+      hlDiv.innerHTML = highlightText(textarea.value);
+      const lineCount = textarea.value.split('\n').length;
       linesDiv.innerHTML = Array.from({length: lineCount}, (_, i) => i + 1).join('<br>');
+    }
+
+    function syncScroll(id) {
+      const textarea = document.getElementById(id);
+      const hlDiv = document.getElementById(`hl-${id}`);
+      const linesDiv = document.getElementById(`lines-${id}`);
+
+      hlDiv.scrollTop = textarea.scrollTop;
+      hlDiv.scrollLeft = textarea.scrollLeft;
+      linesDiv.scrollTop = textarea.scrollTop;
+    }
+
+    function setEditorValue(id, value) {
+      const textarea = document.getElementById(id);
+      textarea.value = value;
+      handleInput(id);
     }
 
     // UTILS
@@ -507,16 +557,14 @@
       if (!file) return;
       const reader = new FileReader();
       reader.onload = function(e) {
-        document.getElementById(targetId).value = e.target.result;
-        updateEditor(targetId);
+        setEditorValue(targetId, e.target.result);
       };
       reader.readAsText(file);
     }
 
     function clearText(id) {
-      document.getElementById(id).value = '';
-      updateEditor(id);
-      if(id === 'input-ex') renderHighlightedCode('output-ex', '');
+      setEditorValue(id, '');
+      if (id === 'input-ex') setEditorValue('output-ex', '');
     }
 
     function copyToClipboard(id) {
@@ -653,7 +701,7 @@
         results.push(exCode);
       });
 
-      renderHighlightedCode('output-ex', results.join('\n\n'));
+      setEditorValue('output-ex', results.join('\n\n'));
     }
 
     function processMode2() {
@@ -729,7 +777,7 @@
         results.push(exCode);
       });
 
-      renderHighlightedCode('output-ex', results.join('\n\n'));
+      setEditorValue('output-ex', results.join('\n\n'));
     }
 
     // ==================== LOGIC MENU 2 ====================
@@ -756,8 +804,8 @@
         return `% [Đã bóc tách hình TikZ số ${count}]`;
       });
 
-      renderHighlightedCode('output-main', modifiedMainContent);
-      renderHighlightedCode('output-tikz-single', combinedTikZContent.trim());
+      setEditorValue('output-main', modifiedMainContent);
+      setEditorValue('output-tikz-single', combinedTikZContent.trim());
 
       document.getElementById('tikz-count-badge').textContent = `${matches.length} hình TikZ`;
       document.getElementById('single-tikz-container').classList.remove('hidden');
