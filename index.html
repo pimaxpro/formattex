@@ -104,6 +104,12 @@
       pointer-events: none;
       overflow: hidden;
     }
+
+    /* Style cho nút Undo/Redo khi bị disabled */
+    .btn-history:disabled {
+      opacity: 0.4;
+      cursor: not-allowed;
+    }
   </style>
 </head>
 <body class="bg-slate-100 text-slate-800 min-h-screen font-sans flex flex-col">
@@ -202,7 +208,15 @@
               <i data-lucide="file-input" class="w-4 h-4 text-slate-600"></i>
               Dữ liệu thô đầu vào:
             </span>
-            <div class="flex items-center space-x-2">
+            <div class="flex items-center space-x-1.5">
+              <!-- Nút Undo / Redo cho Input 1 -->
+              <button id="btn-undo-input-ex" onclick="undo('input-ex')" disabled class="btn-history bg-slate-100 hover:bg-slate-200 text-slate-700 px-2 h-7 flex items-center gap-1 border border-slate-200 transition text-[11px]" title="Hoàn tác (Ctrl+Z)">
+                <i data-lucide="undo-2" class="w-3.5 h-3.5"></i>
+              </button>
+              <button id="btn-redo-input-ex" onclick="redo('input-ex')" disabled class="btn-history bg-slate-100 hover:bg-slate-200 text-slate-700 px-2 h-7 flex items-center gap-1 border border-slate-200 transition text-[11px]" title="Làm lại (Ctrl+Y)">
+                <i data-lucide="redo-2" class="w-3.5 h-3.5"></i>
+              </button>
+              <span class="text-slate-300">|</span>
               <label class="cursor-pointer bg-slate-100 hover:bg-slate-200 text-slate-700 px-2.5 h-7 flex items-center transition border border-slate-200 gap-1 text-xs">
                 <i data-lucide="upload" class="w-3 h-3"></i> Tải file
                 <input type="file" accept=".tex,.txt" class="hidden" onchange="loadFile(event, 'input-ex')">
@@ -234,6 +248,14 @@
               Kết quả chuẩn hóa:
             </span>
             <div class="flex items-center space-x-1.5">
+              <!-- Nút Undo / Redo cho Output 1 -->
+              <button id="btn-undo-output-ex" onclick="undo('output-ex')" disabled class="btn-history bg-slate-100 hover:bg-slate-200 text-slate-700 px-2 h-7 flex items-center gap-1 border border-slate-200 transition text-[11px]" title="Hoàn tác (Ctrl+Z)">
+                <i data-lucide="undo-2" class="w-3.5 h-3.5"></i>
+              </button>
+              <button id="btn-redo-output-ex" onclick="redo('output-ex')" disabled class="btn-history bg-slate-100 hover:bg-slate-200 text-slate-700 px-2 h-7 flex items-center gap-1 border border-slate-200 transition text-[11px]" title="Làm lại (Ctrl+Y)">
+                <i data-lucide="redo-2" class="w-3.5 h-3.5"></i>
+              </button>
+              <span class="text-slate-300">|</span>
               <!-- Nút tự động thêm $ cho đoạn bôi đen -->
               <button onclick="applyAutoMath('output-ex')" class="bg-amber-100 hover:bg-amber-200 text-amber-900 px-2 h-7 flex items-center gap-1 border border-amber-300 transition font-mono font-bold text-[11px]" title="Bọc $ cho số, kí tự toán, tên điểm trong đoạn bôi đen">
                 <i data-lucide="variable" class="w-3.5 h-3.5 text-amber-700"></i> $ Math
@@ -338,7 +360,14 @@
               <i data-lucide="file-text" class="w-4 h-4 text-slate-600"></i>
               Code LaTeX gốc:
             </span>
-            <div class="flex items-center space-x-2">
+            <div class="flex items-center space-x-1.5">
+              <button id="btn-undo-input-tikz" onclick="undo('input-tikz')" disabled class="btn-history bg-slate-100 hover:bg-slate-200 text-slate-700 px-2 h-7 flex items-center gap-1 border border-slate-200 transition text-[11px]" title="Hoàn tác (Ctrl+Z)">
+                <i data-lucide="undo-2" class="w-3.5 h-3.5"></i>
+              </button>
+              <button id="btn-redo-input-tikz" onclick="redo('input-tikz')" disabled class="btn-history bg-slate-100 hover:bg-slate-200 text-slate-700 px-2 h-7 flex items-center gap-1 border border-slate-200 transition text-[11px]" title="Làm lại (Ctrl+Y)">
+                <i data-lucide="redo-2" class="w-3.5 h-3.5"></i>
+              </button>
+              <span class="text-slate-300">|</span>
               <label class="cursor-pointer bg-slate-100 hover:bg-slate-200 text-slate-700 px-2.5 h-7 flex items-center transition border border-slate-200 gap-1 text-xs">
                 <i data-lucide="upload" class="w-3 h-3"></i> Tải file
                 <input type="file" accept=".tex,.txt" class="hidden" onchange="loadFile(event, 'input-tikz')">
@@ -370,6 +399,13 @@
               File gốc (Đã gỡ TikZ):
             </span>
             <div class="flex items-center space-x-1.5">
+              <button id="btn-undo-output-main" onclick="undo('output-main')" disabled class="btn-history bg-slate-100 hover:bg-slate-200 text-slate-700 px-2 h-7 flex items-center gap-1 border border-slate-200 transition text-[11px]" title="Hoàn tác (Ctrl+Z)">
+                <i data-lucide="undo-2" class="w-3.5 h-3.5"></i>
+              </button>
+              <button id="btn-redo-output-main" onclick="redo('output-main')" disabled class="btn-history bg-slate-100 hover:bg-slate-200 text-slate-700 px-2 h-7 flex items-center gap-1 border border-slate-200 transition text-[11px]" title="Làm lại (Ctrl+Y)">
+                <i data-lucide="redo-2" class="w-3.5 h-3.5"></i>
+              </button>
+              <span class="text-slate-300">|</span>
               <button onclick="applyAutoMath('output-main')" class="bg-amber-100 hover:bg-amber-200 text-amber-900 px-2 h-7 flex items-center gap-1 border border-amber-300 transition font-mono font-bold text-[11px]" title="Bọc $ cho số, kí tự toán, tên điểm trong đoạn bôi đen">
                 <i data-lucide="variable" class="w-3.5 h-3.5 text-amber-700"></i> $ Math
               </button>
@@ -469,6 +505,13 @@
             <span id="tikz-count-badge" class="text-xs bg-slate-200 text-slate-800 font-semibold px-2.5 py-0.5">0 hình</span>
           </div>
           <div class="flex items-center space-x-3">
+            <button id="btn-undo-output-tikz-single" onclick="undo('output-tikz-single')" disabled class="btn-history bg-slate-100 hover:bg-slate-200 text-slate-700 px-2 h-7 flex items-center gap-1 border border-slate-200 transition text-[11px]" title="Hoàn tác (Ctrl+Z)">
+              <i data-lucide="undo-2" class="w-3.5 h-3.5"></i>
+            </button>
+            <button id="btn-redo-output-tikz-single" onclick="redo('output-tikz-single')" disabled class="btn-history bg-slate-100 hover:bg-slate-200 text-slate-700 px-2 h-7 flex items-center gap-1 border border-slate-200 transition text-[11px]" title="Làm lại (Ctrl+Y)">
+              <i data-lucide="redo-2" class="w-3.5 h-3.5"></i>
+            </button>
+            <span class="text-slate-300">|</span>
             <button onclick="copyToClipboard('output-tikz-single')" class="text-xs text-slate-700 hover:underline flex items-center space-x-1">
               <i data-lucide="copy" class="w-3 h-3"></i>
               <span>Copy TikZ</span>
@@ -620,6 +663,116 @@
   <script>
     lucide.createIcons();
 
+    // ==================== UNDO / REDO SYSTEM ====================
+    const historyStacks = {}; // Lưu lịch sử { 'id': { undoStack: [], redoStack: [], timeout: null } }
+
+    function initHistory(id) {
+      if (!historyStacks[id]) {
+        historyStacks[id] = {
+          undoStack: [],
+          redoStack: [],
+          timeout: null
+        };
+      }
+    }
+
+    function saveState(id, force = false) {
+      initHistory(id);
+      const textarea = document.getElementById(id);
+      if (!textarea) return;
+
+      const state = {
+        value: textarea.value,
+        selectionStart: textarea.selectionStart,
+        selectionEnd: textarea.selectionEnd
+      };
+
+      const h = historyStacks[id];
+      const lastState = h.undoStack[h.undoStack.length - 1];
+
+      if (lastState && lastState.value === state.value) return;
+
+      if (force) {
+        h.undoStack.push(state);
+        h.redoStack = [];
+        updateHistoryButtons(id);
+      } else {
+        clearTimeout(h.timeout);
+        h.timeout = setTimeout(() => {
+          h.undoStack.push(state);
+          h.redoStack = [];
+          updateHistoryButtons(id);
+        }, 300); // Gom nhóm các thao tác nhập liệu gõ phím nhanh
+      }
+    }
+
+    function undo(id) {
+      initHistory(id);
+      const h = historyStacks[id];
+      const textarea = document.getElementById(id);
+      if (!textarea || h.undoStack.length <= 1) return;
+
+      // Đưa trạng thái hiện tại sang redoStack
+      const currentState = h.undoStack.pop();
+      h.redoStack.push(currentState);
+
+      // Lấy trạng thái trước đó
+      const previousState = h.undoStack[h.undoStack.length - 1];
+      textarea.value = previousState.value;
+      textarea.setSelectionRange(previousState.selectionStart, previousState.selectionEnd);
+
+      handleInput(id, false); // Cập nhật giao diện không lưu lại history
+      updateHistoryButtons(id);
+    }
+
+    function redo(id) {
+      initHistory(id);
+      const h = historyStacks[id];
+      const textarea = document.getElementById(id);
+      if (!textarea || h.redoStack.length === 0) return;
+
+      const nextState = h.redoStack.pop();
+      h.undoStack.push(nextState);
+
+      textarea.value = nextState.value;
+      textarea.setSelectionRange(nextState.selectionStart, nextState.selectionEnd);
+
+      handleInput(id, false);
+      updateHistoryButtons(id);
+    }
+
+    function updateHistoryButtons(id) {
+      initHistory(id);
+      const h = historyStacks[id];
+      const btnUndo = document.getElementById(`btn-undo-${id}`);
+      const btnRedo = document.getElementById(`btn-redo-${id}`);
+
+      if (btnUndo) btnUndo.disabled = h.undoStack.length <= 1;
+      if (btnRedo) btnRedo.disabled = h.redoStack.length === 0;
+    }
+
+    // BẮT SỰ KIỆN PHÍM TẮT CTRL + Z / CTRL + Y CHO Ô DANG FOCUS
+    document.addEventListener('keydown', function(e) {
+      const activeEl = document.activeElement;
+      if (activeEl && activeEl.tagName === 'TEXTAREA') {
+        const id = activeEl.id;
+        
+        if (e.ctrlKey || e.metaKey) {
+          if (e.key.toLowerCase() === 'z') {
+            e.preventDefault(); // Tránh hành vi undo mặc định của trình duyệt
+            if (e.shiftKey) {
+              redo(id);
+            } else {
+              undo(id);
+            }
+          } else if (e.key.toLowerCase() === 'y') {
+            e.preventDefault();
+            redo(id);
+          }
+        }
+      }
+    });
+
     // 1. SWITCH NAVIGATION
     let activeMainMenu = 1;
     function switchMainMenu(menuIndex) {
@@ -715,7 +868,7 @@
       return html;
     }
 
-    function handleInput(id) {
+    function handleInput(id, recordHistory = true) {
       const textarea = document.getElementById(id);
       const hlDiv = document.getElementById(`hl-${id}`);
       const linesDiv = document.getElementById(`lines-${id}`);
@@ -724,6 +877,10 @@
       const lineCount = textarea.value.split('\n').length;
       linesDiv.innerHTML = Array.from({length: lineCount}, (_, i) => i + 1).join('\n');
       syncScroll(id);
+
+      if (recordHistory) {
+        saveState(id);
+      }
     }
 
     function syncScroll(id) {
@@ -738,35 +895,37 @@
     function setEditorValue(id, value) {
       const textarea = document.getElementById(id);
       textarea.value = value;
-      handleInput(id);
+      handleInput(id, false);
+      saveState(id, true); // Ép lưu ngay lập tức trạng thái mới
     }
+
+    // Khoi tao Undo Stack ban dau cho cac khung Textarea
+    window.addEventListener('DOMContentLoaded', () => {
+      ['input-ex', 'output-ex', 'input-tikz', 'output-main', 'output-tikz-single'].forEach(id => {
+        initHistory(id);
+        const el = document.getElementById(id);
+        if (el) {
+          saveState(id, true);
+        }
+      });
+    });
 
     // 3. AUTO MATH DOLLARS WRAPPER
     function autoAddMathDollars(text) {
       if (!text) return '';
       
       const parts = text.split(/(\$(?:\\.|[^$])+\$)/g);
-      
-      // Danh sách các từ viết tắt thông dụng không bọc $
       const excludeList = ['VCB', 'VND', 'VNĐ', 'THPT', 'SGD', 'BGD', 'SGK', 'HCM', 'HN', 'VN', 'USD', 'STT', 'NXB', 'KHTN', 'GDĐT'];
 
       for (let i = 0; i < parts.length; i++) {
         if (!parts[i].startsWith('$')) {
           let str = parts[i];
 
-          // 1. Biểu thức hình học, tọa độ, pt...
           str = str.replace(/(?<![\$\w\\])(\([A-Z0-9a-z;,\s\-\+]+\)|[A-Z]{2,}\s*=\s*[\-+]?\d+(?:[\.,]\d+)?)(?![\$\w])/g, ' $$$1$$ ');
-          
-          // 2. Tên đi kèm từ khóa (BỎ cờ i, CHỈ bọc chữ IN HOA, dùng chuẩn Unicode để không cắt chữ tiếng Việt)
           str = str.replace(/(?<=tam\s+giác|đường\s+tròn|tâm|cô|ông|điểm|mặt\s+phẳng|đường\s+thẳng|đoạn|cạnh|góc|đỉnh)\s+([A-Z]{1,4})(?![\p{L}\p{N}])/gu, ' $$$1$$');
-          
-          // 3. Các số
           str = str.replace(/(?<![\$\w\\])(\d+(?:\s*[\.,]\s*\d+)?\s*(?:\\%)?)(?![\$\w\\])/g, ' $$$1$$ ');
-          
-          // 4. Các biến đi sau từ khóa (hàm số f, số thực x...)
           str = str.replace(/(?<=số\s+thực|biến|hàm\s+số|tham\s+số|đại\s+lượng|đường\s+thẳng|mặt\s+phẳng)\s+([a-z])(?![\p{L}\p{N}])/gu, ' $$$1$$');
 
-          // 5. Bọc MỌI CỤM 1 ĐẾN 4 CHỮ IN HOA đứng độc lập (như M, AB, ABC) trừ blacklist
           str = str.replace(/(?<![\p{L}\p{N}\\])([A-Z]{1,4})(?![\p{L}\p{N}])/gu, (match, p1) => {
             if (excludeList.includes(p1)) return match;
             return ` $${p1}$ `;
@@ -796,7 +955,8 @@
       const processedText = autoAddMathDollars(selectedText);
 
       textarea.setRangeText(processedText, start, end, 'select');
-      handleInput(id);
+      handleInput(id, false);
+      saveState(id, true);
     }
 
     // 4. SELECTION WRAPPER (ITEMIZE & ENUMERATE CONVERTER)
@@ -826,7 +986,8 @@
         textarea.setRangeText(wrappedText, start, end, 'select');
       }
 
-      handleInput(id);
+      handleInput(id, false);
+      saveState(id, true);
     }
 
     // 5. ADVANCED SEARCH LOGIC
@@ -843,7 +1004,7 @@
       if (!findVal) {
         searchStates[id] = { matches: [], activeMatchIndex: -1 };
         countSpan.textContent = "0/0";
-        handleInput(id);
+        handleInput(id, false);
         return;
       }
 
@@ -872,7 +1033,7 @@
         countSpan.textContent = "0/0";
       }
 
-      handleInput(id);
+      handleInput(id, false);
     }
 
     function navigateSearch(id, direction) {
@@ -888,7 +1049,7 @@
 
       document.getElementById(`count-${id}`).textContent = `${state.activeMatchIndex + 1}/${state.matches.length}`;
       scrollToMatch(id);
-      handleInput(id);
+      handleInput(id, false);
     }
 
     function scrollToMatch(id) {
@@ -933,6 +1094,7 @@
       }
 
       findText(id);
+      saveState(id, true);
     }
 
     function escapeRegExp(string) {
