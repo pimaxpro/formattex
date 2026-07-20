@@ -295,7 +295,7 @@
               <button onclick="convertArrayToAligned('output-ex')" class="bg-blue-100 hover:bg-blue-200 text-blue-900 p-1.5 h-7 w-7 flex items-center justify-center border border-blue-300 transition" title="Chuyển toàn bộ array thành aligned và căn lề dấu =">
                 <i data-lucide="columns-2" class="w-4 h-4 text-blue-700"></i>
               </button>
-              <!-- NÚT CHỔI QUÉT RÕ RÀNG -->
+              <!-- NÚT CHỔI QUÉT DỌN DẸP KHOẢNG TRẮNG & DÒNG TRỐNG -->
               <button onclick="applyCleanSpacingTool('output-ex')" class="bg-emerald-100 hover:bg-emerald-200 text-emerald-900 p-1.5 h-7 w-7 flex items-center justify-center border border-emerald-300 transition" title="Dọn dẹp dòng trống thừa & khoảng trắng trước dấu câu">
                 <svg class="w-4 h-4 text-emerald-700" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m2 22 10-10"/><path d="M9.5 12.5 14 17"/><path d="m15 11 3 3"/><path d="m17 7 2 2"/><path d="M19 2l3 3-7 7-3-3z"/></svg>
               </button>
@@ -1067,6 +1067,7 @@
         }
       }
 
+      // 1. LATEX SYNTAX HIGHLIGHTING
       let html = text
         .replace(/&/g, "&amp;")
         .replace(/</g, "&lt;")
@@ -1078,6 +1079,7 @@
       html = html.replace(/\\True\b/g, '<span class="hl-true">\\True</span>');
       html = html.replace(/(\{ex\}|\{tikzpicture\}|\{itemize\}|\{enumerate\})/g, '<span class="hl-env">$1</span>');
 
+      // 2. SEARCH HIGHLIGHT OVERLAY
       if (searchKeyword.trim()) {
         const flags = matchCase ? 'g' : 'gi';
         const escapedKeyword = escapeRegExp(searchKeyword);
@@ -1150,7 +1152,7 @@
     function cleanTextSpacingAndLines(text) {
       if (!text) return '';
 
-      // 1. Xóa khoảng trắng thừa trước các dấu câu "?", ",", ".", "!"
+      // 1. Xóa khoảng trắng thừa trước dấu câu "?", ",", ".", "!"
       let cleaned = text.replace(/\s+([\?\,\.\!])/g, '$1');
 
       // 2. Tách dòng, loại bỏ hoàn toàn các dòng trống (kể cả dòng chứa khoảng trắng ẩn)
@@ -1169,7 +1171,6 @@
       resultText = resultText.replace(/([^\n])\n+(\\begin\{[^}]+\})/g, '$1\n\n$2');
       resultText = resultText.replace(/(\\end\{[^}]+\})\n+([^\n])/g, '$1\n\n$2');
 
-      // Gom các dòng trống thừa phát sinh (nếu có) thành 1 dòng trống đơn chuẩn xác
       resultText = resultText.replace(/\n\s*\n\s*\n+/g, '\n\n');
 
       return resultText.trim();
@@ -1675,7 +1676,8 @@
 
         let exCode = `\\begin{ex}\n`;
         exCode += `    ${mainQuestion}\n\n`;
-        exCode += `    \\shortans{${shortAnswerValue}}\n`;
+        // \shortans{} được tách dòng độc lập, có dòng trắng phía trên và phía dưới chuẩn xác
+        exCode += `    \\shortans{${shortAnswerValue}}\n\n`;
 
         if (solutionPart) {
           let cleanSol = fixMathSpacing(solutionPart);
