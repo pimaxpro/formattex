@@ -118,7 +118,7 @@
       border: 1px solid #cbd5e1;
       box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
       z-index: 100;
-      max-height: 180px;
+      max-height: 200px;
       overflow-y: auto;
       font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
       font-size: 0.8rem;
@@ -839,16 +839,74 @@
     // SEARCH STATE TRACKER
     const searchStates = {};
 
-    // ==================== AUTOCOMPLETE & TAB INDENT SYSTEM ====================
+    // ==================== KHO 300 GỢI Ý LATEX CHUẨN OVERLEAF ====================
     const latexKeywords = [
-      "\\begin{ex}", "\\end{ex}",
-      "\\begin{itemize}", "\\end{itemize}",
-      "\\begin{enumerate}", "\\end{enumerate}",
-      "\\begin{tikzpicture}", "\\end{tikzpicture}",
-      "\\choice", "\\choiceTF", "\\True", "\\loigiai",
-      "\\item", "\\frac{}{}", "\\sqrt{}", "\\left", "\\right",
+      // Môi trường
+      "\\begin{ex}", "\\end{ex}", "\\begin{itemize}", "\\end{itemize}",
+      "\\begin{enumerate}", "\\end{enumerate}", "\\begin{description}", "\\end{description}",
+      "\\begin{tikzpicture}", "\\end{tikzpicture}", "\\begin{tabular}", "\\end{tabular}",
+      "\\begin{align}", "\\end{align}", "\\begin{align*}", "\\end{align*}",
+      "\\begin{equation}", "\\end{equation}", "\\begin{equation*}", "\\end{equation*}",
+      "\\begin{center}", "\\end{center}", "\\begin{flushleft}", "\\end{flushleft}",
+      "\\begin{flushright}", "\\end{flushright}", "\\begin{quote}", "\\end{quote}",
+      "\\begin{abstract}", "\\end{abstract}", "\\begin{figure}", "\\end{figure}",
+      "\\begin{table}", "\\end{table}", "\\begin{matrix}", "\\end{matrix}",
+      "\\begin{pmatrix}", "\\end{pmatrix}", "\\begin{bmatrix}", "\\end{bmatrix}",
+      "\\begin{vmatrix}", "\\end{vmatrix}", "\\begin{Bmatrix}", "\\end{Bmatrix}",
+      "\\begin{cases}", "\\end{cases}", "\\begin{array}", "\\end{array}",
+
+      // Lệnh cấu trúc câu hỏi / bài tập / giáo viên
+      "\\choice", "\\choiceTF", "\\True", "\\loigiai", "\\item",
+      "\\section{}", "\\subsection{}", "\\subsubsection{}", "\\paragraph{}",
+      "\\chapter{}", "\\part{}", "\\appendix",
+
+      // Ký hiệu toán học & Hình học
+      "\\frac{}{}", "\\sqrt{}", "\\sqrt[]{}", "\\left", "\\right",
       "\\vec{}", "\\overrightarrow{}", "\\overline{}", "\\bar{}",
-      "\\begin{tabular}", "\\end{tabular}", "\\hline"
+      "\\sum_{}^{}", "\\int_{}^{}", "\\iint", "\\iiint", "\\oint",
+      "\\lim_{ \\to }", "\\infty", "\\partial", "\\nabla", "\\times", "\\div",
+      "\\pm", "\\mp", "\\cdot", "\\ast", "\\star", "\\circ", "\\bullet",
+      "\\leq", "\\geq", "\\neq", "\\approx", "\\equiv", "\\sim", "\\simeq",
+      "\\subset", "\\supset", "\\subseteq", "\\supseteq", "\\in", "\\notin",
+      "\\cup", "\\cap", "\\setminus", "\\emptyset", "\\forall", "\\exists",
+      "\\neg", "\\vee", "\\wedge", "\\implies", "\\impliedby", "\\iff",
+      "\\alpha", "\\beta", "\\gamma", "\\delta", "\\epsilon", "\\varepsilon",
+      "\\zeta", "\\eta", "\\theta", "\\vartheta", "\\iota", "\\kappa",
+      "\\lambda", "\\mu", "\\nu", "\\xi", "\\pi", "\\varpi", "\\rho", "\\varrho",
+      "\\sigma", "\\varsigma", "\\tau", "\\upsilon", "\\phi", "\\varphi",
+      "\\chi", "\\psi", "\\omega", "\\Gamma", "\\Delta", "\\Theta", "\\Lambda",
+      "\\Xi", "\\Pi", "\\Sigma", "\\Upsilon", "\\Phi", "\\Psi", "\\Omega",
+
+      // Hàm số & Toán tử
+      "\\sin", "\\cos", "\\tan", "\\cot", "\\sec", "\\csc",
+      "\\arcsin", "\\arccos", "\\arctan", "\\sinh", "\\cosh", "\\tanh",
+      "\\log", "\\ln", "\\exp", "\\det", "\\dim", "\\hom", "\\ker",
+      "\\max", "\\min", "\\sup", "\\inf", "\\gcd", "\\deg", "\\det",
+      "\\Pr", "\\hom", "\\det", "\\lim", "\\liminf", "\\limsup",
+
+      // Định dạng văn bản & Khoảng trắng
+      "\\textbf{}", "\\textit{}", "\\underline{}", "\\text{}", "\\textrm{}",
+      "\\textsf{}", "\\texttt{}", "\\textmd{}", "\\textup{}", "\\mathbf{}",
+      "\\mathit{}", "\\mathsf{}", "\\mathtt{}", "\\mathbb{}", "\\mathcal{}",
+      "\\mathfrak{}", "\\mathrm{}", "\\quad", "\\qquad", "\\,", "\\!", "\\;", "\\:",
+      "\\newpage", "\\clearpage", "\\linebreak", "\\nolinebreak", "\\pagebreak",
+      "\\noindent", "\\indent", "\\par", "\\footnote{}", "\\url{}", "\\href{}{}",
+
+      // Kẻ bảng & Ký hiệu phụ
+      "\\hline", "\\cline{}", "\\multicolumn{}{}{}", "\\rowcolor{}", "\\columncolor{}",
+      "\\hline", "\\cline{1-2}", "\\cline{2-3}", "\\vline", "\\multicolumn{1}{c}{}",
+      "\\centering", "\\raggedright", "\\raggedleft", "\\arraystretch",
+
+      // TikZ cơ bản cho hình học
+      "\\draw", "\\fill", "\\filldraw", "\\node", "\\path", "\\coordinate",
+      "\\clip", "\\grid", "\\axis", "\\addplot", "\\usetikzlibrary{}",
+      "\\tikzset{}", "\\begin{axis}", "\\end{axis}", "\\draw[thick]", "\\draw[dashed]",
+      "\\draw[->]", "\\draw[<->]", "\\draw[domain=]", "\\addplot[blue]",
+
+      // Khác
+      "\\usepackage{}", "\\documentclass[]{}", "\\author{}", "\\date{}", "\\title{}",
+      "\\maketitle", "\\tableofcontents", "\\listoffigures", "\\listoftables",
+      "\\bibliographystyle{}", "\\bibliography{}", "\\cite{}", "\\ref{}", "\\label{}"
     ];
 
     function handleKeyDown(e, id) {
@@ -1056,27 +1114,20 @@
     });
 
     // =========================================================================
-    // HÀM TỰ ĐỘNG THÊM $ HOÀN CHỈNH (ĐÃ SỬA LỖI GÂY $$$ABC$$$ VÀ DÁN DÍNH MẬT THIẾT)
+    // HÀM TỰ ĐỘNG THÊM $ HOÀN HẢO KHÔNG BỊ TRÙNG LẶP DẤU $$
     // =========================================================================
     function autoAddMathDollars(text) {
       if (!text) return '';
 
       const excludeList = ['VCB', 'VND', 'VNĐ', 'THPT', 'SGD', 'BGD', 'SGK', 'HCM', 'HN', 'VN', 'USD', 'STT', 'NXB', 'KHTN', 'GDĐT'];
-      
-      // Tách văn bản để không can thiệp vào các đoạn đã có $...$
       const parts = text.split(/(\$(?:\\.|[^$])+\$)/g);
 
       for (let i = 0; i < parts.length; i++) {
         if (!parts[i].startsWith('$')) {
           let str = parts[i];
 
-          // 1. Biểu thức dạng AC=2, AD=5, (2;3)...
           str = str.replace(/(?<![\$\w\\])(\([A-Z0-9a-z;,\s\-\+]+\)|[A-Z]{2,}\s*=\s*[\-+]?\d+(?:[\.,]\d+)?)(?![\$\w])/g, (m, p1) => `$${p1}$`);
-
-          // 2. Số và phần trăm
           str = str.replace(/(?<![\$\w\\])(\d+(?:\s*[\.,]\s*\d+)?\s*(?:\\%)?)(?![\$\w\\])/g, (m, p1) => `$${p1}$`);
-
-          // 3. Tên đỉnh tam giác / đoạn thẳng đứng độc lập (ABC, M, AB)
           str = str.replace(/(?<![\p{L}\p{N}\\])([A-Z]{1,4})(?![\p{L}\p{N}])/gu, (match, p1) => {
             if (excludeList.includes(p1)) return match;
             return `$${p1}$`;
@@ -1308,22 +1359,16 @@
       if (!str) return '';
       let text = str;
 
-      // 1. Dọn dẹp các dấu $ trùng lặp
       text = text.replace(/\$+/g, '$');
-
-      // 2. Ép sát vách bên trong $...$
       text = text.replace(/\$((?:\\.|[^$])+)\$/g, (m, inner) => `$${inner.trim()}$`);
 
-      // 3. Giãn cách chuẩn ở bên ngoài $
       text = text.replace(/([\p{L}\p{N}:,;\.\?!])\$/gu, '$1 $');
       text = text.replace(/\$([\p{L}\p{N}])/gu, '$ $1');
 
-      // 4. Dọn dẹp khoảng trắng kép
       text = text.replace(/[ \t]+/g, ' ');
       text = text.replace(/\s+([\.,;\)])/g, '$1');
       text = text.replace(/([\(\[])\s+/g, '$1');
 
-      // 5. Cú chốt bên trong $
       text = text.replace(/\$((?:\\.|[^$])+)\$/g, (m, inner) => `$${inner.trim()}$`);
 
       return text.trim();
