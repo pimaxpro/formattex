@@ -95,7 +95,7 @@
   </main>
 
   <footer class="bg-slate-800 border-t border-slate-700 py-3 text-center text-xs text-slate-400">
-    LaTeX Standardizer — Tự động nhận diện công thức & Xóa khoảng trắng thừa
+    LaTeX Standardizer — Sửa lỗi thay thế chuỗi toán & Bảo tồn nội dung gốc
   </footer>
 
   <script>
@@ -139,24 +139,22 @@
       URL.revokeObjectURL(url);
     }
 
-    // Hàm tự động nhận diện và bao bọc công thức/số toán học chưa nằm trong $...$
+    // Tự động bọc toán chưa có $, sử dụng callback để tránh lỗi nhóm thế $1 trong JS
     function autoWrapMath(text) {
       if (!text) return '';
 
-      // Tách phần đã có trong $...$ để tránh bọc đúp
+      // Split các đoạn đã nằm trong $...$ để giữ nguyên
       const parts = text.split(/(\$[^\$]+\$)/g);
 
       for (let i = 0; i < parts.length; i++) {
-        // Chỉ xử lý các chuỗi không nằm trong $...$
         if (!parts[i].startsWith('$')) {
           let chunk = parts[i];
 
-          // 1. Tự động bọc các tập hợp/đoạn/khoảng (ví dụ: [-2;3], (-inf; 5], [1; +inf))
-          chunk = chunk.replace(/(?<!\$)([\(\[][\-+]?\d+[\d\s\.,;]*[;\,]\s*[\-+]?(?:\d+|\\infty|\+?\\infty|inf)[\)\]])(?!\$)/g, '$$1$');
+          // 1. Tự động bọc đoạn/khoảng toán học chưa bọc (ví dụ: [-2;3], (-inf; 5])
+          chunk = chunk.replace(/(?<!\$)([\(\[][\-+]?\d+[\d\s\.,;]*[;\,]\s*[\-+]?(?:\d+|\\infty|\+?\\infty|inf)[\)\]])(?!\$)/g, (match, p1) => `$${p1}$`);
 
-          // 2. Tự động bọc số thuần túy hoặc số thực/phân số thô chưa bọc $ (ví dụ: 100, -5, 3.14)
-          // Tránh can thiệp vào từ ngữ hoặc ký tự đặc biệt
-          chunk = chunk.replace(/(?<![\$\w\\])([\-+]?\d+(?:[\.,]\d+)?)(?![\$\w])/g, '$$1$');
+          // 2. Tự động bọc số/phân số/ký tự toán chưa bọc $
+          chunk = chunk.replace(/(?<![\$\w\\])([\-+]?\d+(?:[\.,]\d+)?)(?![\$\w])/g, (match, p1) => `$${p1}$`);
 
           parts[i] = chunk;
         }
@@ -165,16 +163,13 @@
       return parts.join('');
     }
 
-    // Tinh chỉnh sạch sẽ khoảng trắng và dấu $ thừa
+    // Làm sạch khoảng trắng bên trong $...$
     function cleanMathSpaces(str) {
       if (!str) return '';
       let res = str.trim();
 
-      // Xóa khoảng trắng thừa giữa chữ và ngoặc đóng/mở
-      res = res.replace(/\s+/g, ' ');
-
-      // Nếu phương án chỉ là $ x $, làm sạch thành $x$
-      res = res.replace(/\$\s+([^$]+)\s+\$/g, '$$1$');
+      // Nếu có khoảng trắng thừa như {$50 $} hoặc {$ 50$}, làm sạch về {$50$}
+      res = res.replace(/\$\s+([^$]+)\s+\$/g, (match, p1) => `$${p1.trim()}$`);
       res = res.replace(/\$\s+/g, '$').replace(/\s+\$/g, '$');
 
       return res;
@@ -242,10 +237,10 @@
           const key = matches[1].toUpperCase();
           let choiceVal = matches[2].trim();
           
-          // Xóa dấu chấm ở cuối phương án
+          // Xóa dấu chấm cuối phương án
           choiceVal = choiceVal.replace(/\.\s*$/, '');
 
-          // Tự động bọc $ cho phương án và xóa khoảng trắng thừa ở cuối/đầu
+          // Tự động bọc $ và làm sạch khoảng trắng
           choiceVal = autoWrapMath(choiceVal);
           choiceVal = cleanMathSpaces(choiceVal);
 
@@ -255,7 +250,7 @@
         // Đề bài câu hỏi
         let mainQuestion = lastChoiceIndex !== -1 ? questionPart.substring(0, lastChoiceIndex).trim() : questionPart;
         
-        // Tự động nhận diện công thức/đoạn/khoảng trong nội dung đề bài
+        // Tự động bọc $ cho các khoảng/đoạn/số trong đề bài nếu chưa bọc
         mainQuestion = autoWrapMath(mainQuestion);
 
         // 5. DỰNG KHỐI \begin{ex}
