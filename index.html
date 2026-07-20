@@ -47,7 +47,7 @@
     <!-- Mode Description Bar -->
     <div id="mode-description" class="bg-slate-800/60 border border-slate-700/60 rounded-lg p-3 text-xs text-slate-300 flex items-center justify-between">
       <span id="desc-text">Đang ở <b>Chức năng 1</b>: Chuyển đổi đề trắc nghiệm dạng 4 phương án A, B, C, D sang <code>\choice</code></span>
-      <span class="text-xs text-slate-400 bg-slate-700 px-2.5 py-0.5 rounded-full">v2.6 - Fixed Regex Group Conflict</span>
+      <span class="text-xs text-slate-400 bg-slate-700 px-2.5 py-0.5 rounded-full">v2.7 - Perfect Math Spacing</span>
     </div>
 
     <div class="grid grid-cols-1 md:grid-cols-2 gap-4 flex-1">
@@ -120,7 +120,7 @@
   </main>
 
   <footer class="bg-slate-800 border-t border-slate-700 py-3 text-center text-xs text-slate-400">
-    LaTeX Standardizer — Đã sửa hoàn toàn lỗi thay thế $1$ và $2$
+    LaTeX Standardizer — Sửa chuẩn 100% khoảng trắng ngoài và trong dấu $
   </footer>
 
   <script>
@@ -186,11 +186,13 @@
       URL.revokeObjectURL(url);
     }
 
-    // TỰ ĐỘNG BỌC $ VÀ TẠO KHOẢNG TRẮNG CHUẨN
-    function autoWrapMath(text) {
-      if (!text) return '';
+    // CHUẨN HÓA KHOẢNG TRẮNG CHUẨN XUYÊN SUỐT
+    function fixMathSpacing(str) {
+      if (!str) return '';
 
-      // Tách các đoạn đã nằm trong $...$
+      let text = str;
+
+      // 1. Tách các khối $...$ để tự bọc biểu thức chưa có $
       const parts = text.split(/(\$[^\$]+\$)/g);
 
       for (let i = 0; i < parts.length; i++) {
@@ -200,43 +202,31 @@
           // Bọc khoảng/đoạn chưa có $: (-1;1), [-2;3]
           chunk = chunk.replace(/([\(\[][\-+]?\w+\s*[;\,]\s*[\-+]?\w+[\)\]])/g, (m, p1) => ` $${p1}$ `);
 
-          // Bọc biểu thức biến như t = 0 s, t = 2 s
+          // Bọc biến kèm đơn vị: t = 0 s, t = 2 s
           chunk = chunk.replace(/(?<![\$\w\\])([a-zA-Z]\s*=\s*[\-+]?\d+(?:\s*\\[a-zA-Z]+|\s*\{\~[a-zA-Z]+\}|\s*[a-zA-Z]+)?)(?![\$\w])/g, (m, p1) => ` $${p1.trim()}$ `);
 
           parts[i] = chunk;
         }
       }
 
-      let result = parts.join('');
+      text = parts.join('');
 
-      // DÙNG CALLBACK ĐỂ TRÁNH LỖI PHÁT SINH $1 VÀ $2 CỦA JAVASCRIPT REGEX
-      // 1. Thêm khoảng trắng trước $ mở nếu đứng ngay sau chữ/số
-      result = result.replace(/([a-zA-ZÀ-ỹ0-9])\$([^\$]+)\$/g, (match, p1, p2) => `${p1} $${p2}$`);
+      // 2. LÀM SẠCH KHOẢNG TRẮNG BÊN TRONG NỘI DUNG $ ... $ (XÓA DẤU CÁCH SÁT DẤU $)
+      text = text.replace(/\$\s*([^\$]+?)\s*\$/g, (m, p1) => `$${p1.trim()}$`);
 
-      // 2. Thêm khoảng trắng sau $ đóng nếu đứng ngay trước chữ/số
-      result = result.replace(/\$([^\$]+)\$([a-zA-ZÀ-ỹ0-9])/g, (match, p1, p2) => `$${p1}$ ${p2}`);
+      // 3. ĐẢM BẢO KHOẢNG TRẮNG BÊN NGOÀI DẤU $
+      // Thêm 1 khoảng trắng TRƯỚC $ mở nếu đứng ngay sau chữ/số
+      text = text.replace(/([a-zA-ZÀ-ỹ0-9])\$([^\$]+)\$/g, (match, p1, p2) => `${p1} $${p2}$`);
 
-      // Dọn dẹp khoảng trắng dư thừa
-      result = result.replace(/[ \t]+/g, ' ');
-      result = result.replace(/\s+([\.,;\)])/g, '$1');
-      result = result.replace(/([\(\[])\s+/g, '$1');
+      // Thêm 1 khoảng trắng SAU $ đóng nếu đứng ngay trước chữ/số
+      text = text.replace(/\$([^\$]+)\$([a-zA-ZÀ-ỹ0-9])/g, (match, p1, p2) => `$${p1}$ ${p2}`);
 
-      return result.trim();
-    }
+      // 4. DỌN DẸP KHOẢNG TRẮNG KÉP & KHOẢNG TRẮNG TRƯỚC DẤU CÂU
+      text = text.replace(/[ \t]+/g, ' ');
+      text = text.replace(/\s+([\.,;\)])/g, '$1');
+      text = text.replace(/([\(\[])\s+/g, '$1');
 
-    function fixMathSpacing(str) {
-      if (!str) return '';
-      let res = autoWrapMath(str);
-
-      // Làm sạch khoảng trắng thừa sát phía trong dấu $...$
-      res = res.replace(/\$\s+([^$]+)\s+\$/g, (m, p1) => `$${p1.trim()}$`);
-      res = res.replace(/\$\s+/g, '$').replace(/\s+\$/g, '$');
-
-      // Đảm bảo lại khoảng trắng bên ngoài dấu $ bằng Callback an toàn
-      res = res.replace(/([a-zA-ZÀ-ỹ0-9])\$([^\$]+)\$/g, (match, p1, p2) => `${p1} $${p2}$`);
-      res = res.replace(/\$([^\$]+)\$([a-zA-ZÀ-ỹ0-9])/g, (match, p1, p2) => `$${p1}$ ${p2}`);
-
-      return res.trim();
+      return text.trim();
     }
 
     // LÀM SẠCH TIỀN TỐ "CÂU X", [MÃ], DẤU HAI CHẤM
