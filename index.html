@@ -3,225 +3,453 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>LaTeX ex Standardizer</title>
+  <title>PimaX Tool Beta — Bộ Công Cụ LaTeX & PDF Toàn Diện</title>
   <!-- Tailwind CSS -->
   <script src="https://cdn.tailwindcss.com"></script>
   <!-- Lucide Icons -->
   <script src="https://unpkg.com/lucide@latest"></script>
+  <!-- PDF.js v2.16.105 -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.16.105/pdf.min.js"></script>
+  <!-- JSZip library -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+  <style>
+    textarea::-webkit-scrollbar {
+      width: 6px;
+      height: 6px;
+    }
+    textarea::-webkit-scrollbar-thumb {
+      background: #cbd5e1;
+      border-radius: 4px;
+    }
+    textarea::-webkit-scrollbar-thumb:hover {
+      background: #94a3b8;
+    }
+  </style>
 </head>
-<body class="bg-slate-900 text-slate-100 min-h-screen font-sans flex flex-col">
+<body class="bg-slate-100 text-slate-800 min-h-screen font-sans flex flex-col">
 
-  <!-- Header & Menu Navigation -->
-  <header class="bg-slate-800 border-b border-slate-700 shadow-md">
-    <div class="max-w-7xl mx-auto px-6 py-4 flex flex-col md:flex-row justify-between items-center gap-4">
+  <!-- ==================== HEADER & TOP NAVIGATION ==================== -->
+  <header class="bg-white border-b border-slate-200 sticky top-0 z-50 shadow-sm">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 py-3.5 flex flex-col md:flex-row justify-between items-center gap-4">
+      
+      <!-- Logo & Brand -->
       <div class="flex items-center space-x-3">
-        <i data-lucide="file-code-2" class="w-8 h-8 text-blue-400"></i>
-        <h1 class="text-xl font-bold tracking-wide">LaTeX Standardizer</h1>
+        <div class="bg-indigo-600 p-2 rounded-xl text-white shadow-md shadow-indigo-600/30">
+          <i data-lucide="sparkles" class="w-6 h-6"></i>
+        </div>
+        <div>
+          <h1 class="text-xl font-bold tracking-tight text-slate-900 flex items-center gap-2">
+            PimaX Tool
+            <span class="text-xs bg-indigo-100 text-indigo-700 px-2 py-0.5 rounded-full font-semibold border border-indigo-200">Beta</span>
+          </h1>
+          <p class="text-xs text-slate-500">Bộ công cụ hỗ trợ chuẩn hóa LaTeX & Xử lý tài liệu</p>
+        </div>
       </div>
 
-      <!-- TAB MENU SELECTION -->
-      <div class="flex bg-slate-900 p-1 rounded-lg border border-slate-700">
+      <!-- MAIN NAVIGATION MENU -->
+      <nav class="flex bg-slate-100 p-1 rounded-xl border border-slate-200 shadow-inner">
         <button 
-          id="btn-mode-1" 
-          onclick="switchMode(1)" 
-          class="px-4 py-2 text-xs font-semibold rounded-md transition flex items-center space-x-2 bg-blue-600 text-white shadow"
+          id="nav-btn-1" 
+          onclick="switchMainMenu(1)" 
+          class="px-4 py-2 text-xs font-semibold rounded-lg transition-all flex items-center space-x-2 bg-white text-indigo-600 shadow-sm"
         >
-          <i data-lucide="check-square" class="w-4 h-4"></i>
-          <span>CN 1: Trắc nghiệm 4 lựa chọn (\choice)</span>
+          <i data-lucide="file-code-2" class="w-4 h-4"></i>
+          <span>Chuẩn Hóa LaTeX</span>
         </button>
+
         <button 
-          id="btn-mode-2" 
-          onclick="switchMode(2)" 
-          class="px-4 py-2 text-xs font-semibold rounded-md transition flex items-center space-x-2 text-slate-400 hover:text-slate-200"
+          id="nav-btn-2" 
+          onclick="switchMainMenu(2)" 
+          class="px-4 py-2 text-xs font-semibold rounded-lg transition-all flex items-center space-x-2 text-slate-600 hover:text-slate-900"
         >
-          <i data-lucide="list-checks" class="w-4 h-4"></i>
-          <span>CN 2: Trắc nghiệm Đúng/Sai (\choiceTF)</span>
+          <i data-lucide="scissors" class="w-4 h-4"></i>
+          <span>Lọc TikZ</span>
         </button>
-      </div>
+
+        <button 
+          id="nav-btn-3" 
+          onclick="switchMainMenu(3)" 
+          class="px-4 py-2 text-xs font-semibold rounded-lg transition-all flex items-center space-x-2 text-slate-600 hover:text-slate-900"
+        >
+          <i data-lucide="file-image" class="w-4 h-4"></i>
+          <span>Chuyển PDF Thành Ảnh</span>
+        </button>
+      </nav>
+
     </div>
   </header>
 
-  <!-- Main Content -->
-  <main class="flex-1 max-w-7xl w-full mx-auto p-4 md:p-6 space-y-4 flex flex-col">
-    
-    <!-- Mode Description Bar -->
-    <div id="mode-description" class="bg-slate-800/60 border border-slate-700/60 rounded-lg p-3 text-xs text-slate-300 flex items-center justify-between">
-      <span id="desc-text">Đang ở <b>Chức năng 1</b>: Chuyển đổi đề trắc nghiệm dạng 4 phương án A, B, C, D sang <code>\choice</code></span>
-      <span class="text-xs text-slate-400 bg-slate-700 px-2.5 py-0.5 rounded-full">v2.7 - Perfect Math Spacing</span>
-    </div>
+  <!-- ==================== MAIN CONTENT AREA ==================== -->
+  <main class="flex-1 max-w-7xl w-full mx-auto p-4 sm:p-6">
 
-    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 flex-1">
+    <!-- ================================================================= -->
+    <!-- MENU 1: CHUẨN HÓA LATEX (\begin{ex})                              -->
+    <!-- ================================================================= -->
+    <section id="menu-section-1" class="space-y-4">
       
-      <!-- BOX 1: INPUT TEXT -->
-      <div class="flex flex-col space-y-2">
-        <div class="flex justify-between items-center text-sm font-semibold text-slate-300">
-          <div class="flex items-center space-x-2">
-            <i data-lucide="file-input" class="w-4 h-4 text-blue-400"></i>
-            <span>Box 1: Text thô cần chuẩn hóa</span>
-          </div>
-          <div class="flex items-center space-x-3">
-            <label class="cursor-pointer text-xs bg-slate-800 hover:bg-slate-700 text-blue-400 px-2.5 py-1 rounded border border-slate-700 transition flex items-center space-x-1">
-              <i data-lucide="upload" class="w-3 h-3"></i>
-              <span>Tải file</span>
-              <input type="file" accept=".tex,.txt" class="hidden" onchange="loadFile(event)">
-            </label>
-            <button onclick="clearInput()" class="text-xs text-red-400 hover:underline flex items-center space-x-1">
-              <i data-lucide="trash-2" class="w-3 h-3"></i>
-              <span>Xóa</span>
-            </button>
-          </div>
+      <!-- Sub-menu Switcher -->
+      <div class="bg-white p-3 rounded-2xl border border-slate-200 shadow-sm flex flex-col sm:flex-row justify-between items-center gap-3">
+        <div class="flex bg-slate-100 p-1 rounded-lg border border-slate-200 w-full sm:w-auto">
+          <button 
+            id="sub-btn-1" 
+            onclick="switchSubMode(1)" 
+            class="flex-1 sm:flex-none px-4 py-1.5 text-xs font-semibold rounded-md transition flex items-center justify-center space-x-2 bg-indigo-600 text-white shadow-sm"
+          >
+            <i data-lucide="check-square" class="w-3.5 h-3.5"></i>
+            <span>CN 1: Trắc nghiệm 4 Lựa chọn (\choice)</span>
+          </button>
+          <button 
+            id="sub-btn-2" 
+            onclick="switchSubMode(2)" 
+            class="flex-1 sm:flex-none px-4 py-1.5 text-xs font-semibold rounded-md transition flex items-center justify-center space-x-2 text-slate-600 hover:text-slate-900"
+          >
+            <i data-lucide="list-checks" class="w-3.5 h-3.5"></i>
+            <span>CN 2: Trắc nghiệm Đúng/Sai (\choiceTF)</span>
+          </button>
         </div>
-        <textarea 
-          id="input-text" 
-          class="w-full flex-1 min-h-[500px] bg-slate-950 border border-slate-800 rounded-lg p-4 font-mono text-sm text-slate-200 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 resize-none shadow-inner" 
-          placeholder="Paste đoạn text đề thi / bài tập thô vào đây..."
-        ></textarea>
+        <span id="sub-mode-desc" class="text-xs text-slate-500 font-medium">
+          Chế độ: <b>Trắc nghiệm 4 phương án (A, B, C, D)</b>
+        </span>
       </div>
 
-      <!-- BOX 2: OUTPUT RESULT -->
-      <div class="flex flex-col space-y-2">
-        <div class="flex justify-between items-center text-sm font-semibold text-slate-300">
+      <!-- Editor Grid -->
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <!-- Input Box -->
+        <div class="bg-white border border-slate-200 rounded-2xl p-4 shadow-sm flex flex-col space-y-2">
+          <div class="flex justify-between items-center text-xs font-bold text-slate-700">
+            <span class="flex items-center gap-1.5">
+              <i data-lucide="file-input" class="w-4 h-4 text-indigo-600"></i>
+              Dữ liệu thô đầu vào:
+            </span>
+            <div class="flex items-center space-x-2">
+              <label class="cursor-pointer bg-slate-100 hover:bg-slate-200 text-indigo-600 px-2.5 py-1 rounded-lg transition border border-slate-200 flex items-center gap-1">
+                <i data-lucide="upload" class="w-3 h-3"></i> Tải file
+                <input type="file" accept=".tex,.txt" class="hidden" onchange="loadFile(event, 'input-ex')">
+              </label>
+              <button onclick="clearText('input-ex')" class="text-red-500 hover:underline">Xóa</button>
+            </div>
+          </div>
+          <textarea 
+            id="input-ex" 
+            class="w-full h-[480px] bg-slate-50 border border-slate-200 rounded-xl p-3.5 font-mono text-sm text-slate-800 focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 resize-none"
+            placeholder="Dán nội dung câu hỏi thô vào đây..."
+          ></textarea>
+        </div>
+
+        <!-- Output Box -->
+        <div class="bg-white border border-slate-200 rounded-2xl p-4 shadow-sm flex flex-col space-y-2">
+          <div class="flex justify-between items-center text-xs font-bold text-slate-700">
+            <span class="flex items-center gap-1.5 text-emerald-700">
+              <i data-lucide="file-output" class="w-4 h-4 text-emerald-600"></i>
+              Kết quả chuẩn hóa dạng cây (\begin{ex}):
+            </span>
+            <div class="flex items-center space-x-3">
+              <button onclick="copyToClipboard('output-ex')" class="text-indigo-600 hover:underline flex items-center gap-1">
+                <i data-lucide="copy" class="w-3 h-3"></i> Copy
+              </button>
+              <button onclick="downloadSingleText('output-ex', 'chuan_hoa_ex.tex')" class="text-emerald-600 hover:underline flex items-center gap-1">
+                <i data-lucide="download" class="w-3 h-3"></i> Tải .tex
+              </button>
+            </div>
+          </div>
+          <textarea 
+            id="output-ex" 
+            readonly 
+            class="w-full h-[480px] bg-slate-900 border border-slate-800 rounded-xl p-3.5 font-mono text-sm text-emerald-400 focus:outline-none resize-none"
+            placeholder="Kết quả chuẩn hóa sẽ xuất hiện tại đây..."
+          ></textarea>
+        </div>
+      </div>
+
+      <div class="flex justify-end pt-2">
+        <button 
+          onclick="processExEnvironment()" 
+          class="bg-indigo-600 hover:bg-indigo-700 text-white font-semibold px-6 py-2.5 rounded-xl transition flex items-center space-x-2 shadow-lg shadow-indigo-600/20"
+        >
+          <i data-lucide="wand-2" class="w-4 h-4"></i>
+          <span id="btn-ex-label">Chuẩn Hóa Ngay (CN 1)</span>
+        </button>
+      </div>
+    </section>
+
+    <!-- ================================================================= -->
+    <!-- MENU 2: LỌC TIKZ                                                 -->
+    <!-- ================================================================= -->
+    <section id="menu-section-2" class="hidden space-y-4">
+      <div class="bg-white p-4 rounded-2xl border border-slate-200 shadow-sm">
+        <p class="text-sm text-slate-600">
+          Tự động lọc và tách toàn bộ các khối <code class="text-amber-600 font-bold">\begin{tikzpicture}...\end{tikzpicture}</code> ra khỏi file LaTeX gốc và gom tất cả vào 1 file duy nhất.
+        </p>
+      </div>
+
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <!-- Input TikZ -->
+        <div class="bg-white border border-slate-200 rounded-2xl p-4 shadow-sm flex flex-col space-y-2">
+          <div class="flex justify-between items-center text-xs font-bold text-slate-700">
+            <span>Code LaTeX gốc:</span>
+            <div class="flex items-center space-x-2">
+              <label class="cursor-pointer bg-slate-100 hover:bg-slate-200 text-amber-600 px-2.5 py-1 rounded-lg transition border border-slate-200 flex items-center gap-1">
+                <i data-lucide="upload" class="w-3 h-3"></i> Tải file
+                <input type="file" accept=".tex,.txt" class="hidden" onchange="loadFile(event, 'input-tikz')">
+              </label>
+              <button onclick="clearText('input-tikz')" class="text-red-500 hover:underline">Xóa</button>
+            </div>
+          </div>
+          <textarea id="input-tikz" class="w-full h-96 bg-slate-50 border border-slate-200 rounded-xl p-3.5 font-mono text-sm text-slate-800 focus:outline-none focus:border-amber-500 focus:ring-1 focus:ring-amber-500 resize-none" placeholder="Dán nội dung LaTeX chứa TikZ vào đây..."></textarea>
+        </div>
+
+        <!-- Output Main -->
+        <div class="bg-white border border-slate-200 rounded-2xl p-4 shadow-sm flex flex-col space-y-2">
+          <div class="flex justify-between items-center text-xs font-bold text-slate-700">
+            <span>File gốc (Đã gỡ TikZ):</span>
+            <div class="flex items-center space-x-3">
+              <button onclick="copyToClipboard('output-main')" class="text-indigo-600 hover:underline flex items-center gap-1">
+                <i data-lucide="copy" class="w-3 h-3"></i> Copy
+              </button>
+              <button onclick="downloadSingleText('output-main', 'file_goc_no_tikz.tex')" class="text-amber-600 hover:underline flex items-center gap-1">
+                <i data-lucide="download" class="w-3 h-3"></i> Tải file gốc
+              </button>
+            </div>
+          </div>
+          <textarea id="output-main" readonly class="w-full h-96 bg-slate-900 border border-slate-800 rounded-xl p-3.5 font-mono text-sm text-slate-300 focus:outline-none resize-none" placeholder="File gốc sau khi gỡ các khối TikZ sẽ hiển thị ở đây..."></textarea>
+        </div>
+      </div>
+
+      <div class="bg-white p-4 rounded-2xl border border-slate-200 shadow-sm flex flex-wrap justify-between items-center gap-4">
+        <div class="flex items-center space-x-3">
+          <label class="text-xs font-semibold text-slate-700">Tên file TikZ tổng:</label>
+          <input type="text" id="file-name-tikz" value="tat_ca_hinh_tikz" class="bg-slate-50 border border-slate-200 rounded-lg px-3 py-1.5 text-xs font-mono focus:outline-none focus:border-amber-500 w-48">
+          
+          <label class="text-xs font-semibold text-slate-700 ml-2">Đuôi file:</label>
+          <select id="file-ext-tikz" class="bg-slate-50 border border-slate-200 text-xs rounded-lg px-2 py-1.5 focus:outline-none focus:border-amber-500">
+            <option value=".tex" selected>.tex</option>
+            <option value=".txt">.txt</option>
+          </select>
+        </div>
+        <button onclick="extractAllTikZToSingleFile()" class="bg-amber-600 hover:bg-amber-700 text-white font-semibold px-6 py-2.5 rounded-xl transition flex items-center space-x-2 shadow-lg shadow-amber-600/20">
+          <i data-lucide="scissors" class="w-4 h-4"></i>
+          <span>Tách & Gom Vào 1 File</span>
+        </button>
+      </div>
+
+      <!-- Result Container TikZ -->
+      <div id="single-tikz-container" class="hidden bg-white rounded-2xl p-5 border border-slate-200 shadow-sm space-y-3">
+        <div class="flex justify-between items-center border-b border-slate-100 pb-3 flex-wrap gap-2">
           <div class="flex items-center space-x-2">
-            <i data-lucide="file-output" class="w-4 h-4 text-emerald-400"></i>
-            <span>Box 2: Kết quả chuẩn hóa dạng cây (\begin{ex})</span>
+            <i data-lucide="file-code-2" class="w-5 h-5 text-amber-600"></i>
+            <h3 class="font-bold text-slate-800 text-sm">File chứa toàn bộ hình TikZ</h3>
+            <span id="tikz-count-badge" class="text-xs bg-amber-100 text-amber-700 font-semibold px-2.5 py-0.5 rounded-full">0 hình</span>
           </div>
           <div class="flex items-center space-x-3">
-            <button onclick="copyToClipboard()" class="text-xs text-blue-400 hover:underline flex items-center space-x-1">
+            <button onclick="copyToClipboard('output-tikz-single')" class="text-xs text-indigo-600 hover:underline flex items-center space-x-1">
               <i data-lucide="copy" class="w-3 h-3"></i>
-              <span>Copy</span>
+              <span>Copy TikZ</span>
             </button>
-            <button onclick="downloadResult()" class="text-xs text-emerald-400 hover:underline flex items-center space-x-1">
-              <i data-lucide="download" class="w-3 h-3"></i>
-              <span>Tải .tex</span>
+            <button onclick="downloadSingleText('output-tikz-single', getTikZFilename())" class="bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-semibold px-4 py-1.5 rounded-lg transition flex items-center space-x-1.5 shadow">
+              <i data-lucide="download" class="w-4 h-4"></i>
+              <span>Tải File TikZ Tổng</span>
             </button>
           </div>
         </div>
-        <textarea 
-          id="output-text" 
-          readonly 
-          class="w-full flex-1 min-h-[500px] bg-slate-950 border border-slate-800 rounded-lg p-4 font-mono text-sm text-emerald-400 focus:outline-none resize-none shadow-inner" 
-          placeholder="Kết quả chuẩn hóa dạng cây sẽ xuất hiện tại đây..."
-        ></textarea>
+        <textarea id="output-tikz-single" readonly class="w-full h-80 bg-slate-900 border border-slate-800 rounded-xl p-3.5 font-mono text-sm text-amber-300 focus:outline-none resize-none" placeholder="Code các hình TikZ sẽ gom vào đây..."></textarea>
       </div>
+    </section>
 
-    </div>
+    <!-- ================================================================= -->
+    <!-- MENU 3: CHUYỂN PDF THÀNH ẢNH                                      -->
+    <!-- ================================================================= -->
+    <section id="menu-section-3" class="hidden space-y-4">
+      <div class="max-w-3xl mx-auto bg-white p-6 sm:p-8 rounded-2xl border border-slate-200 shadow-sm space-y-6">
+        <div>
+          <h2 class="text-lg font-bold text-slate-900 flex items-center gap-2">
+            <i data-lucide="file-image" class="w-5 h-5 text-indigo-600"></i>
+            Chuyển PDF sang Ảnh (PNG / JPG)
+          </h2>
+          <p class="text-xs text-slate-500 mt-1">Xuất các trang trong file PDF thành file ảnh chất lượng cao và đóng gói file ZIP.</p>
+        </div>
 
-    <!-- Action Bar -->
-    <div class="flex justify-end pt-2">
-      <button 
-        onclick="processMain()" 
-        class="bg-blue-600 hover:bg-blue-500 text-white font-medium px-6 py-2.5 rounded-lg transition flex items-center space-x-2 shadow-lg shadow-blue-600/20"
-      >
-        <i data-lucide="wand-2" class="w-4 h-4"></i>
-        <span id="btn-process-label">Chuẩn Hóa Ngay (CN 1)</span>
-      </button>
-    </div>
+        <div class="space-y-4">
+          <!-- Chọn file -->
+          <div>
+            <label class="block text-xs font-bold text-slate-700 mb-1">Chọn file PDF:</label>
+            <input type="file" id="pdf-input" accept="application/pdf" class="w-full text-xs text-slate-600 border border-slate-200 p-2.5 rounded-xl bg-slate-50 focus:ring-2 focus:ring-indigo-500 outline-none">
+          </div>
+
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <!-- Định dạng -->
+            <div>
+              <label class="block text-xs font-bold text-slate-700 mb-1">Định dạng ảnh xuất:</label>
+              <select id="format-select" class="w-full text-xs border border-slate-200 p-2.5 rounded-xl bg-slate-50 focus:ring-2 focus:ring-indigo-500 outline-none font-medium">
+                <option value="png" selected>PNG (Sắc nét, không nén)</option>
+                <option value="jpeg">JPG (Dung lượng nhẹ)</option>
+              </select>
+            </div>
+            <!-- Chế độ kích thước -->
+            <div>
+              <label class="block text-xs font-bold text-slate-700 mb-1">Kiểu chỉnh độ phân giải:</label>
+              <select id="mode-select" class="w-full text-xs border border-slate-200 p-2.5 rounded-xl bg-slate-50 focus:ring-2 focus:ring-indigo-500 outline-none font-medium">
+                <option value="width">Cố định Chiều Rộng</option>
+                <option value="height">Cố định Chiều Cao</option>
+                <option value="exact">Cố định Cả 2</option>
+              </select>
+            </div>
+          </div>
+
+          <!-- Nhập Dimension -->
+          <div id="dimension-box" class="grid grid-cols-2 gap-4 bg-slate-50 p-4 rounded-xl border border-slate-200">
+            <div id="width-box">
+              <label class="block text-xs font-bold text-slate-700 mb-1">Chiều Rộng (px):</label>
+              <input 
+                type="number" 
+                id="width-input" 
+                value="1920" 
+                min="100" 
+                max="10000"
+                class="w-full border border-slate-200 p-2 text-xs rounded-lg focus:ring-2 focus:ring-indigo-500 outline-none font-mono"
+                placeholder="VD: 1920"
+              >
+            </div>
+            <div id="height-box" class="opacity-50 pointer-events-none">
+              <label class="block text-xs font-bold text-slate-700 mb-1">Chiều Cao (px):</label>
+              <input 
+                type="number" 
+                id="height-input" 
+                value="1080" 
+                min="100" 
+                max="10000"
+                class="w-full border border-slate-200 p-2 text-xs rounded-lg focus:ring-2 focus:ring-indigo-500 outline-none font-mono"
+                placeholder="VD: 1080"
+              >
+            </div>
+          </div>
+
+          <button id="convert-btn" class="w-full bg-indigo-600 text-white py-3 rounded-xl font-semibold hover:bg-indigo-700 transition shadow-lg shadow-indigo-600/20 disabled:bg-slate-300">
+            Chuyển Đổi Sang Ảnh
+          </button>
+        </div>
+
+        <!-- Tiến trình & Tải về -->
+        <div id="status" class="text-center text-xs text-slate-600 font-semibold"></div>
+        <div id="download-container" class="text-center hidden">
+          <button id="download-btn" class="bg-emerald-600 text-white px-6 py-2.5 rounded-xl text-xs font-semibold hover:bg-emerald-700 transition shadow-lg shadow-emerald-600/20 flex items-center justify-center space-x-2 mx-auto">
+            <i data-lucide="download" class="w-4 h-4"></i>
+            <span>Tải File ZIP Ảnh</span>
+          </button>
+        </div>
+      </div>
+    </section>
 
   </main>
 
-  <footer class="bg-slate-800 border-t border-slate-700 py-3 text-center text-xs text-slate-400">
-    LaTeX Standardizer — Sửa chuẩn 100% khoảng trắng ngoài và trong dấu $
+  <!-- ==================== FOOTER ==================== -->
+  <footer class="bg-white border-t border-slate-200 py-3 text-center text-xs text-slate-500">
+    PimaX Tool Beta — Hệ sinh thái hỗ trợ soạn thảo LaTeX & Xử lý tài liệu
   </footer>
 
+  <!-- ==================== SCRIPT XỬ LÝ TOÀN BỘ APP ==================== -->
   <script>
     lucide.createIcons();
 
-    let currentMode = 1;
-
-    function switchMode(mode) {
-      currentMode = mode;
-      const btn1 = document.getElementById('btn-mode-1');
-      const btn2 = document.getElementById('btn-mode-2');
-      const descText = document.getElementById('desc-text');
-      const processLabel = document.getElementById('btn-process-label');
-
-      if (mode === 1) {
-        btn1.className = "px-4 py-2 text-xs font-semibold rounded-md transition flex items-center space-x-2 bg-blue-600 text-white shadow";
-        btn2.className = "px-4 py-2 text-xs font-semibold rounded-md transition flex items-center space-x-2 text-slate-400 hover:text-slate-200";
-        descText.innerHTML = "Đang ở <b>Chức năng 1</b>: Chuyển đổi đề trắc nghiệm 4 phương án A, B, C, D sang <code>\\choice</code>";
-        processLabel.innerText = "Chuẩn Hóa Ngay (CN 1)";
-      } else {
-        btn2.className = "px-4 py-2 text-xs font-semibold rounded-md transition flex items-center space-x-2 bg-blue-600 text-white shadow";
-        btn1.className = "px-4 py-2 text-xs font-semibold rounded-md transition flex items-center space-x-2 text-slate-400 hover:text-slate-200";
-        descText.innerHTML = "Đang ở <b>Chức năng 2</b>: Chuyển đổi đề trắc nghiệm Đúng/Sai a), b), c), d) sang <code>\\choiceTF</code> (Tự đọc DDSD/ĐSĐS)";
-        processLabel.innerText = "Chuẩn Hóa Ngay (CN 2)";
+    // 1. CHUYỂN TAB MENU CHÍNH
+    let activeMainMenu = 1;
+    function switchMainMenu(menuIndex) {
+      activeMainMenu = menuIndex;
+      for (let i = 1; i <= 3; i++) {
+        const btn = document.getElementById(`nav-btn-${i}`);
+        const sec = document.getElementById(`menu-section-${i}`);
+        if (i === menuIndex) {
+          btn.className = "px-4 py-2 text-xs font-semibold rounded-lg transition-all flex items-center space-x-2 bg-white text-indigo-600 shadow-sm";
+          sec.classList.remove('hidden');
+        } else {
+          btn.className = "px-4 py-2 text-xs font-semibold rounded-lg transition-all flex items-center space-x-2 text-slate-600 hover:text-slate-900";
+          sec.classList.add('hidden');
+        }
       }
     }
 
-    function loadFile(event) {
+    // 2. CHUYỂN SUB-MODE MENU 1 (\choice vs \choiceTF)
+    let subModeEx = 1;
+    function switchSubMode(mode) {
+      subModeEx = mode;
+      const btn1 = document.getElementById('sub-btn-1');
+      const btn2 = document.getElementById('sub-btn-2');
+      const desc = document.getElementById('sub-mode-desc');
+      const label = document.getElementById('btn-ex-label');
+
+      if (mode === 1) {
+        btn1.className = "flex-1 sm:flex-none px-4 py-1.5 text-xs font-semibold rounded-md transition flex items-center justify-center space-x-2 bg-indigo-600 text-white shadow-sm";
+        btn2.className = "flex-1 sm:flex-none px-4 py-1.5 text-xs font-semibold rounded-md transition flex items-center justify-center space-x-2 text-slate-600 hover:text-slate-900";
+        desc.innerHTML = "Chế độ: <b>Trắc nghiệm 4 phương án (A, B, C, D)</b>";
+        label.innerText = "Chuẩn Hóa Ngay (CN 1)";
+      } else {
+        btn2.className = "flex-1 sm:flex-none px-4 py-1.5 text-xs font-semibold rounded-md transition flex items-center justify-center space-x-2 bg-indigo-600 text-white shadow-sm";
+        btn1.className = "flex-1 sm:flex-none px-4 py-1.5 text-xs font-semibold rounded-md transition flex items-center justify-center space-x-2 text-slate-600 hover:text-slate-900";
+        desc.innerHTML = "Chế độ: <b>Trắc nghiệm Đúng/Sai (a, b, c, d)</b>";
+        label.innerText = "Chuẩn Hóa Ngay (CN 2)";
+      }
+    }
+
+    // UTILS
+    function loadFile(event, targetId) {
       const file = event.target.files[0];
       if (!file) return;
-
       const reader = new FileReader();
       reader.onload = function(e) {
-        document.getElementById('input-text').value = e.target.result;
+        document.getElementById(targetId).value = e.target.result;
       };
       reader.readAsText(file);
     }
 
-    function clearInput() {
-      document.getElementById('input-text').value = '';
-      document.getElementById('output-text').value = '';
+    function clearText(id) {
+      document.getElementById(id).value = '';
+      if(id === 'input-ex') document.getElementById('output-ex').value = '';
     }
 
-    function copyToClipboard() {
-      const textarea = document.getElementById('output-text');
+    function copyToClipboard(id) {
+      const textarea = document.getElementById(id);
       if (!textarea.value) return;
       textarea.select();
       navigator.clipboard.writeText(textarea.value);
-      alert('Đã copy kết quả vào bộ nhớ tạm!');
+      alert('Đã copy vào bộ nhớ tạm!');
     }
 
-    function downloadResult() {
-      const text = document.getElementById('output-text').value;
+    function downloadSingleText(elementId, filename) {
+      const text = document.getElementById(elementId).value;
       if (!text) return;
       const blob = new Blob([text], { type: 'text/plain;charset=utf-8' });
+      saveBlob(blob, filename);
+    }
+
+    function saveBlob(blob, filename) {
       const url = URL.createObjectURL(blob);
       const a = document.createElement('a');
       a.href = url;
-      a.download = 'chuan_hoa_ex.tex';
+      a.download = filename;
       document.body.appendChild(a);
       a.click();
       document.body.removeChild(a);
       URL.revokeObjectURL(url);
     }
 
-    // CHUẨN HÓA KHOẢNG TRẮNG CHUẨN XUYÊN SUỐT
+    // ==================== LOGIC MENU 1: CHUẨN HÓA LATEX ====================
     function fixMathSpacing(str) {
       if (!str) return '';
-
       let text = str;
 
-      // 1. Tách các khối $...$ để tự bọc biểu thức chưa có $
       const parts = text.split(/(\$[^\$]+\$)/g);
-
       for (let i = 0; i < parts.length; i++) {
         if (!parts[i].startsWith('$')) {
           let chunk = parts[i];
-
-          // Bọc khoảng/đoạn chưa có $: (-1;1), [-2;3]
           chunk = chunk.replace(/([\(\[][\-+]?\w+\s*[;\,]\s*[\-+]?\w+[\)\]])/g, (m, p1) => ` $${p1}$ `);
-
-          // Bọc biến kèm đơn vị: t = 0 s, t = 2 s
           chunk = chunk.replace(/(?<![\$\w\\])([a-zA-Z]\s*=\s*[\-+]?\d+(?:\s*\\[a-zA-Z]+|\s*\{\~[a-zA-Z]+\}|\s*[a-zA-Z]+)?)(?![\$\w])/g, (m, p1) => ` $${p1.trim()}$ `);
-
           parts[i] = chunk;
         }
       }
 
       text = parts.join('');
-
-      // 2. LÀM SẠCH KHOẢNG TRẮNG BÊN TRONG NỘI DUNG $ ... $ (XÓA DẤU CÁCH SÁT DẤU $)
       text = text.replace(/\$\s*([^\$]+?)\s*\$/g, (m, p1) => `$${p1.trim()}$`);
-
-      // 3. ĐẢM BẢO KHOẢNG TRẮNG BÊN NGOÀI DẤU $
-      // Thêm 1 khoảng trắng TRƯỚC $ mở nếu đứng ngay sau chữ/số
       text = text.replace(/([a-zA-ZÀ-ỹ0-9])\$([^\$]+)\$/g, (match, p1, p2) => `${p1} $${p2}$`);
-
-      // Thêm 1 khoảng trắng SAU $ đóng nếu đứng ngay trước chữ/số
       text = text.replace(/\$([^\$]+)\$([a-zA-ZÀ-ỹ0-9])/g, (match, p1, p2) => `$${p1}$ ${p2}`);
-
-      // 4. DỌN DẸP KHOẢNG TRẮNG KÉP & KHOẢNG TRẮNG TRƯỚC DẤU CÂU
       text = text.replace(/[ \t]+/g, ' ');
       text = text.replace(/\s+([\.,;\)])/g, '$1');
       text = text.replace(/([\(\[])\s+/g, '$1');
@@ -229,7 +457,6 @@
       return text.trim();
     }
 
-    // LÀM SẠCH TIỀN TỐ "CÂU X", [MÃ], DẤU HAI CHẤM
     function cleanHeaderPrefix(rawText) {
       let str = rawText.trim();
       str = str.replace(/^Câu\s+\d+\s*[\.\:-]*/i, '').trim();
@@ -239,19 +466,13 @@
       return str;
     }
 
-    function processMain() {
-      if (currentMode === 1) {
-        processMode1();
-      } else {
-        processMode2();
-      }
+    function processExEnvironment() {
+      if (subModeEx === 1) processMode1();
+      else processMode2();
     }
 
-    // =========================================================================
-    // CHỨC NĂNG 1: Trắc nghiệm A, B, C, D -> \choice
-    // =========================================================================
     function processMode1() {
-      const input = document.getElementById('input-text').value;
+      const input = document.getElementById('input-ex').value;
       if (!input.trim()) return;
 
       const questionBlocks = input.split(/(?=(?:^|\n)\s*Câu\s+\d+)/i).filter(b => b.trim());
@@ -259,7 +480,6 @@
 
       questionBlocks.forEach(block => {
         let content = cleanHeaderPrefix(block);
-
         let questionPart = content;
         let solutionPart = "";
 
@@ -286,7 +506,6 @@
         }
 
         const choiceRegex = /(?:^|\n)\s*([A-D])\.\s*([\s\S]*?)(?=(?:\n\s*[A-D]\.|$))/g;
-        
         let choices = {};
         let matches;
         let firstChoiceIndex = -1;
@@ -295,10 +514,8 @@
           if (firstChoiceIndex === -1) firstChoiceIndex = matches.index;
           const key = matches[1].toUpperCase();
           let choiceVal = matches[2].trim();
-          
           choiceVal = choiceVal.replace(/\.\s*$/, '');
           choiceVal = fixMathSpacing(choiceVal);
-
           choices[key] = choiceVal;
         }
 
@@ -326,14 +543,11 @@
         results.push(exCode);
       });
 
-      document.getElementById('output-text').value = results.join('\n\n');
+      document.getElementById('output-ex').value = results.join('\n\n');
     }
 
-    // =========================================================================
-    // CHỨC NĂNG 2: Trắc nghiệm Đúng/Sai a) b) c) d) -> \choiceTF
-    // =========================================================================
     function processMode2() {
-      const input = document.getElementById('input-text').value;
+      const input = document.getElementById('input-ex').value;
       if (!input.trim()) return;
 
       const questionBlocks = input.split(/(?=(?:^|\n)\s*Câu\s+\d+)/i).filter(b => b.trim());
@@ -341,7 +555,6 @@
 
       questionBlocks.forEach(block => {
         let content = cleanHeaderPrefix(block);
-
         let questionPart = content;
         let solutionPart = "";
 
@@ -368,7 +581,6 @@
         solutionPart = solutionPart.replace(/(?:Đáp\s*án|Chọn)[\.\s:]*([DĐS[\s\-\,\.]+){4}\.?\s*/gi, '').trim();
 
         const choiceTFRegex = /(?:^|\n)\s*([a-d])[\)\.]\s*([\s\S]*?)(?=(?:\n\s*[a-d][\)\.]|$))/gi;
-        
         let choices = {};
         let matches;
         let firstChoiceIndex = -1;
@@ -377,10 +589,8 @@
           if (firstChoiceIndex === -1) firstChoiceIndex = matches.index;
           const key = matches[1].toLowerCase();
           let choiceVal = matches[2].trim();
-          
           choiceVal = choiceVal.replace(/\.\s*$/, '');
           choiceVal = fixMathSpacing(choiceVal);
-
           choices[key] = choiceVal;
         }
 
@@ -409,8 +619,188 @@
         results.push(exCode);
       });
 
-      document.getElementById('output-text').value = results.join('\n\n');
+      document.getElementById('output-ex').value = results.join('\n\n');
     }
+
+    // ==================== LOGIC MENU 2: LỌC TIKZ ====================
+    function extractAllTikZToSingleFile() {
+      const input = document.getElementById('input-tikz').value;
+      if (!input.trim()) return;
+
+      const tikzRegex = /\\begin\{tikzpicture\}[\s\S]*?\\end\{tikzpicture\}/g;
+      const matches = input.match(tikzRegex);
+
+      if (!matches || matches.length === 0) {
+        alert('Không tìm thấy môi trường \\begin{tikzpicture} nào trong dữ liệu!');
+        return;
+      }
+
+      let count = 0;
+      let combinedTikZContent = `% ==============================================\n`;
+      combinedTikZContent += `% TỔNG HỢP TẤT CẢ HÌNH TIKZ (${matches.length} HÌNH)\n`;
+      combinedTikZContent += `% ==============================================\n\n`;
+
+      const modifiedMainContent = input.replace(tikzRegex, (match) => {
+        count++;
+        combinedTikZContent += `% --- HÌNH SỐ ${count} ---\n${match}\n\n`;
+        return `% [Đã bóc tách hình TikZ số ${count}]`;
+      });
+
+      document.getElementById('output-main').value = modifiedMainContent;
+      document.getElementById('output-tikz-single').value = combinedTikZContent.trim();
+      document.getElementById('tikz-count-badge').textContent = `${matches.length} hình TikZ`;
+      
+      document.getElementById('single-tikz-container').classList.remove('hidden');
+      lucide.createIcons();
+    }
+
+    function getTikZFilename() {
+      const name = document.getElementById('file-name-tikz').value || 'tat_ca_hinh_tikz';
+      const ext = document.getElementById('file-ext-tikz').value || '.tex';
+      return `${name}${ext}`;
+    }
+
+    // ==================== LOGIC MENU 3: CHUYỂN PDF TO IMAGE ====================
+    const PDFJS_VERSION = '2.16.105';
+    pdfjsLib.GlobalWorkerOptions.workerSrc = `https://cdnjs.cloudflare.com/ajax/libs/pdf.js/${PDFJS_VERSION}/pdf.worker.min.js`;
+
+    const pdfInput = document.getElementById('pdf-input');
+    const formatSelect = document.getElementById('format-select');
+    const modeSelect = document.getElementById('mode-select');
+    const widthInput = document.getElementById('width-input');
+    const heightInput = document.getElementById('height-input');
+    const widthBox = document.getElementById('width-box');
+    const heightBox = document.getElementById('height-box');
+    const convertBtn = document.getElementById('convert-btn');
+    const statusDiv = document.getElementById('status');
+    const downloadContainer = document.getElementById('download-container');
+    const downloadBtn = document.getElementById('download-btn');
+
+    let zipBlob = null;
+
+    modeSelect.addEventListener('change', () => {
+      const mode = modeSelect.value;
+      if (mode === 'width') {
+        widthBox.classList.remove('opacity-50', 'pointer-events-none');
+        heightBox.classList.add('opacity-50', 'pointer-events-none');
+      } else if (mode === 'height') {
+        widthBox.classList.add('opacity-50', 'pointer-events-none');
+        heightBox.classList.remove('opacity-50', 'pointer-events-none');
+      } else {
+        widthBox.classList.remove('opacity-50', 'pointer-events-none');
+        heightBox.classList.remove('opacity-50', 'pointer-events-none');
+      }
+    });
+
+    convertBtn.addEventListener('click', async () => {
+      const file = pdfInput.files[0];
+      if (!file) {
+        alert('Vui lòng chọn file PDF!');
+        return;
+      }
+
+      const format = formatSelect.value;
+      const mode = modeSelect.value;
+      const targetWidth = parseFloat(widthInput.value);
+      const targetHeight = parseFloat(heightInput.value);
+
+      if ((mode === 'width' || mode === 'exact') && (!targetWidth || targetWidth <= 0)) {
+        alert('Vui lòng nhập Chiều Rộng hợp lệ!');
+        return;
+      }
+      if ((mode === 'height' || mode === 'exact') && (!targetHeight || targetHeight <= 0)) {
+        alert('Vui lòng nhập Chiều Cao hợp lệ!');
+        return;
+      }
+
+      convertBtn.disabled = true;
+      downloadContainer.classList.add('hidden');
+      statusDiv.textContent = 'Đang đọc file PDF...';
+
+      try {
+        const arrayBuffer = await file.arrayBuffer();
+
+        const loadingTask = pdfjsLib.getDocument({
+          data: arrayBuffer,
+          cMapUrl: `https://cdnjs.cloudflare.com/ajax/libs/pdf.js/${PDFJS_VERSION}/cmaps/`,
+          cMapPacked: true,
+          standardFontDataUrl: `https://cdnjs.cloudflare.com/ajax/libs/pdf.js/${PDFJS_VERSION}/standard_fonts/`
+        });
+
+        const pdf = await loadingTask.promise;
+        const totalPages = pdf.numPages;
+        const zip = new JSZip();
+
+        for (let i = 1; i <= totalPages; i++) {
+          const page = await pdf.getPage(i);
+          const pageNumString = String(i).padStart(3, '0');
+          const mimeType = format === 'png' ? 'image/png' : 'image/jpeg';
+          const unscaledViewport = page.getViewport({ scale: 1.0 });
+
+          let scale = 1.0;
+          if (mode === 'width') {
+            scale = targetWidth / unscaledViewport.width;
+          } else if (mode === 'height') {
+            scale = targetHeight / unscaledViewport.height;
+          } else if (mode === 'exact') {
+            const scaleX = targetWidth / unscaledViewport.width;
+            const scaleY = targetHeight / unscaledViewport.height;
+            scale = Math.min(scaleX, scaleY);
+          }
+
+          const viewport = page.getViewport({ scale: scale });
+          const canvas = document.createElement('canvas');
+          const ctx = canvas.getContext('2d');
+
+          if (mode === 'exact') {
+            canvas.width = targetWidth;
+            canvas.height = targetHeight;
+
+            ctx.fillStyle = '#FFFFFF';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+            const offsetX = (targetWidth - viewport.width) / 2;
+            const offsetY = (targetHeight - viewport.height) / 2;
+
+            statusDiv.textContent = `Đang xuất trang ${i} / ${totalPages} (${targetWidth}x${targetHeight} px)...`;
+            await page.render({
+              canvasContext: ctx,
+              viewport: viewport,
+              transform: [1, 0, 0, 1, offsetX, offsetY]
+            }).promise;
+          } else {
+            canvas.width = Math.round(viewport.width);
+            canvas.height = Math.round(viewport.height);
+
+            statusDiv.textContent = `Đang xuất trang ${i} / ${totalPages} (${canvas.width}x${canvas.height} px)...`;
+            await page.render({
+              canvasContext: ctx,
+              viewport: viewport
+            }).promise;
+          }
+
+          const imgDataUrl = canvas.toDataURL(mimeType, 0.95);
+          const base64Data = imgDataUrl.split(',')[1];
+          zip.file(`trang_${pageNumString}.${format}`, base64Data, { base64: true });
+        }
+
+        statusDiv.textContent = 'Đang đóng gói file ZIP...';
+        zipBlob = await zip.generateAsync({ type: 'blob' });
+
+        statusDiv.textContent = `Hoàn thành! Đã xuất ${totalPages} trang dạng ${format.toUpperCase()}.`;
+        downloadContainer.classList.remove('hidden');
+      } catch (err) {
+        console.error(err);
+        statusDiv.textContent = 'Có lỗi xảy ra trong quá trình chuyển đổi: ' + err.message;
+      } finally {
+        convertBtn.disabled = false;
+      }
+    });
+
+    downloadBtn.addEventListener('click', () => {
+      if (!zipBlob) return;
+      saveBlob(zipBlob, `pdf_converted_${formatSelect.value}.zip`);
+    });
   </script>
 </body>
 </html>
