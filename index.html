@@ -746,25 +746,38 @@
       if (!text) return '';
       
       const parts = text.split(/(\$(?:\\.|[^$])+\$)/g);
+      
+      // Danh sách các từ viết tắt thông dụng không bọc $
+      const excludeList = ['VCB', 'VND', 'VNĐ', 'THPT', 'SGD', 'BGD', 'SGK', 'HCM', 'HN', 'VN', 'USD', 'STT', 'NXB', 'KHTN', 'GDĐT'];
 
       for (let i = 0; i < parts.length; i++) {
         if (!parts[i].startsWith('$')) {
           let str = parts[i];
 
+          // 1. Biểu thức hình học, tọa độ, pt...
           str = str.replace(/(?<![\$\w\\])(\([A-Z0-9a-z;,\s\-\+]+\)|[A-Z]{2,}\s*=\s*[\-+]?\d+(?:[\.,]\d+)?)(?![\$\w])/g, ' $$$1$$ ');
-          str = str.replace(/(?<=tam\s+giác|đường\s+tròn|tâm|cô|ông|điểm|mặt\s+phẳng|đường\s+thẳng)\s+([A-Z]{1,3}\b)/gi, ' $$$1$$');
+          
+          // 2. Tên đi kèm từ khóa (BỎ cờ i, CHỈ bọc chữ IN HOA, dùng chuẩn Unicode để không cắt chữ tiếng Việt)
+          str = str.replace(/(?<=tam\s+giác|đường\s+tròn|tâm|cô|ông|điểm|mặt\s+phẳng|đường\s+thẳng|đoạn|cạnh|góc|đỉnh)\s+([A-Z]{1,4})(?![\p{L}\p{N}])/gu, ' $$$1$$');
+          
+          // 3. Các số
           str = str.replace(/(?<![\$\w\\])(\d+(?:\s*[\.,]\s*\d+)?\s*(?:\\%)?)(?![\$\w\\])/g, ' $$$1$$ ');
-          str = str.replace(/(?<=số\s+thực|biến|hàm\s+số|tham\s+số)\s+([a-z])\b/gi, ' $$$1$$');
+          
+          // 4. Các biến đi sau từ khóa (hàm số f, số thực x...)
+          str = str.replace(/(?<=số\s+thực|biến|hàm\s+số|tham\s+số|đại\s+lượng|đường\s+thẳng|mặt\s+phẳng)\s+([a-z])(?![\p{L}\p{N}])/gu, ' $$$1$$');
+
+          // 5. Bọc MỌI CỤM 1 ĐẾN 4 CHỮ IN HOA đứng độc lập (như M, AB, ABC) trừ blacklist
+          str = str.replace(/(?<![\p{L}\p{N}\\])([A-Z]{1,4})(?![\p{L}\p{N}])/gu, (match, p1) => {
+            if (excludeList.includes(p1)) return match;
+            return ` $${p1}$ `;
+          });
 
           parts[i] = str;
         }
       }
 
       let result = parts.join('');
-      
-      // Giao lại cho hàm fixMathSpacing xử lý triệt để khoảng trắng
       result = fixMathSpacing(result);
-      
       return result;
     }
 
@@ -979,15 +992,12 @@
       return fixMathSpacing(text);
     }
 
-    // HÀM CHUẨN HÓA KHOẢNG TRẮNG CÔNG THỨC SIÊU MẠNH (ĐÃ FIX LỖI DÍNH CHỮ)
     function fixMathSpacing(str) {
       if (!str) return '';
       let text = str;
 
-      // 1. Quét sạch khoảng trắng thừa bên trong TẤT CẢ các khối toán học ngay từ đầu
       text = text.replace(/\$((?:\\.|[^$])+)\$/g, (m, inner) => `$${inner.trim()}$`);
 
-      // 2. Tách và xử lý phần văn bản bên ngoài khối toán
       const parts = text.split(/(\$(?:\\.|[^$])+\$)/g);
       for (let i = 0; i < parts.length; i++) {
         if (!parts[i].startsWith('$')) {
@@ -999,18 +1009,13 @@
       }
       text = parts.join('');
 
-      // 3. TÁCH DÃN BÊN NGOÀI: Tự động phát hiện mọi chữ/số bị dính sát vào bên ngoài dấu $ 
-      // (Dùng \p{L} để tương thích chuẩn mọi ký tự tiếng Việt, \p{N} cho số)
-      text = text.replace(/([\p{L}\p{N}:,;\.\?!])\$/gu, '$1 $'); // Ép giãn: chữ/dấu câu đứng TRƯỚC $
-      text = text.replace(/\$([\p{L}\p{N}])/gu, '$ $1');         // Ép giãn: chữ/số đứng SAU $
+      text = text.replace(/([\p{L}\p{N}:,;\.\?!])\$/gu, '$1 $');
+      text = text.replace(/\$([\p{L}\p{N}])/gu, '$ $1');
 
-      // 4. Dọn dẹp các khoảng trắng kép sinh ra và làm gọn dấu câu
       text = text.replace(/[ \t]+/g, ' ');
       text = text.replace(/\s+([\.,;\)])/g, '$1');
       text = text.replace(/([\(\[])\s+/g, '$1');
 
-      // 5. CÚ CHỐT: Quét lại màng lọc một lần cuối để đảm bảo tuyệt đối 
-      // KHÔNG có khoảng trắng thừa lọt vào sát vách bên trong $
       text = text.replace(/\$((?:\\.|[^$])+)\$/g, (m, inner) => `$${inner.trim()}$`);
 
       return text.trim();
