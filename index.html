@@ -11,20 +11,45 @@
 </head>
 <body class="bg-slate-900 text-slate-100 min-h-screen font-sans flex flex-col">
 
-  <!-- Header -->
-  <header class="bg-slate-800 border-b border-slate-700 py-4 px-6 shadow-md">
-    <div class="max-w-7xl mx-auto flex justify-between items-center">
+  <!-- Header & Menu Navigation -->
+  <header class="bg-slate-800 border-b border-slate-700 shadow-md">
+    <div class="max-w-7xl mx-auto px-6 py-4 flex flex-col md:flex-row justify-between items-center gap-4">
       <div class="flex items-center space-x-3">
         <i data-lucide="file-code-2" class="w-8 h-8 text-blue-400"></i>
         <h1 class="text-xl font-bold tracking-wide">LaTeX Standardizer</h1>
       </div>
-      <span class="text-xs text-slate-400 bg-slate-700 px-3 py-1 rounded-full">Fix Lỗi Nuốt Đáp Án & Gán \True Chuẩn</span>
+
+      <!-- TAB MENU SELECTION -->
+      <div class="flex bg-slate-900 p-1 rounded-lg border border-slate-700">
+        <button 
+          id="btn-mode-1" 
+          onclick="switchMode(1)" 
+          class="px-4 py-2 text-xs font-semibold rounded-md transition flex items-center space-x-2 bg-blue-600 text-white shadow"
+        >
+          <i data-lucide="check-square" class="w-4 h-4"></i>
+          <span>CN 1: Trắc nghiệm 4 lựa chọn (\choice)</span>
+        </button>
+        <button 
+          id="btn-mode-2" 
+          onclick="switchMode(2)" 
+          class="px-4 py-2 text-xs font-semibold rounded-md transition flex items-center space-x-2 text-slate-400 hover:text-slate-200"
+        >
+          <i data-lucide="list-checks" class="w-4 h-4"></i>
+          <span>CN 2: Trắc nghiệm Đúng/Sai (\choiceTF)</span>
+        </button>
+      </div>
     </div>
   </header>
 
   <!-- Main Content -->
   <main class="flex-1 max-w-7xl w-full mx-auto p-4 md:p-6 space-y-4 flex flex-col">
     
+    <!-- Mode Description Bar -->
+    <div id="mode-description" class="bg-slate-800/60 border border-slate-700/60 rounded-lg p-3 text-xs text-slate-300 flex items-center justify-between">
+      <span id="desc-text">Đang ở <b>Chức năng 1</b>: Chuyển đổi đề trắc nghiệm dạng 4 phương án A, B, C, D sang <code>\choice</code></span>
+      <span class="text-xs text-slate-400 bg-slate-700 px-2.5 py-0.5 rounded-full">v2.0</span>
+    </div>
+
     <div class="grid grid-cols-1 md:grid-cols-2 gap-4 flex-1">
       
       <!-- BOX 1: INPUT TEXT -->
@@ -84,22 +109,44 @@
     <!-- Action Bar -->
     <div class="flex justify-end pt-2">
       <button 
-        onclick="processToExEnvironment()" 
+        onclick="processMain()" 
         class="bg-blue-600 hover:bg-blue-500 text-white font-medium px-6 py-2.5 rounded-lg transition flex items-center space-x-2 shadow-lg shadow-blue-600/20"
       >
         <i data-lucide="wand-2" class="w-4 h-4"></i>
-        <span>Chuẩn Hóa Ngay</span>
+        <span id="btn-process-label">Chuẩn Hóa Ngay (CN 1)</span>
       </button>
     </div>
 
   </main>
 
   <footer class="bg-slate-800 border-t border-slate-700 py-3 text-center text-xs text-slate-400">
-    LaTeX Standardizer — Sửa triệt để lỗi mất đáp án & dính 'Chọn ý'
+    LaTeX Standardizer — Hỗ trợ song song Chức năng 1 (\choice) & Chức năng 2 (\choiceTF)
   </footer>
 
   <script>
     lucide.createIcons();
+
+    let currentMode = 1; // 1: \choice (A. B. C. D.), 2: \choiceTF (a) b) c) d))
+
+    function switchMode(mode) {
+      currentMode = mode;
+      const btn1 = document.getElementById('btn-mode-1');
+      const btn2 = document.getElementById('btn-mode-2');
+      const descText = document.getElementById('desc-text');
+      const processLabel = document.getElementById('btn-process-label');
+
+      if (mode === 1) {
+        btn1.className = "px-4 py-2 text-xs font-semibold rounded-md transition flex items-center space-x-2 bg-blue-600 text-white shadow";
+        btn2.className = "px-4 py-2 text-xs font-semibold rounded-md transition flex items-center space-x-2 text-slate-400 hover:text-slate-200";
+        descText.innerHTML = "Đang ở <b>Chức năng 1</b>: Chuyển đổi đề trắc nghiệm dạng 4 phương án A, B, C, D sang <code>\\choice</code>";
+        processLabel.innerText = "Chuẩn Hóa Ngay (CN 1)";
+      } else {
+        btn2.className = "px-4 py-2 text-xs font-semibold rounded-md transition flex items-center space-x-2 bg-blue-600 text-white shadow";
+        btn1.className = "px-4 py-2 text-xs font-semibold rounded-md transition flex items-center space-x-2 text-slate-400 hover:text-slate-200";
+        descText.innerHTML = "Đang ở <b>Chức năng 2</b>: Chuyển đổi đề trắc nghiệm Đúng/Sai a), b), c), d) sang <code>\\choiceTF</code> (Tự đọc DSDS/ĐSĐS)";
+        processLabel.innerText = "Chuẩn Hóa Ngay (CN 2)";
+      }
+    }
 
     function loadFile(event) {
       const file = event.target.files[0];
@@ -180,7 +227,18 @@
       return res;
     }
 
-    function processToExEnvironment() {
+    function processMain() {
+      if (currentMode === 1) {
+        processMode1();
+      } else {
+        processMode2();
+      }
+    }
+
+    // =========================================================================
+    // CHỨC NĂNG 1: Trắc nghiệm A, B, C, D -> \choice
+    // =========================================================================
+    function processMode1() {
       const input = document.getElementById('input-text').value;
       if (!input.trim()) return;
 
@@ -190,12 +248,10 @@
       questionBlocks.forEach(block => {
         let content = block.trim();
 
-        // 1. Loại bỏ tiền tố "Câu X", mã định danh dạng [AECK]
         content = content.replace(/^Câu\s+\d+\s*[\.\:-]*/i, '').trim();
         content = content.replace(/^\[[^\]]*\]\s*/i, '').trim();
         content = content.replace(/^\([^\)]*\)\s*/i, '').trim();
 
-        // 2. Bóc tách "Lời giải." trước
         let questionPart = content;
         let solutionPart = "";
 
@@ -207,24 +263,20 @@
           solutionPart = content.substring(solMatch.index + solMatch[0].length).trim();
         }
 
-        // 3. Tìm và bóc tách cụm "Chọn ý A." / "Chọn A." / "Đáp án A." trước để không làm nhiễu câu chọn A, B, C, D
         let trueAnswerKey = null;
         const choicePickRegex = /(?:Chọn\s*(?:ý|đáp\s*án)?|Đáp\s*án)\s*([A-D])[\.\s]*/gi;
 
         let pickMatch;
-        // Kiểm tra trong Lời giải
         if ((pickMatch = choicePickRegex.exec(solutionPart)) !== null) {
           trueAnswerKey = pickMatch[1].toUpperCase();
           solutionPart = solutionPart.replace(/(?:Chọn\s*(?:ý|đáp\s*án)?|Đáp\s*án)\s*[A-D][\.\s]*/gi, '').trim();
         } 
-        // Nếu không có trong lời giải, kiểm tra trong khối đề/phương án
         choicePickRegex.lastIndex = 0;
         if (!trueAnswerKey && (pickMatch = choicePickRegex.exec(questionPart)) !== null) {
           trueAnswerKey = pickMatch[1].toUpperCase();
           questionPart = questionPart.replace(/(?:Chọn\s*(?:ý|đáp\s*án)?|Đáp\s*án)\s*[A-D][\.\s]*/gi, '').trim();
         }
 
-        // 4. Bóc tách 4 phương án A, B, C, D từ questionPart
         const choiceRegex = /(?:^|\n)\s*([A-D])\.\s*([\s\S]*?)(?=(?:\n\s*[A-D]\.|$))/g;
         
         let choices = {};
@@ -243,13 +295,9 @@
           choices[key] = choiceVal;
         }
 
-        // Đề bài câu hỏi (Phần văn bản nằm trước phương án A.)
         let mainQuestion = firstChoiceIndex !== -1 ? questionPart.substring(0, firstChoiceIndex).trim() : questionPart;
-        
-        // Tự động bọc $ cho các số/đoạn toán trong đề bài
         mainQuestion = autoWrapMath(mainQuestion);
 
-        // 5. DỰNG KHỐI \begin{ex} DẠNG CÂY
         let exCode = `\\begin{ex}\n`;
         exCode += `    ${mainQuestion}\n`;
         exCode += `    \\choice\n`;
@@ -268,7 +316,106 @@
         }
 
         exCode += `\\end{ex}`;
+        results.push(exCode);
+      });
 
+      document.getElementById('output-text').value = results.join('\n\n');
+    }
+
+    // =========================================================================
+    // CHỨC NĂNG 2: Trắc nghiệm Đúng/Sai a) b) c) d) -> \choiceTF
+    // =========================================================================
+    function processMode2() {
+      const input = document.getElementById('input-text').value;
+      if (!input.trim()) return;
+
+      const questionBlocks = input.split(/(?=(?:^|\n)\s*Câu\s+\d+)/i).filter(b => b.trim());
+      let results = [];
+
+      questionBlocks.forEach(block => {
+        let content = block.trim();
+
+        // 1. Loại bỏ tiền tố "Câu X", mã định danh
+        content = content.replace(/^Câu\s+\d+\s*[\.\:-]*/i, '').trim();
+        content = content.replace(/^\[[^\]]*\]\s*/i, '').trim();
+        content = content.replace(/^\([^\)]*\)\s*/i, '').trim();
+
+        // 2. Tách Lời giải
+        let questionPart = content;
+        let solutionPart = "";
+
+        const solutionHeaderRegex = /(?:Lời\s*giải|Hướng\s*dẫn\s*giải)[\.\s:]*/i;
+        const solMatch = content.match(solutionHeaderRegex);
+
+        if (solMatch) {
+          questionPart = content.substring(0, solMatch.index).trim();
+          solutionPart = content.substring(solMatch.index + solMatch[0].length).trim();
+        }
+
+        // 3. Đọc đáp án Đúng/Sai dạng DSDS, ĐSĐS, D-S-D-S...
+        let tfPattern = null; // Mảng boolean [true, false, true, false]
+        const answerTFRegex = /(?:Đáp\s*án|Chọn)[\.\s:]*([DĐS[\s\-\,\.]+){4}/i;
+
+        let tfMatch = solutionPart.match(answerTFRegex);
+        if (tfMatch) {
+          let cleanStr = tfMatch[0].replace(/(?:Đáp\s*án|Chọn)[\.\s:]*/i, '').replace(/[\s\-\,\.]/g, '').toUpperCase();
+          if (cleanStr.length === 4) {
+            tfPattern = cleanStr.split('').map(ch => (ch === 'D' || ch === 'Đ'));
+          }
+          solutionPart = solutionPart.replace(answerTFRegex, '').trim();
+        } else {
+          tfMatch = questionPart.match(answerTFRegex);
+          if (tfMatch) {
+            let cleanStr = tfMatch[0].replace(/(?:Đáp\s*án|Chọn)[\.\s:]*/i, '').replace(/[\s\-\,\.]/g, '').toUpperCase();
+            if (cleanStr.length === 4) {
+              tfPattern = cleanStr.split('').map(ch => (ch === 'D' || ch === 'Đ'));
+            }
+            questionPart = questionPart.replace(answerTFRegex, '').trim();
+          }
+        }
+
+        // 4. Bóc tách 4 phương án a), b), c), d) hoặc a., b., c., d.
+        const choiceTFRegex = /(?:^|\n)\s*([a-d])[\)\.]\s*([\s\S]*?)(?=(?:\n\s*[a-d][\)\.]|$))/gi;
+        
+        let choices = {};
+        let matches;
+        let firstChoiceIndex = -1;
+
+        while ((matches = choiceTFRegex.exec(questionPart)) !== null) {
+          if (firstChoiceIndex === -1) firstChoiceIndex = matches.index;
+          const key = matches[1].toLowerCase();
+          let choiceVal = matches[2].trim();
+          
+          choiceVal = choiceVal.replace(/\.\s*$/, '');
+          choiceVal = autoWrapMath(choiceVal);
+          choiceVal = cleanMathSpaces(choiceVal);
+
+          choices[key] = choiceVal;
+        }
+
+        let mainQuestion = firstChoiceIndex !== -1 ? questionPart.substring(0, firstChoiceIndex).trim() : questionPart;
+        mainQuestion = autoWrapMath(mainQuestion);
+
+        // 5. DỰNG KHỐI \begin{ex} CHO \choiceTF
+        let exCode = `\\begin{ex}\n`;
+        exCode += `    ${mainQuestion}\n`;
+        exCode += `    \\choiceTF\n`;
+
+        const keys = ['a', 'b', 'c', 'd'];
+        keys.forEach((key, index) => {
+          let optionText = choices[key] || '';
+          let isTrue = (tfPattern && tfPattern[index]) ? '\\True ' : '';
+          exCode += `    {${isTrue}${optionText}}\n`;
+        });
+
+        if (solutionPart) {
+          const indentedSolution = solutionPart.split('\n').map(line => line ? `        ${line}` : '').join('\n');
+          exCode += `    \\loigiai{\n${indentedSolution}\n    }\n`;
+        } else {
+          exCode += `    \\loigiai{\n\n    }\n`;
+        }
+
+        exCode += `\\end{ex}`;
         results.push(exCode);
       });
 
