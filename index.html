@@ -745,35 +745,26 @@
     function autoAddMathDollars(text) {
       if (!text) return '';
       
-      // Tách văn bản thành các mảng nằm trong và nằm ngoài dấu $ để không tác động vào khối toán đã có
-      const parts = text.split(/(\$[^\$]+\$)/g);
+      const parts = text.split(/(\$(?:\\.|[^$])+\$)/g);
 
       for (let i = 0; i < parts.length; i++) {
         if (!parts[i].startsWith('$')) {
           let str = parts[i];
 
-          // 1. Nhận diện các biểu thức hình học, khoảng toán học, gán số (VD: AC=2, AD=5, (2;3), (C))
           str = str.replace(/(?<![\$\w\\])(\([A-Z0-9a-z;,\s\-\+]+\)|[A-Z]{2,}\s*=\s*[\-+]?\d+(?:[\.,]\d+)?)(?![\$\w])/g, ' $$$1$$ ');
-
-          // 2. Nhận diện tên điểm, tên đường tròn, tâm (VD: tam giác ABC, đường tròn tâm O, cô A)
           str = str.replace(/(?<=tam\s+giác|đường\s+tròn|tâm|cô|ông|điểm|mặt\s+phẳng|đường\s+thẳng)\s+([A-Z]{1,3}\b)/gi, ' $$$1$$');
-
-          // 3. Nhận diện các số, số thập phân có dấu phẩy/chấm, phần trăm (VD: 385, 4; 82000; 9,5\%)
           str = str.replace(/(?<![\$\w\\])(\d+(?:\s*[\.,]\s*\d+)?\s*(?:\\%)?)(?![\$\w\\])/g, ' $$$1$$ ');
-
-          // 4. Nhận diện biến đơn số thực/biến số đứng sau các từ khóa (VD: số thực m, biến x)
           str = str.replace(/(?<=số\s+thực|biến|hàm\s+số|tham\s+số)\s+([a-z])\b/gi, ' $$$1$$');
 
-          // Sửa khoảng trắng thừa vừa chèn
-          str = str.replace(/\$\s*([^\$]+?)\s*\$/g, '$$$1$$');
           parts[i] = str;
         }
       }
 
       let result = parts.join('');
-
-      // Tối ưu khoảng trắng xung quanh khối toán $
+      
+      // Giao lại cho hàm fixMathSpacing xử lý triệt để khoảng trắng
       result = fixMathSpacing(result);
+      
       return result;
     }
 
@@ -988,28 +979,39 @@
       return fixMathSpacing(text);
     }
 
+    // HÀM CHUẨN HÓA KHOẢNG TRẮNG CÔNG THỨC MỚI NHẤT
     function fixMathSpacing(str) {
       if (!str) return '';
       let text = str;
 
-      text = text.replace(/\$\s*([^\$]+?)\s*\$/g, (m, p1) => `$${p1.trim()}$`);
+      // 1. Quét sạch khoảng trắng thừa bên trong TẤT CẢ các khối toán học ngay từ đầu
+      // Biểu thức /\$((?:\\.|[^$])+)\$/g sẽ quét toàn bộ khối $...$, sau đó ép inner.trim() để xóa sạch mọi dấu cách, tab, dấu xuống dòng sát rìa.
+      text = text.replace(/\$((?:\\.|[^$])+)\$/g, (m, inner) => `$${inner.trim()}$`);
 
-      const parts = text.split(/(\$[^\$]+\$)/g);
+      // 2. Tách và xử lý phần văn bản bên ngoài khối toán
+      const parts = text.split(/(\$(?:\\.|[^$])+\$)/g);
       for (let i = 0; i < parts.length; i++) {
         if (!parts[i].startsWith('$')) {
           let chunk = parts[i];
-          chunk = chunk.replace(/([\(\[][\-+]?\w+\s*[;\,]\s*[\-+]?\w+[\)\]])/g, (m, p1) => ` $${p1}$ `);
+          // Bọc $ cho các biểu thức hình học, tọa độ, gán biến bị sót và ép trim() ngay lập tức
+          chunk = chunk.replace(/([\(\[][\-+]?\w+\s*[;\,]\s*[\-+]?\w+[\)\]])/g, (m, p1) => ` $${p1.trim()}$ `);
           chunk = chunk.replace(/(?<![\$\w\\])([a-zA-Z]\s*=\s*[\-+]?\d+(?:\s*\\[a-zA-Z]+|\s*\{\~[a-zA-Z]+\}|\s*[a-zA-Z]+)?)(?![\$\w])/g, (m, p1) => ` $${p1.trim()}$ `);
           parts[i] = chunk;
         }
       }
       text = parts.join('');
 
-      text = text.replace(/([a-zA-ZÀ-ỹ0-9])\$([^\$]+)\$/g, (match, p1, p2) => `${p1} $${p2}$`);
-      text = text.replace(/\$([^\$]+)\$([a-zA-ZÀ-ỹ0-9])/g, (match, p1, p2) => `$${p1}$ ${p2}`);
+      // 3. Đảm bảo khoảng trắng chuẩn giữa văn bản và khối toán
+      text = text.replace(/([a-zA-ZÀ-ỹ0-9])\$((?:\\.|[^$])+)\$/g, (match, p1, p2) => `${p1} $${p2.trim()}$`);
+      text = text.replace(/\$((?:\\.|[^$])+)\$([a-zA-ZÀ-ỹ0-9])/g, (match, p1, p2) => `$${p1.trim()}$ ${p2}`);
+      
+      // 4. Dọn dẹp khoảng trắng kép và khoảng trắng trước dấu câu
       text = text.replace(/[ \t]+/g, ' ');
       text = text.replace(/\s+([\.,;\)])/g, '$1');
       text = text.replace(/([\(\[])\s+/g, '$1');
+
+      // 5. CÚ CHỐT: Quét lại một lần cuối cùng để đảm bảo tuyệt đối không có khoảng trắng thừa lọt vào sát vách $
+      text = text.replace(/\$((?:\\.|[^$])+)\$/g, (m, inner) => `$${inner.trim()}$`);
 
       return text.trim();
     }
