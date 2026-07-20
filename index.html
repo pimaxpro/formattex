@@ -13,45 +13,45 @@
   <!-- JSZip library -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
   <style>
-    /* Custom Scrollbar */
+    /* Custom Scrollbar - Light Mode */
     .custom-scroll::-webkit-scrollbar {
       width: 6px;
       height: 6px;
     }
     .custom-scroll::-webkit-scrollbar-thumb {
-      background: #475569;
+      background: #cbd5e1;
     }
     .custom-scroll::-webkit-scrollbar-thumb:hover {
-      background: #64748b;
+      background: #94a3b8;
     }
 
-    /* LaTeX Syntax Highlighting Colors */
-    .hl-keyword { color: #f43f5e; font-weight: bold; }
-    .hl-true { color: #38bdf8; font-weight: bold; }
-    .hl-env { color: #fbbf24; font-weight: bold; }
-    .hl-math { color: #4ade80; }
-    .hl-comment { color: #94a3b8; font-style: italic; }
+    /* LaTeX Syntax Highlighting Colors - Light Theme */
+    .hl-keyword { color: #e11d48; font-weight: bold; } /* \begin, \end, \choice, \loigiai */
+    .hl-true { color: #0284c7; font-weight: bold; }    /* \True */
+    .hl-env { color: #b45309; font-weight: bold; }     /* {ex}, {tikzpicture} */
+    .hl-math { color: #15803d; font-weight: 500; }     /* $ ... $ */
+    .hl-comment { color: #64748b; font-style: italic; }/* % comment */
 
-    /* Code Editor Container */
+    /* Light Code Editor Container */
     .editor-container {
       position: relative;
       flex: 1;
-      background-color: #020617;
+      background-color: #ffffff;
       display: flex;
       overflow: hidden;
     }
     .line-numbers {
       user-select: none;
       text-align: right;
-      color: #64748b;
+      color: #94a3b8;
       padding: 0.75rem 0.75rem 0.75rem 0.5rem;
-      border-right: 1px solid #1e293b;
+      border-right: 1px solid #e2e8f0;
       font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
       font-size: 0.875rem;
       line-height: 1.5rem;
       overflow: hidden;
       white-space: pre;
-      background-color: #090d16;
+      background-color: #f8fafc;
     }
     .editor-area {
       position: relative;
@@ -80,12 +80,12 @@
     .code-input {
       color: transparent;
       background: transparent;
-      caret-color: #f8fafc;
+      caret-color: #0f172a;
       z-index: 2;
       resize: none;
     }
     .code-highlight {
-      color: #e2e8f0;
+      color: #1e293b;
       z-index: 1;
       pointer-events: none;
     }
@@ -196,7 +196,7 @@
             </div>
           </div>
 
-          <div class="editor-container border border-slate-800">
+          <div class="editor-container border border-slate-200">
             <div id="lines-input-ex" class="line-numbers min-w-[42px]">1</div>
             <div class="editor-area">
               <div id="hl-input-ex" class="code-highlight"></div>
@@ -228,7 +228,7 @@
             </div>
           </div>
 
-          <div class="editor-container border border-slate-800">
+          <div class="editor-container border border-slate-200">
             <div id="lines-output-ex" class="line-numbers min-w-[42px]">1</div>
             <div class="editor-area">
               <div id="hl-output-ex" class="code-highlight"></div>
@@ -284,7 +284,7 @@
             </div>
           </div>
 
-          <div class="editor-container border border-slate-800">
+          <div class="editor-container border border-slate-200">
             <div id="lines-input-tikz" class="line-numbers min-w-[42px]">1</div>
             <div class="editor-area">
               <div id="hl-input-tikz" class="code-highlight"></div>
@@ -316,7 +316,7 @@
             </div>
           </div>
 
-          <div class="editor-container border border-slate-800">
+          <div class="editor-container border border-slate-200">
             <div id="lines-output-main" class="line-numbers min-w-[42px]">1</div>
             <div class="editor-area">
               <div id="hl-output-main" class="code-highlight"></div>
@@ -370,7 +370,7 @@
           </div>
         </div>
 
-        <div class="editor-container h-80 border border-slate-800">
+        <div class="editor-container h-80 border border-slate-200">
           <div id="lines-output-tikz-single" class="line-numbers min-w-[42px]">1</div>
           <div class="editor-area">
             <div id="hl-output-tikz-single" class="code-highlight"></div>
