@@ -591,7 +591,6 @@
       linesDiv.innerHTML = Array.from({length: lineCount}, (_, i) => i + 1).join('\n');
       syncScroll(id);
       
-      // Update Search count if active
       if (document.getElementById(`find-${id}`)) {
         findText(id);
       }
@@ -694,6 +693,19 @@
     }
 
     // ==================== LOGIC MENU 1 ====================
+    function formatOptionText(str) {
+      if (!str) return '';
+      let text = str.trim();
+      
+      // Kiểm tra xem lựa chọn có chứa ký tự chữ cái Tiếng Việt/English thông thường hay không
+      // Nếu KHÔNG chứa chữ cái văn bản và chưa nằm trong $$ thì tự động bao quanh bởi $...$
+      const containsWords = /[a-zA-ZÀ-ỹ]/.test(text.replace(/\\[a-zA-Z]+/g, ''));
+      if (!containsWords && !text.startsWith('$') && !text.endsWith('$')) {
+        return `$${text}$`;
+      }
+      return fixMathSpacing(text);
+    }
+
     function fixMathSpacing(str) {
       if (!str) return '';
       let text = str;
@@ -774,7 +786,7 @@
           const key = matches[1].toUpperCase();
           let choiceVal = matches[2].trim();
           choiceVal = choiceVal.replace(/\.\s*$/, '');
-          choiceVal = fixMathSpacing(choiceVal);
+          choiceVal = formatOptionText(choiceVal);
           choices[key] = choiceVal;
         }
 
@@ -849,7 +861,7 @@
           const key = matches[1].toLowerCase();
           let choiceVal = matches[2].trim();
           choiceVal = choiceVal.replace(/\.\s*$/, '');
-          choiceVal = fixMathSpacing(choiceVal);
+          choiceVal = formatOptionText(choiceVal);
           choices[key] = choiceVal;
         }
 
