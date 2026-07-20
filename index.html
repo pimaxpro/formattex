@@ -32,6 +32,19 @@
     .hl-math { color: #15803d; font-weight: 500; }
     .hl-comment { color: #64748b; font-style: italic; }
 
+    /* Search Match Highlighting */
+    .hl-search-match {
+      background-color: #fef08a; /* Yellow-200 */
+      color: #0f172a;
+      border-radius: 2px;
+    }
+    .hl-search-match-active {
+      background-color: #fbbf24; /* Amber-400 */
+      color: #0f172a;
+      font-weight: bold;
+      border-radius: 2px;
+    }
+
     /* Light Code Editor Container */
     .editor-container {
       position: relative;
@@ -82,13 +95,13 @@
       caret-color: #0f172a;
       z-index: 2;
       resize: none;
-      overflow: auto; /* Duy nhất textarea được nhận thanh cuộn */
+      overflow: auto;
     }
     .code-highlight {
       color: #1e293b;
       z-index: 1;
       pointer-events: none;
-      overflow: hidden; /* Ẩn hoàn toàn thanh trượt thừa ở lớp màu bên dưới */
+      overflow: hidden;
     }
   </style>
 </head>
@@ -182,7 +195,7 @@
       <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
         
         <!-- Input Box 1 -->
-        <div class="bg-white border border-slate-200 p-4 shadow-sm flex flex-col justify-between h-[620px]">
+        <div class="bg-white border border-slate-200 p-4 shadow-sm flex flex-col justify-between h-[640px]">
           <div class="flex justify-between items-center text-xs font-bold text-slate-700 h-8 mb-3 pb-2 border-b border-slate-100">
             <span class="flex items-center gap-1.5">
               <i data-lucide="file-input" class="w-4 h-4 text-slate-600"></i>
@@ -213,7 +226,7 @@
         </div>
 
         <!-- Output Box 1 -->
-        <div class="bg-white border border-slate-200 p-4 shadow-sm flex flex-col justify-between h-[620px]">
+        <div class="bg-white border border-slate-200 p-4 shadow-sm flex flex-col justify-between h-[640px]">
           <div class="flex justify-between items-center text-xs font-bold text-slate-700 h-8 mb-2 pb-2 border-b border-slate-100">
             <span class="flex items-center gap-1.5">
               <i data-lucide="file-output" class="w-4 h-4 text-slate-600"></i>
@@ -229,21 +242,42 @@
             </div>
           </div>
 
-          <!-- SEARCH & REPLACE BAR FOR OUTPUT-EX -->
-          <div class="bg-slate-50 p-2 border border-slate-200 mb-2 flex flex-wrap items-center gap-2 text-xs">
-            <div class="flex items-center space-x-1 flex-1 min-w-[140px]">
-              <i data-lucide="search" class="w-3.5 h-3.5 text-slate-400"></i>
-              <input type="text" id="find-output-ex" placeholder="Tìm kiếm..." oninput="findText('output-ex')" class="w-full bg-white border border-slate-200 px-2 py-1 outline-none focus:border-slate-400">
+          <!-- ADVANCED SEARCH & REPLACE BAR FOR OUTPUT-EX -->
+          <div class="bg-slate-50 p-2 border border-slate-200 mb-2 flex flex-col gap-2 text-xs">
+            <div class="flex items-center gap-2 flex-wrap">
+              <div class="flex items-center space-x-1 flex-1 min-w-[150px]">
+                <i data-lucide="search" class="w-3.5 h-3.5 text-slate-400"></i>
+                <input type="text" id="find-output-ex" placeholder="Tìm kiếm..." oninput="findText('output-ex')" class="w-full bg-white border border-slate-200 px-2 py-1 outline-none focus:border-slate-400">
+              </div>
+
+              <!-- Prev / Next Buttons & Count Indicator -->
+              <div class="flex items-center space-x-1 border border-slate-200 bg-white px-1 py-0.5">
+                <button onclick="navigateSearch('output-ex', -1)" title="Tìm trước" class="hover:bg-slate-100 p-1 rounded">
+                  <i data-lucide="chevron-left" class="w-3.5 h-3.5 text-slate-600"></i>
+                </button>
+                <span id="count-output-ex" class="text-[11px] text-slate-600 font-mono px-1 min-w-[50px] text-center">0/0</span>
+                <button onclick="navigateSearch('output-ex', 1)" title="Tìm tiếp" class="hover:bg-slate-100 p-1 rounded">
+                  <i data-lucide="chevron-right" class="w-3.5 h-3.5 text-slate-600"></i>
+                </button>
+              </div>
+
+              <!-- Match Case Option -->
+              <label class="flex items-center space-x-1 cursor-pointer select-none text-slate-600">
+                <input type="checkbox" id="match-case-output-ex" onchange="findText('output-ex')" class="rounded border-slate-300">
+                <span>Match case</span>
+              </label>
             </div>
-            <div class="flex items-center space-x-1 flex-1 min-w-[140px]">
-              <i data-lucide="replace" class="w-3.5 h-3.5 text-slate-400"></i>
-              <input type="text" id="replace-output-ex" placeholder="Thay thế bằng..." class="w-full bg-white border border-slate-200 px-2 py-1 outline-none focus:border-slate-400">
+
+            <div class="flex items-center gap-2">
+              <div class="flex items-center space-x-1 flex-1">
+                <i data-lucide="replace" class="w-3.5 h-3.5 text-slate-400"></i>
+                <input type="text" id="replace-output-ex" placeholder="Thay thế bằng..." class="w-full bg-white border border-slate-200 px-2 py-1 outline-none focus:border-slate-400">
+              </div>
+              <div class="flex items-center space-x-1">
+                <button onclick="replaceText('output-ex', false)" class="bg-slate-200 hover:bg-slate-300 text-slate-800 px-2.5 py-1 font-medium transition">Thay</button>
+                <button onclick="replaceText('output-ex', true)" class="bg-slate-800 hover:bg-slate-900 text-white px-2.5 py-1 font-medium transition">Thay tất cả</button>
+              </div>
             </div>
-            <div class="flex items-center space-x-1">
-              <button onclick="replaceText('output-ex', false)" class="bg-slate-200 hover:bg-slate-300 text-slate-800 px-2 py-1 font-medium transition">Thay</button>
-              <button onclick="replaceText('output-ex', true)" class="bg-slate-800 hover:bg-slate-900 text-white px-2 py-1 font-medium transition">Thay tất cả</button>
-            </div>
-            <span id="count-output-ex" class="text-[11px] text-slate-500 min-w-[45px] text-right">0 khớp</span>
           </div>
 
           <div class="editor-container border border-slate-200">
@@ -287,7 +321,7 @@
       <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
         
         <!-- Input TikZ -->
-        <div class="bg-white border border-slate-200 p-4 shadow-sm flex flex-col justify-between h-[560px]">
+        <div class="bg-white border border-slate-200 p-4 shadow-sm flex flex-col justify-between h-[580px]">
           <div class="flex justify-between items-center text-xs font-bold text-slate-700 h-8 mb-3 pb-2 border-b border-slate-100">
             <span class="flex items-center gap-1.5">
               <i data-lucide="file-text" class="w-4 h-4 text-slate-600"></i>
@@ -318,7 +352,7 @@
         </div>
 
         <!-- Output Main -->
-        <div class="bg-white border border-slate-200 p-4 shadow-sm flex flex-col justify-between h-[560px]">
+        <div class="bg-white border border-slate-200 p-4 shadow-sm flex flex-col justify-between h-[580px]">
           <div class="flex justify-between items-center text-xs font-bold text-slate-700 h-8 mb-2 pb-2 border-b border-slate-100">
             <span class="flex items-center gap-1.5">
               <i data-lucide="file-check" class="w-4 h-4 text-slate-600"></i>
@@ -334,21 +368,40 @@
             </div>
           </div>
 
-          <!-- SEARCH & REPLACE BAR FOR OUTPUT-MAIN -->
-          <div class="bg-slate-50 p-2 border border-slate-200 mb-2 flex flex-wrap items-center gap-2 text-xs">
-            <div class="flex items-center space-x-1 flex-1 min-w-[140px]">
-              <i data-lucide="search" class="w-3.5 h-3.5 text-slate-400"></i>
-              <input type="text" id="find-output-main" placeholder="Tìm kiếm..." oninput="findText('output-main')" class="w-full bg-white border border-slate-200 px-2 py-1 outline-none focus:border-slate-400">
+          <!-- ADVANCED SEARCH & REPLACE BAR FOR OUTPUT-MAIN -->
+          <div class="bg-slate-50 p-2 border border-slate-200 mb-2 flex flex-col gap-2 text-xs">
+            <div class="flex items-center gap-2 flex-wrap">
+              <div class="flex items-center space-x-1 flex-1 min-w-[150px]">
+                <i data-lucide="search" class="w-3.5 h-3.5 text-slate-400"></i>
+                <input type="text" id="find-output-main" placeholder="Tìm kiếm..." oninput="findText('output-main')" class="w-full bg-white border border-slate-200 px-2 py-1 outline-none focus:border-slate-400">
+              </div>
+
+              <div class="flex items-center space-x-1 border border-slate-200 bg-white px-1 py-0.5">
+                <button onclick="navigateSearch('output-main', -1)" title="Tìm trước" class="hover:bg-slate-100 p-1 rounded">
+                  <i data-lucide="chevron-left" class="w-3.5 h-3.5 text-slate-600"></i>
+                </button>
+                <span id="count-output-main" class="text-[11px] text-slate-600 font-mono px-1 min-w-[50px] text-center">0/0</span>
+                <button onclick="navigateSearch('output-main', 1)" title="Tìm tiếp" class="hover:bg-slate-100 p-1 rounded">
+                  <i data-lucide="chevron-right" class="w-3.5 h-3.5 text-slate-600"></i>
+                </button>
+              </div>
+
+              <label class="flex items-center space-x-1 cursor-pointer select-none text-slate-600">
+                <input type="checkbox" id="match-case-output-main" onchange="findText('output-main')" class="rounded border-slate-300">
+                <span>Match case</span>
+              </label>
             </div>
-            <div class="flex items-center space-x-1 flex-1 min-w-[140px]">
-              <i data-lucide="replace" class="w-3.5 h-3.5 text-slate-400"></i>
-              <input type="text" id="replace-output-main" placeholder="Thay thế bằng..." class="w-full bg-white border border-slate-200 px-2 py-1 outline-none focus:border-slate-400">
+
+            <div class="flex items-center gap-2">
+              <div class="flex items-center space-x-1 flex-1">
+                <i data-lucide="replace" class="w-3.5 h-3.5 text-slate-400"></i>
+                <input type="text" id="replace-output-main" placeholder="Thay thế bằng..." class="w-full bg-white border border-slate-200 px-2 py-1 outline-none focus:border-slate-400">
+              </div>
+              <div class="flex items-center space-x-1">
+                <button onclick="replaceText('output-main', false)" class="bg-slate-200 hover:bg-slate-300 text-slate-800 px-2.5 py-1 font-medium transition">Thay</button>
+                <button onclick="replaceText('output-main', true)" class="bg-slate-800 hover:bg-slate-900 text-white px-2.5 py-1 font-medium transition">Thay tất cả</button>
+              </div>
             </div>
-            <div class="flex items-center space-x-1">
-              <button onclick="replaceText('output-main', false)" class="bg-slate-200 hover:bg-slate-300 text-slate-800 px-2 py-1 font-medium transition">Thay</button>
-              <button onclick="replaceText('output-main', true)" class="bg-slate-800 hover:bg-slate-900 text-white px-2 py-1 font-medium transition">Thay tất cả</button>
-            </div>
-            <span id="count-output-main" class="text-[11px] text-slate-500 min-w-[45px] text-right">0 khớp</span>
           </div>
 
           <div class="editor-container border border-slate-200">
@@ -405,21 +458,40 @@
           </div>
         </div>
 
-        <!-- SEARCH & REPLACE BAR FOR OUTPUT-TIKZ-SINGLE -->
-        <div class="bg-slate-50 p-2 border border-slate-200 flex flex-wrap items-center gap-2 text-xs">
-          <div class="flex items-center space-x-1 flex-1 min-w-[140px]">
-            <i data-lucide="search" class="w-3.5 h-3.5 text-slate-400"></i>
-            <input type="text" id="find-output-tikz-single" placeholder="Tìm kiếm..." oninput="findText('output-tikz-single')" class="w-full bg-white border border-slate-200 px-2 py-1 outline-none focus:border-slate-400">
+        <!-- ADVANCED SEARCH & REPLACE BAR FOR OUTPUT-TIKZ-SINGLE -->
+        <div class="bg-slate-50 p-2 border border-slate-200 flex flex-col gap-2 text-xs">
+          <div class="flex items-center gap-2 flex-wrap">
+            <div class="flex items-center space-x-1 flex-1 min-w-[150px]">
+              <i data-lucide="search" class="w-3.5 h-3.5 text-slate-400"></i>
+              <input type="text" id="find-output-tikz-single" placeholder="Tìm kiếm..." oninput="findText('output-tikz-single')" class="w-full bg-white border border-slate-200 px-2 py-1 outline-none focus:border-slate-400">
+            </div>
+
+            <div class="flex items-center space-x-1 border border-slate-200 bg-white px-1 py-0.5">
+              <button onclick="navigateSearch('output-tikz-single', -1)" title="Tìm trước" class="hover:bg-slate-100 p-1 rounded">
+                <i data-lucide="chevron-left" class="w-3.5 h-3.5 text-slate-600"></i>
+              </button>
+              <span id="count-output-tikz-single" class="text-[11px] text-slate-600 font-mono px-1 min-w-[50px] text-center">0/0</span>
+              <button onclick="navigateSearch('output-tikz-single', 1)" title="Tìm tiếp" class="hover:bg-slate-100 p-1 rounded">
+                <i data-lucide="chevron-right" class="w-3.5 h-3.5 text-slate-600"></i>
+              </button>
+            </div>
+
+            <label class="flex items-center space-x-1 cursor-pointer select-none text-slate-600">
+              <input type="checkbox" id="match-case-output-tikz-single" onchange="findText('output-tikz-single')" class="rounded border-slate-300">
+              <span>Match case</span>
+            </label>
           </div>
-          <div class="flex items-center space-x-1 flex-1 min-w-[140px]">
-            <i data-lucide="replace" class="w-3.5 h-3.5 text-slate-400"></i>
-            <input type="text" id="replace-output-tikz-single" placeholder="Thay thế bằng..." class="w-full bg-white border border-slate-200 px-2 py-1 outline-none focus:border-slate-400">
+
+          <div class="flex items-center gap-2">
+            <div class="flex items-center space-x-1 flex-1">
+              <i data-lucide="replace" class="w-3.5 h-3.5 text-slate-400"></i>
+              <input type="text" id="replace-output-tikz-single" placeholder="Thay thế bằng..." class="w-full bg-white border border-slate-200 px-2 py-1 outline-none focus:border-slate-400">
+            </div>
+            <div class="flex items-center space-x-1">
+              <button onclick="replaceText('output-tikz-single', false)" class="bg-slate-200 hover:bg-slate-300 text-slate-800 px-2.5 py-1 font-medium transition">Thay</button>
+              <button onclick="replaceText('output-tikz-single', true)" class="bg-slate-800 hover:bg-slate-900 text-white px-2.5 py-1 font-medium transition">Thay tất cả</button>
+            </div>
           </div>
-          <div class="flex items-center space-x-1">
-            <button onclick="replaceText('output-tikz-single', false)" class="bg-slate-200 hover:bg-slate-300 text-slate-800 px-2 py-1 font-medium transition">Thay</button>
-            <button onclick="replaceText('output-tikz-single', true)" class="bg-slate-800 hover:bg-slate-900 text-white px-2 py-1 font-medium transition">Thay tất cả</button>
-          </div>
-          <span id="count-output-tikz-single" class="text-[11px] text-slate-500 min-w-[45px] text-right">0 khớp</span>
         </div>
 
         <div class="editor-container h-80 border border-slate-200">
@@ -564,9 +636,26 @@
       }
     }
 
-    // 2. HIGHLIGHT & PERFECT SCROLL SYNCRONIZATION
-    function highlightText(text) {
+    // SEARCH STATE TRACKER
+    const searchStates = {};
+
+    // 2. HIGHLIGHT & SEARCH HIGHLIGHT SYNCHRONIZATION
+    function highlightText(text, id) {
       if (!text) return '';
+      
+      let searchKeyword = "";
+      let matchCase = false;
+      let activeIndex = -1;
+
+      if (id && document.getElementById(`find-${id}`)) {
+        searchKeyword = document.getElementById(`find-${id}`).value;
+        matchCase = document.getElementById(`match-case-${id}`).checked;
+        if (searchStates[id]) {
+          activeIndex = searchStates[id].activeMatchIndex;
+        }
+      }
+
+      // 1. LATEX SYNTAX HIGHLIGHTING
       let html = text
         .replace(/&/g, "&amp;")
         .replace(/</g, "&lt;")
@@ -578,6 +667,29 @@
       html = html.replace(/\\True\b/g, '<span class="hl-true">\\True</span>');
       html = html.replace(/(\{ex\}|\{tikzpicture\})/g, '<span class="hl-env">$1</span>');
 
+      // 2. SEARCH HIGHLIGHT OVERLAY (SAFE INSERTION)
+      if (searchKeyword.trim()) {
+        const flags = matchCase ? 'g' : 'gi';
+        const escapedKeyword = escapeRegExp(searchKeyword);
+        const searchRegex = new RegExp(escapedKeyword, flags);
+
+        // Splitting HTML into tags and text nodes to highlight ONLY visible text
+        const parts = html.split(/(<[^>]+>)/g);
+        let matchCounter = 0;
+
+        for (let i = 0; i < parts.length; i++) {
+          if (!parts[i].startsWith('<')) {
+            parts[i] = parts[i].replace(searchRegex, (match) => {
+              const currentMatchIdx = matchCounter++;
+              const isCurrent = (currentMatchIdx === activeIndex);
+              const highlightClass = isCurrent ? 'hl-search-match-active' : 'hl-search-match';
+              return `<mark class="${highlightClass}">${match}</mark>`;
+            });
+          }
+        }
+        html = parts.join('');
+      }
+
       if (html.endsWith('\n')) html += ' ';
       return html;
     }
@@ -587,14 +699,10 @@
       const hlDiv = document.getElementById(`hl-${id}`);
       const linesDiv = document.getElementById(`lines-${id}`);
 
-      hlDiv.innerHTML = highlightText(textarea.value);
+      hlDiv.innerHTML = highlightText(textarea.value, id);
       const lineCount = textarea.value.split('\n').length;
       linesDiv.innerHTML = Array.from({length: lineCount}, (_, i) => i + 1).join('\n');
       syncScroll(id);
-      
-      if (document.getElementById(`find-${id}`)) {
-        findText(id);
-      }
     }
 
     function syncScroll(id) {
@@ -613,39 +721,111 @@
       handleInput(id);
     }
 
-    // 3. SEARCH & REPLACE LOGIC
+    // 3. ADVANCED SEARCH LOGIC (PREV / NEXT / MATCH CASE / AUTO SCROLL)
     function findText(id) {
       const findVal = document.getElementById(`find-${id}`).value;
       const countSpan = document.getElementById(`count-${id}`);
+      const matchCase = document.getElementById(`match-case-${id}`).checked;
       const textarea = document.getElementById(id);
 
+      if (!searchStates[id]) {
+        searchStates[id] = { matches: [], activeMatchIndex: -1 };
+      }
+
       if (!findVal) {
-        countSpan.textContent = "0 khớp";
+        searchStates[id] = { matches: [], activeMatchIndex: -1 };
+        countSpan.textContent = "0/0";
+        handleInput(id);
         return;
       }
 
-      const regex = new RegExp(escapeRegExp(findVal), 'g');
-      const matches = textarea.value.match(regex);
-      const count = matches ? matches.length : 0;
-      countSpan.textContent = `${count} khớp`;
+      const flags = matchCase ? 'g' : 'gi';
+      const regex = new RegExp(escapeRegExp(findVal), flags);
+      const matches = [];
+      let match;
+
+      while ((match = regex.exec(textarea.value)) !== null) {
+        matches.push({
+          index: match.index,
+          length: match[0].length
+        });
+      }
+
+      searchStates[id].matches = matches;
+
+      if (matches.length > 0) {
+        if (searchStates[id].activeMatchIndex < 0 || searchStates[id].activeMatchIndex >= matches.length) {
+          searchStates[id].activeMatchIndex = 0;
+        }
+        countSpan.textContent = `${searchStates[id].activeMatchIndex + 1}/${matches.length}`;
+        scrollToMatch(id);
+      } else {
+        searchStates[id].activeMatchIndex = -1;
+        countSpan.textContent = "0/0";
+      }
+
+      handleInput(id);
+    }
+
+    function navigateSearch(id, direction) {
+      const state = searchStates[id];
+      if (!state || !state.matches || state.matches.length === 0) return;
+
+      state.activeMatchIndex += direction;
+      if (state.activeMatchIndex >= state.matches.length) {
+        state.activeMatchIndex = 0;
+      } else if (state.activeMatchIndex < 0) {
+        state.activeMatchIndex = state.matches.length - 1;
+      }
+
+      document.getElementById(`count-${id}`).textContent = `${state.activeMatchIndex + 1}/${state.matches.length}`;
+      scrollToMatch(id);
+      handleInput(id);
+    }
+
+    function scrollToMatch(id) {
+      const state = searchStates[id];
+      if (!state || state.activeMatchIndex < 0) return;
+
+      const textarea = document.getElementById(id);
+      const match = state.matches[state.activeMatchIndex];
+
+      // Scroll textarea to line containing the match
+      const textBefore = textarea.value.substring(0, match.index);
+      const lineNumber = textBefore.split('\n').length;
+      const lineHeight = 24; // 1.5rem = 24px
+
+      textarea.scrollTop = (lineNumber - 3) * lineHeight;
+      syncScroll(id);
     }
 
     function replaceText(id, replaceAll = false) {
       const findVal = document.getElementById(`find-${id}`).value;
       const replaceVal = document.getElementById(`replace-${id}`).value;
+      const matchCase = document.getElementById(`match-case-${id}`).checked;
       const textarea = document.getElementById(id);
 
       if (!findVal) return;
 
+      const flags = matchCase ? 'g' : 'gi';
+
       if (replaceAll) {
-        const regex = new RegExp(escapeRegExp(findVal), 'g');
+        const regex = new RegExp(escapeRegExp(findVal), flags);
         textarea.value = textarea.value.replace(regex, replaceVal);
       } else {
-        const regex = new RegExp(escapeRegExp(findVal));
-        textarea.value = textarea.value.replace(regex, replaceVal);
+        const state = searchStates[id];
+        if (state && state.matches && state.activeMatchIndex >= 0) {
+          const match = state.matches[state.activeMatchIndex];
+          const before = textarea.value.substring(0, match.index);
+          const after = textarea.value.substring(match.index + match.length);
+          textarea.value = before + replaceVal + after;
+        } else {
+          const regex = new RegExp(escapeRegExp(findVal), matchCase ? '' : 'i');
+          textarea.value = textarea.value.replace(regex, replaceVal);
+        }
       }
 
-      handleInput(id);
+      findText(id);
     }
 
     function escapeRegExp(string) {
