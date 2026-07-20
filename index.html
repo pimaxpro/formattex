@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>PimaX Tool Beta — Bộ Công Của LaTeX & PDF Toàn Diện</title>
+  <title>PimaX Tool Beta — Bộ Công Cụ LaTeX & PDF Toàn Diện</title>
   <!-- Tailwind CSS -->
   <script src="https://cdn.tailwindcss.com"></script>
   <!-- Lucide Icons -->
@@ -295,6 +295,10 @@
               <button onclick="convertArrayToAligned('output-ex')" class="bg-blue-100 hover:bg-blue-200 text-blue-900 p-1.5 h-7 w-7 flex items-center justify-center border border-blue-300 transition" title="Chuyển toàn bộ array thành aligned và căn lề dấu =">
                 <i data-lucide="columns-2" class="w-4 h-4 text-blue-700"></i>
               </button>
+              <!-- NÚT CHỔI QUÉT DỌN DẸP KHOẢNG TRẮNG & DÒNG TRỐNG -->
+              <button onclick="applyCleanSpacingTool('output-ex')" class="bg-emerald-100 hover:bg-emerald-200 text-emerald-900 p-1.5 h-7 w-7 flex items-center justify-center border border-emerald-300 transition" title="Dọn dẹp dòng trống thừa & khoảng trắng trước dấu câu">
+                <i data-lucide="broom" class="w-4 h-4 text-emerald-700"></i>
+              </button>
               <button onclick="wrapSelectionWithEnv('output-ex', 'itemize')" class="bg-slate-100 hover:bg-slate-200 text-slate-800 p-1.5 h-7 w-7 flex items-center justify-center border border-slate-200 transition" title="Chuyển thành môi trường \\begin{itemize}">
                 <i data-lucide="list" class="w-4 h-4 text-slate-600"></i>
               </button>
@@ -341,8 +345,8 @@
                 <input type="text" id="replace-output-ex" placeholder="Thay thế bằng..." class="w-full bg-white border border-slate-200 px-2 py-1 outline-none focus:border-slate-400">
               </div>
               <div class="flex items-center space-x-1">
-                <button onclick="replaceText('output-ex', false)" class="bg-slate-200 hover:bg-slate-300 text-slate-800 px-2 py-1 font-medium transition">Thay</button>
-                <button onclick="replaceText('output-ex', true)" class="bg-slate-800 hover:bg-slate-900 text-white px-2 py-1 font-medium transition">Thay tất cả</button>
+                <button onclick="replaceText('output-ex', false)" class="bg-slate-200 hover:bg-slate-300 text-slate-800 px-2.5 py-1 font-medium transition">Thay</button>
+                <button onclick="replaceText('output-ex', true)" class="bg-slate-800 hover:bg-slate-900 text-white px-2.5 py-1 font-medium transition">Thay tất cả</button>
               </div>
             </div>
           </div>
@@ -450,6 +454,10 @@
               <button onclick="convertArrayToAligned('output-main')" class="bg-blue-100 hover:bg-blue-200 text-blue-900 p-1.5 h-7 w-7 flex items-center justify-center border border-blue-300 transition" title="Chuyển toàn bộ array thành aligned và căn lề dấu =">
                 <i data-lucide="columns-2" class="w-4 h-4 text-blue-700"></i>
               </button>
+              <!-- NÚT CHỔI QUÉT DỌN DẸP KHOẢNG TRẮNG & DÒNG TRỐNG -->
+              <button onclick="applyCleanSpacingTool('output-main')" class="bg-emerald-100 hover:bg-emerald-200 text-emerald-900 p-1.5 h-7 w-7 flex items-center justify-center border border-emerald-300 transition" title="Dọn dẹp dòng trống thừa & khoảng trắng trước dấu câu">
+                <i data-lucide="broom" class="w-4 h-4 text-emerald-700"></i>
+              </button>
               <button onclick="wrapSelectionWithEnv('output-main', 'itemize')" class="bg-slate-100 hover:bg-slate-200 text-slate-800 p-1.5 h-7 w-7 flex items-center justify-center border border-slate-200 transition" title="Chuyển thành môi trường \\begin{itemize}">
                 <i data-lucide="list" class="w-4 h-4 text-slate-600"></i>
               </button>
@@ -496,8 +504,8 @@
                 <input type="text" id="replace-output-main" placeholder="Thay thế bằng..." class="w-full bg-white border border-slate-200 px-2 py-1 outline-none focus:border-slate-400">
               </div>
               <div class="flex items-center space-x-1">
-                <button onclick="replaceText('output-main', false)" class="bg-slate-200 hover:bg-slate-300 text-slate-800 px-2 py-1 font-medium transition">Thay</button>
-                <button onclick="replaceText('output-main', true)" class="bg-slate-800 hover:bg-slate-900 text-white px-2 py-1 font-medium transition">Thay tất cả</button>
+                <button onclick="replaceText('output-main', false)" class="bg-slate-200 hover:bg-slate-300 text-slate-800 px-2.5 py-1 font-medium transition">Thay</button>
+                <button onclick="replaceText('output-main', true)" class="bg-slate-800 hover:bg-slate-900 text-white px-2.5 py-1 font-medium transition">Thay tất cả</button>
               </div>
             </div>
           </div>
@@ -593,8 +601,8 @@
               <input type="text" id="replace-output-tikz-single" placeholder="Thay thế bằng..." class="w-full bg-white border border-slate-200 px-2 py-1 outline-none focus:border-slate-400">
             </div>
             <div class="flex items-center space-x-1">
-              <button onclick="replaceText('output-tikz-single', false)" class="bg-slate-200 hover:bg-slate-300 text-slate-800 px-2 py-1 font-medium transition">Thay</button>
-              <button onclick="replaceText('output-tikz-single', true)" class="bg-slate-800 hover:bg-slate-900 text-white px-2 py-1 font-medium transition">Thay tất cả</button>
+              <button onclick="replaceText('output-tikz-single', false)" class="bg-slate-200 hover:bg-slate-300 text-slate-800 px-2.5 py-1 font-medium transition">Thay</button>
+              <button onclick="replaceText('output-tikz-single', true)" class="bg-slate-800 hover:bg-slate-900 text-white px-2.5 py-1 font-medium transition">Thay tất cả</button>
             </div>
           </div>
         </div>
@@ -1143,25 +1151,26 @@
     function cleanTextSpacingAndLines(text) {
       if (!text) return '';
 
-      // 1. Xóa khoảng trắng thừa đứng trước các dấu câu "?", ",", ".", "!"
       let cleaned = text.replace(/\s+([\?\,\.\!])/g, '$1');
-
-      // 2. Xóa các dòng trống liên tiếp thành 1 dòng trống đơn
       cleaned = cleaned.replace(/\n\s*\n\s*\n+/g, '\n\n');
 
-      // 3. Đảm bảo các môi trường \begin và \end luôn cách nhau đúng 1 dòng trắng
-      // Đảm bảo có 1 dòng trống trước \begin
       cleaned = cleaned.replace(/([^\n])\n*(\\begin\{[^}]+\})/g, '$1\n\n$2');
-      // Đảm bảo có 1 dòng trống sau \end
       cleaned = cleaned.replace(/(\\end\{[^}]+\})\n*([^\n])/g, '$1\n\n$2');
 
-      // Dọn dẹp lại dòng trống dư thừa phát sinh sau khi format môi trường
       cleaned = cleaned.replace(/\n\s*\n\s*\n+/g, '\n\n');
 
       return cleaned.trim();
     }
 
-    // ==================== HÀM CHUYỂN ĐỔI ARRAY THÀNH ALIGNED ====================
+    function applyCleanSpacingTool(id) {
+      const textarea = document.getElementById(id);
+      if (!textarea || !textarea.value.trim()) return;
+
+      textarea.value = cleanTextSpacingAndLines(textarea.value);
+      handleInput(id, false);
+      saveState(id, true);
+    }
+
     function convertArrayToAligned(id) {
       const textarea = document.getElementById(id);
       if (!textarea) return;
@@ -1186,7 +1195,6 @@
         return `\\begin{aligned}\n${formattedBody}\n\\end{aligned}`;
       });
 
-      // Áp dụng bộ lọc dọn dẹp dòng trống và dấu câu
       text = cleanTextSpacingAndLines(text);
 
       textarea.value = text;
@@ -1194,7 +1202,6 @@
       saveState(id, true);
     }
 
-    // ==================== HÀM TỰ ĐỘNG THÊM $ HOÀN HẢO ====================
     function autoAddMathDollars(text) {
       if (!text) return '';
 
@@ -1447,7 +1454,6 @@
 
       text = text.replace(/\$((?:\\.|[^$])+)\$/g, (m, inner) => `$${inner.trim()}$`);
 
-      // Tích hợp bộ lọc dọn dẹp khoảng trắng trước dấu câu và chuẩn hóa môi trường
       text = cleanTextSpacingAndLines(text);
 
       return text.trim();
@@ -1469,7 +1475,6 @@
       else processMode3();
     }
 
-    // Chức năng 1: \choice
     function processMode1() {
       const input = document.getElementById('input-ex').value;
       if (!input.trim()) return;
@@ -1546,7 +1551,6 @@
       setEditorValue('output-ex', cleanTextSpacingAndLines(results.join('\n\n')));
     }
 
-    // Chức năng 2: \choiceTF
     function processMode2() {
       const input = document.getElementById('input-ex').value;
       if (!input.trim()) return;
@@ -1624,7 +1628,6 @@
       setEditorValue('output-ex', cleanTextSpacingAndLines(results.join('\n\n')));
     }
 
-    // Chức năng 3: \shortans
     function processMode3() {
       const input = document.getElementById('input-ex').value;
       if (!input.trim()) return;
@@ -1812,7 +1815,7 @@
             const offsetX = (targetWidth - viewport.width) / 2;
             const offsetY = (targetHeight - viewport.height) / 2;
 
-            statusDiv.textContent = `Đang xuất trang ${i} / ${totalPages} (${targetWidth}x${targetHeight} px)...`;
+            statusDiv.textContent = `Đang xuất trang ${i} / ${totalPages} (${targetWidth}x{targetHeight} px)...`;
             await page.render({
               canvasContext: ctx,
               viewport: viewport,
@@ -1822,7 +1825,7 @@
             canvas.width = Math.round(viewport.width);
             canvas.height = Math.round(viewport.height);
 
-            statusDiv.textContent = `Đang xuất trang ${i} / ${totalPages} (${canvas.width}x${canvas.height} px)...`;
+            statusDiv.textContent = `Đang xuất trang ${i} / ${totalPages} (${canvas.width}x{canvas.height} px)...`;
             await page.render({
               canvasContext: ctx,
               viewport: viewport
