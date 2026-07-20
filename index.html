@@ -839,9 +839,9 @@
     // SEARCH STATE TRACKER
     const searchStates = {};
 
-    // ==================== KHO 300 GỢI Ý LATEX CHUẨN OVERLEAF ====================
+    // ==================== KHO ~300 GỢI Ý LATEX CHUẨN OVERLEAF ====================
     const latexKeywords = [
-      // Môi trường
+      // Môi trường (Có hỗ trợ sinh cặp begin/end tự động)
       "\\begin{ex}", "\\end{ex}", "\\begin{itemize}", "\\end{itemize}",
       "\\begin{enumerate}", "\\end{enumerate}", "\\begin{description}", "\\end{description}",
       "\\begin{tikzpicture}", "\\end{tikzpicture}", "\\begin{tabular}", "\\end{tabular}",
@@ -963,9 +963,10 @@
             items[activeIdx - 1].classList.add('active');
           }
         } else if (e.key === 'Enter') {
-          if (activeIdx >= 0) {
+          if (activeIdx >= 0 && dropdown.style.display === 'block') {
             e.preventDefault();
             items[activeIdx].click();
+            return;
           }
         } else if (e.key === 'Escape') {
           dropdown.style.display = 'none';
@@ -1003,7 +1004,20 @@
         item.onclick = () => {
           const start = textarea.selectionStart;
           const replaceStart = start - query.length;
-          textarea.setRangeText(kw, replaceStart, start, 'end');
+          
+          let insertText = kw;
+          let cursorOffset = kw.length;
+
+          // LOGIC TỰ SINH CẶP BEGIN / END KHI CHỌN MÔI TRƯỜNG
+          if (kw.startsWith('\\begin{') && kw.endsWith('}')) {
+            const envName = kw.substring(7, kw.length - 1);
+            insertText = `\\begin{${envName}}\n    \n\\end{${envName}}`;
+            cursorOffset = `\\begin{${envName}}\n    `.length;
+          }
+
+          textarea.setRangeText(insertText, replaceStart, start, 'end');
+          textarea.setSelectionRange(replaceStart + cursorOffset, replaceStart + cursorOffset);
+
           dropdown.style.display = 'none';
           handleInput(id);
           textarea.focus();
