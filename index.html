@@ -979,13 +979,12 @@
       return fixMathSpacing(text);
     }
 
-    // HÀM CHUẨN HÓA KHOẢNG TRẮNG CÔNG THỨC MỚI NHẤT
+    // HÀM CHUẨN HÓA KHOẢNG TRẮNG CÔNG THỨC SIÊU MẠNH (ĐÃ FIX LỖI DÍNH CHỮ)
     function fixMathSpacing(str) {
       if (!str) return '';
       let text = str;
 
       // 1. Quét sạch khoảng trắng thừa bên trong TẤT CẢ các khối toán học ngay từ đầu
-      // Biểu thức /\$((?:\\.|[^$])+)\$/g sẽ quét toàn bộ khối $...$, sau đó ép inner.trim() để xóa sạch mọi dấu cách, tab, dấu xuống dòng sát rìa.
       text = text.replace(/\$((?:\\.|[^$])+)\$/g, (m, inner) => `$${inner.trim()}$`);
 
       // 2. Tách và xử lý phần văn bản bên ngoài khối toán
@@ -993,7 +992,6 @@
       for (let i = 0; i < parts.length; i++) {
         if (!parts[i].startsWith('$')) {
           let chunk = parts[i];
-          // Bọc $ cho các biểu thức hình học, tọa độ, gán biến bị sót và ép trim() ngay lập tức
           chunk = chunk.replace(/([\(\[][\-+]?\w+\s*[;\,]\s*[\-+]?\w+[\)\]])/g, (m, p1) => ` $${p1.trim()}$ `);
           chunk = chunk.replace(/(?<![\$\w\\])([a-zA-Z]\s*=\s*[\-+]?\d+(?:\s*\\[a-zA-Z]+|\s*\{\~[a-zA-Z]+\}|\s*[a-zA-Z]+)?)(?![\$\w])/g, (m, p1) => ` $${p1.trim()}$ `);
           parts[i] = chunk;
@@ -1001,16 +999,18 @@
       }
       text = parts.join('');
 
-      // 3. Đảm bảo khoảng trắng chuẩn giữa văn bản và khối toán
-      text = text.replace(/([a-zA-ZÀ-ỹ0-9])\$((?:\\.|[^$])+)\$/g, (match, p1, p2) => `${p1} $${p2.trim()}$`);
-      text = text.replace(/\$((?:\\.|[^$])+)\$([a-zA-ZÀ-ỹ0-9])/g, (match, p1, p2) => `$${p1.trim()}$ ${p2}`);
-      
-      // 4. Dọn dẹp khoảng trắng kép và khoảng trắng trước dấu câu
+      // 3. TÁCH DÃN BÊN NGOÀI: Tự động phát hiện mọi chữ/số bị dính sát vào bên ngoài dấu $ 
+      // (Dùng \p{L} để tương thích chuẩn mọi ký tự tiếng Việt, \p{N} cho số)
+      text = text.replace(/([\p{L}\p{N}:,;\.\?!])\$/gu, '$1 $'); // Ép giãn: chữ/dấu câu đứng TRƯỚC $
+      text = text.replace(/\$([\p{L}\p{N}])/gu, '$ $1');         // Ép giãn: chữ/số đứng SAU $
+
+      // 4. Dọn dẹp các khoảng trắng kép sinh ra và làm gọn dấu câu
       text = text.replace(/[ \t]+/g, ' ');
       text = text.replace(/\s+([\.,;\)])/g, '$1');
       text = text.replace(/([\(\[])\s+/g, '$1');
 
-      // 5. CÚ CHỐT: Quét lại một lần cuối cùng để đảm bảo tuyệt đối không có khoảng trắng thừa lọt vào sát vách $
+      // 5. CÚ CHỐT: Quét lại màng lọc một lần cuối để đảm bảo tuyệt đối 
+      // KHÔNG có khoảng trắng thừa lọt vào sát vách bên trong $
       text = text.replace(/\$((?:\\.|[^$])+)\$/g, (m, inner) => `$${inner.trim()}$`);
 
       return text.trim();
