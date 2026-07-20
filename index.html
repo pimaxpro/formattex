@@ -73,7 +73,6 @@
       line-height: 1.5rem;
       white-space: pre;
       tab-size: 4;
-      overflow: auto;
       word-wrap: normal;
       box-sizing: border-box;
     }
@@ -83,11 +82,13 @@
       caret-color: #0f172a;
       z-index: 2;
       resize: none;
+      overflow: auto; /* Duy nhất textarea được nhận thanh cuộn */
     }
     .code-highlight {
       color: #1e293b;
       z-index: 1;
       pointer-events: none;
+      overflow: hidden; /* Ẩn hoàn toàn thanh trượt thừa ở lớp màu bên dưới */
     }
   </style>
 </head>
@@ -697,8 +698,6 @@
       if (!str) return '';
       let text = str.trim();
       
-      // Kiểm tra xem lựa chọn có chứa ký tự chữ cái Tiếng Việt/English thông thường hay không
-      // Nếu KHÔNG chứa chữ cái văn bản và chưa nằm trong $$ thì tự động bao quanh bởi $...$
       const containsWords = /[a-zA-ZÀ-ỹ]/.test(text.replace(/\\[a-zA-Z]+/g, ''));
       if (!containsWords && !text.startsWith('$') && !text.endsWith('$')) {
         return `$${text}$`;
