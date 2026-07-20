@@ -47,7 +47,7 @@
     <!-- Mode Description Bar -->
     <div id="mode-description" class="bg-slate-800/60 border border-slate-700/60 rounded-lg p-3 text-xs text-slate-300 flex items-center justify-between">
       <span id="desc-text">Đang ở <b>Chức năng 1</b>: Chuyển đổi đề trắc nghiệm dạng 4 phương án A, B, C, D sang <code>\choice</code></span>
-      <span class="text-xs text-slate-400 bg-slate-700 px-2.5 py-0.5 rounded-full">v2.0</span>
+      <span class="text-xs text-slate-400 bg-slate-700 px-2.5 py-0.5 rounded-full">v2.2 - Ultimate Clean</span>
     </div>
 
     <div class="grid grid-cols-1 md:grid-cols-2 gap-4 flex-1">
@@ -120,13 +120,13 @@
   </main>
 
   <footer class="bg-slate-800 border-t border-slate-700 py-3 text-center text-xs text-slate-400">
-    LaTeX Standardizer — Hỗ trợ song song Chức năng 1 (\choice) & Chức năng 2 (\choiceTF)
+    LaTeX Standardizer — Lọc sạch triệt để dữ liệu nhiễu cho cả Chức năng 1 & 2
   </footer>
 
   <script>
     lucide.createIcons();
 
-    let currentMode = 1; // 1: \choice (A. B. C. D.), 2: \choiceTF (a) b) c) d))
+    let currentMode = 1;
 
     function switchMode(mode) {
       currentMode = mode;
@@ -138,12 +138,12 @@
       if (mode === 1) {
         btn1.className = "px-4 py-2 text-xs font-semibold rounded-md transition flex items-center space-x-2 bg-blue-600 text-white shadow";
         btn2.className = "px-4 py-2 text-xs font-semibold rounded-md transition flex items-center space-x-2 text-slate-400 hover:text-slate-200";
-        descText.innerHTML = "Đang ở <b>Chức năng 1</b>: Chuyển đổi đề trắc nghiệm dạng 4 phương án A, B, C, D sang <code>\\choice</code>";
+        descText.innerHTML = "Đang ở <b>Chức năng 1</b>: Chuyển đổi đề trắc nghiệm 4 phương án A, B, C, D sang <code>\\choice</code>";
         processLabel.innerText = "Chuẩn Hóa Ngay (CN 1)";
       } else {
         btn2.className = "px-4 py-2 text-xs font-semibold rounded-md transition flex items-center space-x-2 bg-blue-600 text-white shadow";
         btn1.className = "px-4 py-2 text-xs font-semibold rounded-md transition flex items-center space-x-2 text-slate-400 hover:text-slate-200";
-        descText.innerHTML = "Đang ở <b>Chức năng 2</b>: Chuyển đổi đề trắc nghiệm Đúng/Sai a), b), c), d) sang <code>\\choiceTF</code> (Tự đọc DSDS/ĐSĐS)";
+        descText.innerHTML = "Đang ở <b>Chức năng 2</b>: Chuyển đổi đề trắc nghiệm Đúng/Sai a), b), c), d) sang <code>\\choiceTF</code> (Đọc DĐSD/DSDS)";
         processLabel.innerText = "Chuẩn Hóa Ngay (CN 2)";
       }
     }
@@ -186,7 +186,7 @@
       URL.revokeObjectURL(url);
     }
 
-    // Tự động nhận diện và bao bọc các đoạn, khoảng, số nguyên khối
+    // Tự động nhận diện công thức toán chưa bọc $ và giữ khoảng trắng tách biệt văn bản
     function autoWrapMath(text) {
       if (!text) return '';
 
@@ -196,27 +196,29 @@
         if (!parts[i].startsWith('$')) {
           let chunk = parts[i];
 
-          // 1. Nhận diện nguyên khối Khoảng/Đoạn toán học thô, ví dụ: (-1;1), [-2;3]
+          // 1. Nhận diện khối khoảng/đoạn: (-1;1), [-2;3]
           const intervalRegex = /([\(\[][\-+]?\w+\s*[;\,]\s*[\-+]?\w+[\)\]])/g;
-          chunk = chunk.replace(intervalRegex, (match, p1) => `$${p1}$`);
+          chunk = chunk.replace(intervalRegex, (match, p1) => ` $${p1}$ `);
 
-          // 2. Nhận diện các số đơn lẻ chưa bọc $
-          const subParts = chunk.split(/(\$[^\$]+\$)/g);
-          for (let j = 0; j < subParts.length; j++) {
-            if (!subParts[j].startsWith('$')) {
-              subParts[j] = subParts[j].replace(/(?<![\$\w\\])([\-+]?\d+(?:[\.,]\d+)?)(?![\$\w])/g, (m, p1) => `$${p1}$`);
-            }
-          }
-          chunk = subParts.join('');
+          // 2. Nhận diện các biểu thức biến kèm đơn vị như t = 0 s, t = 2 s
+          chunk = chunk.replace(/(?<![\$\w\\])([a-zA-Z]\s*=\s*[\-+]?\d+(?:\s*[a-zA-Z]+)?)(?![\$\w])/g, (m, p1) => ` $${p1.trim()}$ `);
+
+          // 3. Chuẩn hóa lại các khoảng trắng dính sát nhau
+          chunk = chunk.replace(/\s+/g, ' ');
 
           parts[i] = chunk;
         }
       }
 
-      return parts.join('');
+      let result = parts.join('');
+
+      result = result.replace(/\s+([\.,;\)])/g, '$1');
+      result = result.replace(/([\(\[])\s+/g, '$1');
+      result = result.replace(/\$\s+\$/g, '');
+
+      return result.trim();
     }
 
-    // Tinh chỉnh khoảng trắng thừa bên trong $...$
     function cleanMathSpaces(str) {
       if (!str) return '';
       let res = str.trim();
@@ -225,6 +227,27 @@
       res = res.replace(/\$\s+/g, '$').replace(/\s+\$/g, '$');
 
       return res;
+    }
+
+    // =========================================================================
+    // LÀM SẠCH NHIỄU DÙNG CHUNG CHO CẢ CHỨC NĂNG 1 VÀ CHỨC NĂNG 2
+    // =========================================================================
+    function cleanHeaderPrefix(rawText) {
+      let str = rawText.trim();
+
+      // 1. Xóa "Câu X", "Câu X.", "Câu X:", "Câu X -"
+      str = str.replace(/^Câu\s+\d+\s*[\.\:-]*/i, '').trim();
+
+      // 2. Xóa các mã định danh trong ngoặc vuông như [AECK], [TDM31], [Q740609750]
+      str = str.replace(/^\[[^\]]*\]\s*/i, '').trim();
+
+      // 3. Xóa thông tin điểm/mã trong ngoặc đơn như (10 Điểm), (1.5đ)
+      str = str.replace(/^\([^\)]*\)\s*/i, '').trim();
+
+      // 4. Xóa các ký tự nhiễu còn sót lại ở đầu chuỗi như dấu hai chấm, gạch ngang, dấu chấm dư thừa
+      str = str.replace(/^[:\.-]+\s*/, '').trim();
+
+      return str;
     }
 
     function processMain() {
@@ -246,15 +269,12 @@
       let results = [];
 
       questionBlocks.forEach(block => {
-        let content = block.trim();
-
-        content = content.replace(/^Câu\s+\d+\s*[\.\:-]*/i, '').trim();
-        content = content.replace(/^\[[^\]]*\]\s*/i, '').trim();
-        content = content.replace(/^\([^\)]*\)\s*/i, '').trim();
+        let content = cleanHeaderPrefix(block);
 
         let questionPart = content;
         let solutionPart = "";
 
+        // Tách phần Lời giải nếu có
         const solutionHeaderRegex = /(?:Lời\s*giải|Hướng\s*dẫn\s*giải)[\.\s:]*/i;
         const solMatch = content.match(solutionHeaderRegex);
 
@@ -263,6 +283,7 @@
           solutionPart = content.substring(solMatch.index + solMatch[0].length).trim();
         }
 
+        // Đọc và xóa dòng chốt đáp án ("Chọn ý A.", "Đáp án A")
         let trueAnswerKey = null;
         const choicePickRegex = /(?:Chọn\s*(?:ý|đáp\s*án)?|Đáp\s*án)\s*([A-D])[\.\s]*/gi;
 
@@ -277,6 +298,7 @@
           questionPart = questionPart.replace(/(?:Chọn\s*(?:ý|đáp\s*án)?|Đáp\s*án)\s*[A-D][\.\s]*/gi, '').trim();
         }
 
+        // Bóc tách 4 phương án A, B, C, D
         const choiceRegex = /(?:^|\n)\s*([A-D])\.\s*([\s\S]*?)(?=(?:\n\s*[A-D]\.|$))/g;
         
         let choices = {};
@@ -333,17 +355,12 @@
       let results = [];
 
       questionBlocks.forEach(block => {
-        let content = block.trim();
+        let content = cleanHeaderPrefix(block);
 
-        // 1. Loại bỏ tiền tố "Câu X", mã định danh
-        content = content.replace(/^Câu\s+\d+\s*[\.\:-]*/i, '').trim();
-        content = content.replace(/^\[[^\]]*\]\s*/i, '').trim();
-        content = content.replace(/^\([^\)]*\)\s*/i, '').trim();
-
-        // 2. Tách Lời giải
         let questionPart = content;
         let solutionPart = "";
 
+        // Tách phần Lời giải nếu có
         const solutionHeaderRegex = /(?:Lời\s*giải|Hướng\s*dẫn\s*giải)[\.\s:]*/i;
         const solMatch = content.match(solutionHeaderRegex);
 
@@ -352,8 +369,8 @@
           solutionPart = content.substring(solMatch.index + solMatch[0].length).trim();
         }
 
-        // 3. Đọc đáp án Đúng/Sai dạng DSDS, ĐSĐS, D-S-D-S...
-        let tfPattern = null; // Mảng boolean [true, false, true, false]
+        // Đọc và xóa chuỗi chốt Đúng/Sai (DĐSD, DSDS, ĐSĐS...)
+        let tfPattern = null;
         const answerTFRegex = /(?:Đáp\s*án|Chọn)[\.\s:]*([DĐS[\s\-\,\.]+){4}/i;
 
         let tfMatch = solutionPart.match(answerTFRegex);
@@ -374,7 +391,7 @@
           }
         }
 
-        // 4. Bóc tách 4 phương án a), b), c), d) hoặc a., b., c., d.
+        // Bóc tách 4 lựa chọn a), b), c), d)
         const choiceTFRegex = /(?:^|\n)\s*([a-d])[\)\.]\s*([\s\S]*?)(?=(?:\n\s*[a-d][\)\.]|$))/gi;
         
         let choices = {};
@@ -396,7 +413,6 @@
         let mainQuestion = firstChoiceIndex !== -1 ? questionPart.substring(0, firstChoiceIndex).trim() : questionPart;
         mainQuestion = autoWrapMath(mainQuestion);
 
-        // 5. DỰNG KHỐI \begin{ex} CHO \choiceTF
         let exCode = `\\begin{ex}\n`;
         exCode += `    ${mainQuestion}\n`;
         exCode += `    \\choiceTF\n`;
