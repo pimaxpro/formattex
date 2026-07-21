@@ -1,26 +1,33 @@
 /* =========================================================
-   PIMAX TOOL — EX ENVIRONMENT PROCESSOR (FULL CORE GỐC)
+   PIMAX TOOL — EX ENVIRONMENT PROCESSOR
    ========================================================= */
 
-var subModeEx = 1;
+// Đảm bảo biến subModeEx luôn khởi tạo trên window
+if (typeof window.subModeEx === 'undefined') {
+  window.subModeEx = 1;
+}
 
+/**
+ * Chuyển đổi giữa các chế độ phụ CN1, CN2, CN3
+ */
 function switchSubMode(mode) {
-  subModeEx = mode;
-  if (typeof window !== 'undefined') {
-    window.subModeEx = mode;
-  }
+  window.subModeEx = mode;
   
+  // Cập nhật giao diện active cho các nút
   [1, 2, 3].forEach(m => {
     const btn = document.getElementById(`sub-btn-${m}`);
     if (btn) {
       if (m === mode) {
-        btn.className = "px-3 py-1.5 text-xs font-semibold rounded transition flex items-center justify-center space-x-1.5 theme-btn-pimax whitespace-nowrap";
+        btn.classList.add("theme-btn-pimax");
+        btn.classList.remove("opacity-75");
       } else {
-        btn.className = "px-3 py-1.5 text-xs font-semibold rounded transition flex items-center justify-center space-x-1.5 opacity-75 hover:opacity-100 whitespace-nowrap";
+        btn.classList.remove("theme-btn-pimax");
+        btn.classList.add("opacity-75");
       }
     }
   });
 
+  // Cập nhật nhãn thông báo và nhãn trên nút Chuẩn Hóa
   const descEl = document.getElementById('sub-mode-desc');
   const btnLabelEl = document.getElementById('btn-ex-label');
   
@@ -36,17 +43,19 @@ function switchSubMode(mode) {
   }
 }
 
+/**
+ * Điều hướng thực thi khi bấm nút Chuẩn hóa
+ */
 function processExEnvironment() {
-  const currentMode = subModeEx || (window.subModeEx ? window.subModeEx : 1);
+  const currentMode = window.subModeEx || 1;
   if (currentMode === 1) processMode1();
   else if (currentMode === 2) processMode2();
-  else processMode3();
+  else if (currentMode === 3) processMode3();
 }
 
 /* =========================================================
-   CÁC HÀM XỬ LÝ CHÍNH
+   MODE 1: CHUẨN HÓA TRẮC NGHIỆM 4 PHƯƠNG ÁN (\choice)
    ========================================================= */
-
 function processMode1() {
   const inputEl = document.getElementById('input-ex');
   if (!inputEl || !inputEl.value.trim()) return;
@@ -119,6 +128,9 @@ function processMode1() {
   setEditorValue('output-ex', cleanTextSpacingAndLines(results.join('\n\n')));
 }
 
+/* =========================================================
+   MODE 2: CHUẨN HÓA TRẮC NGHIỆM ĐÚNG/SAI (\choiceTF)
+   ========================================================= */
 function processMode2() {
   const inputEl = document.getElementById('input-ex');
   if (!inputEl || !inputEl.value.trim()) return;
@@ -192,6 +204,9 @@ function processMode2() {
   setEditorValue('output-ex', cleanTextSpacingAndLines(results.join('\n\n')));
 }
 
+/* =========================================================
+   MODE 3: CHUẨN HÓA TRẢ LỜI NGẮN (\shortans)
+   ========================================================= */
 function processMode3() {
   const inputEl = document.getElementById('input-ex');
   if (!inputEl || !inputEl.value.trim()) return;
@@ -242,7 +257,7 @@ function processMode3() {
 }
 
 /* =========================================================
-   HÀM BỔ TRỢ GỐC CHUẨN XÁC KHÔNG BỊ TRÙNG VÒNG LẶP
+   HÀM BỔ TRỢ GỐC CHUẨN XÁC
    ========================================================= */
 
 function cleanHeaderPrefix(rawText) {
