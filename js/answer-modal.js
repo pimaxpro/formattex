@@ -1,5 +1,37 @@
-// Phân tích và lưu trạng thái đáp án hiện tại
+// Biến lưu danh sách câu hỏi và trạng thái đáp án
 let parsedQuestions = [];
+
+/**
+ * Hàm tách các tham số ngoặc nhọn {...} cấp 1 (xử lý tốt ngoặc lồng nhau như \frac{}{})
+ */
+function extractCurlyBrackets(text) {
+  const results = [];
+  let depth = 0;
+  let startIdx = -1;
+
+  for (let i = 0; i < text.length; i++) {
+    if (text[i] === '{') {
+      if (depth === 0) {
+        startIdx = i;
+      }
+      depth++;
+    } else if (text[i] === '}') {
+      if (depth > 0) {
+        depth--;
+        if (depth === 0 && startIdx !== -1) {
+          results.push({
+            fullText: text.substring(startIdx, i + 1),
+            innerContent: text.substring(startIdx + 1, i),
+            start: startIdx,
+            end: i + 1
+          });
+          startIdx = -1;
+        }
+      }
+    }
+  }
+  return results;
+}
 
 function openAnswerModal() {
   const outputText = document.getElementById('output-ex').value;
@@ -8,7 +40,6 @@ function openAnswerModal() {
     return;
   }
 
-  // Tách các khối \begin{ex} ... \end{ex}
   const exRegex = /\\begin\{ex\}([\s\S]*?)\\end\{ex\}/g;
   let match;
   parsedQuestions = [];
@@ -24,23 +55,21 @@ function openAnswerModal() {
     let currentAnswers = [];
 
     if (isTF) {
-      // Phân tích đáp án Đúng/Sai dạng \choiceTF {..} {..} {..} {..}
       const choicesBlockMatch = innerContent.match(/\\choiceTF\s*([\s\S]*?)(?=\\loigiai|\n\s*\n|$)/);
       if (choicesBlockMatch) {
-        const optionMatches = [...choicesBlockMatch[1].matchAll(/\{([\s\S]*?)\}/g)];
-        currentAnswers = optionMatches.slice(0, 4).map(m => m[1].includes('\\True'));
+        const optionMatches = extractCurlyBrackets(choicesBlockMatch[1]);
+        currentAnswers = optionMatches.slice(0, 4).map(m => m.innerContent.includes('\\True'));
       } else {
         currentAnswers = [false, false, false, false];
       }
     } else if (!isShortAns) {
-      // Phân tích đáp án trắc nghiệm A, B, C, D dạng \choice {..} {..} {..} {..}
       const choicesBlockMatch = innerContent.match(/\\choice\s*([\s\S]*?)(?=\\loigiai|\n\s*\n|$)/);
-      let selectedOption = null; // 'A', 'B', 'C', 'D'
+      let selectedOption = null;
       if (choicesBlockMatch) {
-        const optionMatches = [...choicesBlockMatch[1].matchAll(/\{([\s\S]*?)\}/g)];
+        const optionMatches = extractCurlyBrackets(choicesBlockMatch[1]);
         const labels = ['A', 'B', 'C', 'D'];
         optionMatches.slice(0, 4).forEach((m, idx) => {
-          if (m[1].includes('\\True')) {
+          if (m.innerContent.includes('\\True')) {
             selectedOption = labels[idx];
           }
         });
@@ -88,7 +117,6 @@ function renderAnswerTable() {
   `;
 
   if (hasTF) {
-    // Header bảng Đúng / Sai
     html += `
           <th class="p-2 border-r border-slate-200 dark:border-slate-700">a) Đ / S</th>
           <th class="p-2 border-r border-slate-200 dark:border-slate-700">b) Đ / S</th>
@@ -100,7 +128,7 @@ function renderAnswerTable() {
     `;
 
     parsedQuestions.forEach((q, qIdx) => {
-      if (q.isShortAns) return; // Không hiển thị tự luận/trả lời ngắn
+      if (q.isShortAns) return;
 
       const tfState = Array.isArray(q.selectedAnswer) ? q.selectedAnswer : [false, false, false, false];
 
@@ -132,7 +160,6 @@ function renderAnswerTable() {
     });
 
   } else {
-    // Header bảng 4 Phương án A, B, C, D (giống chuẩn hình minh họa của thầy)
     html += `
           <th class="p-2 border-r border-slate-200 dark:border-slate-700 w-1/4">PA A</th>
           <th class="p-2 border-r border-slate-200 dark:border-slate-700 w-1/4">PA B</th>
@@ -146,7 +173,7 @@ function renderAnswerTable() {
     parsedQuestions.forEach((q, qIdx) => {
       if (q.isShortAns) return;
 
-      const selected = q.selectedAnswer; // 'A', 'B', 'C', 'D' hoặc null
+      const selected = q.selectedAnswer;
 
       html += `
         <tr class="hover:bg-slate-50 dark:hover:bg-slate-800/50 transition">
@@ -174,7 +201,7 @@ function renderAnswerTable() {
 
 function selectChoiceAnswer(qIdx, choiceLabel) {
   if (parsedQuestions[qIdx].selectedAnswer === choiceLabel) {
-    parsedQuestions[qIdx].selectedAnswer = null; // Bỏ chọn nếu bấm lại
+    parsedQuestions[qIdx].selectedAnswer = null;
   } else {
     parsedQuestions[qIdx].selectedAnswer = choiceLabel;
   }
@@ -216,13 +243,12 @@ function applyAnswersToOutput() {
     let updatedInner = innerContent;
 
     if (qData.isTF) {
-      // Cập nhật câu hỏi Đúng / Sai
-      updatedInner = updatedInner.replace(/\\choiceTF\s*([\s\S]*?)(?=\\loigiai|\n\s*\n|$)/, (choiceBlock, optionsText) => {
-        const optionMatches = [...optionsText.matchAll(/\{([\s\S]*?)\}/g)];
+      updatedInner = updatedInner.replace(/(\\choiceTF[\s\S]*?)(?=\\loigiai|\n\s*\n|$)/, (choiceBlock) => {
+        const optionMatches = extractCurlyBrackets(choiceBlock);
         if (optionMatches.length < 4) return choiceBlock;
 
         const updatedOptions = optionMatches.slice(0, 4).map((m, idx) => {
-          let cleanContent = m[1].replace(/\\True\s*/g, '').trim();
+          let cleanContent = m.innerContent.replace(/\\True\s*/g, '').trim();
           const isTrue = qData.selectedAnswer && qData.selectedAnswer[idx] === true;
           return `{${isTrue ? '\\True ' : ''}${cleanContent}}`;
         });
@@ -230,14 +256,13 @@ function applyAnswersToOutput() {
         return `\\choiceTF\n    ${updatedOptions.join('\n    ')}\n    `;
       });
     } else if (!qData.isShortAns) {
-      // Cập nhật câu hỏi 4 Phương án
-      updatedInner = updatedInner.replace(/\\choice\s*([\s\S]*?)(?=\\loigiai|\n\s*\n|$)/, (choiceBlock, optionsText) => {
-        const optionMatches = [...optionsText.matchAll(/\{([\s\S]*?)\}/g)];
+      updatedInner = updatedInner.replace(/(\\choice[\s\S]*?)(?=\\loigiai|\n\s*\n|$)/, (choiceBlock) => {
+        const optionMatches = extractCurlyBrackets(choiceBlock);
         if (optionMatches.length < 4) return choiceBlock;
 
         const labels = ['A', 'B', 'C', 'D'];
         const updatedOptions = optionMatches.slice(0, 4).map((m, idx) => {
-          let cleanContent = m[1].replace(/\\True\s*/g, '').trim();
+          let cleanContent = m.innerContent.replace(/\\True\s*/g, '').trim();
           const isTrue = qData.selectedAnswer === labels[idx];
           return `{${isTrue ? '\\True ' : ''}${cleanContent}}`;
         });
