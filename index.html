@@ -13,13 +13,15 @@
   <!-- JSZip library -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
   <!-- Custom Style -->
-  <link rel="stylesheet" href="css/style.css?v=13.0">
+  <link rel="stylesheet" href="css/style.css?v=14.0">
 </head>
 <body class="min-h-screen font-sans flex flex-col transition-colors duration-200 bg-slate-100 dark:bg-slate-900 text-slate-800 dark:text-slate-100">
 
   <!-- ==================== HEADER & TOP NAVIGATION ==================== -->
   <header class="bg-white dark:bg-slate-900 border-b border-slate-300 dark:border-slate-800 sticky top-0 z-50 shadow-sm">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 py-3 flex flex-col md:flex-row justify-between items-center gap-4">
+      
+      <!-- LOGO & BRANDING -->
       <div class="flex items-center space-x-3">
         <div class="bg-rose-700 text-white p-2 rounded-none shadow-md">
           <i data-lucide="sparkles" class="w-5 h-5"></i>
@@ -33,21 +35,30 @@
         </div>
       </div>
 
-      <!-- NAV MENU CHÍNH (VUÔNG VỨC HOÀN TOÀN) -->
-      <nav class="flex bg-slate-200 dark:bg-slate-800 p-1.5 border border-slate-300 dark:border-slate-700 shadow-inner space-x-2 rounded-none">
-        <button id="nav-btn-1" onclick="switchMainMenu(1)" class="px-4 py-2 text-xs font-bold rounded-none transition-all flex items-center space-x-2 bg-rose-700 text-white shadow-md cursor-pointer border border-rose-800">
-          <i data-lucide="file-code-2" class="w-4 h-4"></i>
-          <span>Chuẩn Hóa LaTeX</span>
+      <!-- NAV MENU CHÍNH + NÚT DARK MODE KẾ BÊN -->
+      <div class="flex items-center space-x-3">
+        <!-- MENU CHÍNH -->
+        <nav class="flex bg-slate-200 dark:bg-slate-800 p-1.5 border border-slate-300 dark:border-slate-700 shadow-inner space-x-2 rounded-none">
+          <button id="nav-btn-1" onclick="switchMainMenu(1)" class="px-4 py-2 text-xs font-bold rounded-none transition-all flex items-center space-x-2 bg-rose-700 text-white shadow-md cursor-pointer border border-rose-800">
+            <i data-lucide="file-code-2" class="w-4 h-4"></i>
+            <span>Chuẩn Hóa LaTeX</span>
+          </button>
+          <button id="nav-btn-2" onclick="switchMainMenu(2)" class="px-4 py-2 text-xs font-semibold rounded-none transition-all flex items-center space-x-2 bg-white dark:bg-slate-700 text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-600 border border-slate-300 dark:border-slate-600 shadow-sm cursor-pointer">
+            <i data-lucide="scissors" class="w-4 h-4 text-slate-500 dark:text-slate-400"></i>
+            <span>Lọc TikZ</span>
+          </button>
+          <button id="nav-btn-3" onclick="switchMainMenu(3)" class="px-4 py-2 text-xs font-semibold rounded-none transition-all flex items-center space-x-2 bg-white dark:bg-slate-700 text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-600 border border-slate-300 dark:border-slate-600 shadow-sm cursor-pointer">
+            <i data-lucide="file-image" class="w-4 h-4 text-slate-500 dark:text-slate-400"></i>
+            <span>Chuyển PDF Thành Ảnh</span>
+          </button>
+        </nav>
+
+        <!-- NÚT BẤM BẬT/TẮT DARK MODE (ĐÃ KHÔI PHÚC) -->
+        <button onclick="toggleDarkMode()" class="p-2 bg-slate-200 dark:bg-slate-800 hover:bg-slate-300 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 border border-slate-300 dark:border-slate-700 rounded-none transition shadow-sm cursor-pointer flex items-center justify-center" title="Chuyển chế độ Tối / Sáng">
+          <i id="theme-icon" data-lucide="moon" class="w-5 h-5 pointer-events-none"></i>
         </button>
-        <button id="nav-btn-2" onclick="switchMainMenu(2)" class="px-4 py-2 text-xs font-semibold rounded-none transition-all flex items-center space-x-2 bg-white dark:bg-slate-700 text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-600 border border-slate-300 dark:border-slate-600 shadow-sm cursor-pointer">
-          <i data-lucide="scissors" class="w-4 h-4 text-slate-500 dark:text-slate-400"></i>
-          <span>Lọc TikZ</span>
-        </button>
-        <button id="nav-btn-3" onclick="switchMainMenu(3)" class="px-4 py-2 text-xs font-semibold rounded-none transition-all flex items-center space-x-2 bg-white dark:bg-slate-700 text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-600 border border-slate-300 dark:border-slate-600 shadow-sm cursor-pointer">
-          <i data-lucide="file-image" class="w-4 h-4 text-slate-500 dark:text-slate-400"></i>
-          <span>Chuyển PDF Thành Ảnh</span>
-        </button>
-      </nav>
+      </div>
+
     </div>
   </header>
 
@@ -57,7 +68,7 @@
     <!-- MENU 1: CHUẨN HÓA LATEX -->
     <section id="menu-section-1" class="space-y-4">
       
-      <!-- THANH CHỌN LOẠI CÂU HỎI (VUÔNG VỨC HOÀN TOÀN) -->
+      <!-- THANH CHỌN LOẠI CÂU HỎI -->
       <div class="flex items-center justify-between border-b border-slate-300 dark:border-slate-800 pb-3 mb-2">
         <div class="flex items-center space-x-2 p-1.5 bg-slate-200 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 shadow-inner rounded-none">
           
@@ -362,7 +373,7 @@
 
   </main>
 
-  <!-- MODAL BẢNG TÍCH ĐÁP ÁN TRẮC NGHIỆM (VUÔNG VỨC) -->
+  <!-- MODAL BẢNG TÍCH ĐÁP ÁN TRẮC NGHIỆM -->
   <div id="answer-modal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-[100] hidden flex items-center justify-center p-4">
     <div class="bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-none shadow-2xl max-w-2xl w-full max-h-[85vh] flex flex-col overflow-hidden">
       <div class="p-4 border-b border-slate-200 dark:border-slate-700 flex justify-between items-center bg-slate-100 dark:bg-slate-800">
@@ -399,12 +410,12 @@
   </footer>
 
   <!-- SCRIPT ENGINE CORE -->
-  <script src="js/editor.js?v=13.0"></script>
-  <script src="js/clean-tool.js?v=13.0"></script>
-  <script src="js/ex-processor.js?v=13.0"></script>
-  <script src="js/tikz-extractor.js?v=13.0"></script>
-  <script src="js/pdf-converter.js?v=13.0"></script>
-  <script src="js/answer-modal.js?v=13.0"></script>
-  <script src="js/app.js?v=13.0"></script>
+  <script src="js/editor.js?v=14.0"></script>
+  <script src="js/clean-tool.js?v=14.0"></script>
+  <script src="js/ex-processor.js?v=14.0"></script>
+  <script src="js/tikz-extractor.js?v=14.0"></script>
+  <script src="js/pdf-converter.js?v=14.0"></script>
+  <script src="js/answer-modal.js?v=14.0"></script>
+  <script src="js/app.js?v=14.0"></script>
 </body>
 </html>
