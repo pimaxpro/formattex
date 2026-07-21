@@ -1,5 +1,5 @@
 /* =========================================================
-   PIMAX TOOL — APPLICATION CONTROLLER (APP.JS FULL - SQUARE UI)
+   PIMAX TOOL — APPLICATION CONTROLLER (APP.JS FULL)
    ========================================================= */
 
 // Trạng thái ứng dụng hiện tại
@@ -7,14 +7,14 @@ let currentMainMenu = 1; // 1: Chuẩn hóa LaTeX, 2: Lọc TikZ, 3: Chuyển PD
 let currentSubMode = 1;  // 1: \choice, 2: \choiceTF, 3: \shortans
 
 /* =========================================================
-   1. ĐIỀU HƯỚNG MENU CHÍNH (VUÔNG VỨC GÓC CẠNH - MÀU PIMAX)
+   1. ĐIỀU HƯỚNG MENU CHÍNH (BO GÓC NHẸ - TÔNG PIMAX)
    ========================================================= */
 function switchMainMenu(menuIndex) {
   currentMainMenu = menuIndex;
 
-  // Lớp CSS chuẩn vuông vức (rounded-none) cho Menu Chính
-  const activeClass = "px-4 py-2 text-xs font-bold rounded-none transition-all flex items-center space-x-2 bg-rose-700 text-white shadow-md cursor-pointer border border-rose-800";
-  const inactiveClass = "px-4 py-2 text-xs font-semibold rounded-none transition-all flex items-center space-x-2 bg-white dark:bg-slate-700 text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-600 border border-slate-300 dark:border-slate-600 shadow-sm cursor-pointer";
+  // Lớp CSS bo góc nhẹ (rounded-lg) đồng bộ tuyệt đối
+  const activeClass = "px-4 py-1.5 text-xs font-bold rounded-lg transition-all flex items-center space-x-2 bg-rose-700 text-white shadow-sm cursor-pointer border border-rose-800";
+  const inactiveClass = "px-4 py-1.5 text-xs font-semibold rounded-lg transition-all flex items-center space-x-2 bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-700 border border-slate-300 dark:border-slate-700 shadow-sm cursor-pointer";
 
   for (let i = 1; i <= 3; i++) {
     const btn = document.getElementById(`nav-btn-${i}`);
@@ -43,14 +43,14 @@ function switchMainMenu(menuIndex) {
 }
 
 /* =========================================================
-   2. ĐIỀU HƯỚNG MENU PHỤ (SUB-MODE - VUÔNG VỨC GÓC CẠNH)
+   2. ĐIỀU HƯỚNG MENU PHỤ (SUB-MODE: BO GÓC NHẸ)
    ========================================================= */
 function switchSubMode(mode) {
   currentSubMode = mode;
 
-  // Lớp CSS chuẩn vuông vức (rounded-none) cho Sub-Mode
-  const activeClass = "px-4 py-2 text-xs font-bold rounded-none transition-all flex items-center space-x-2 bg-rose-700 text-white shadow-md cursor-pointer border border-rose-800";
-  const inactiveClass = "px-4 py-2 text-xs font-semibold rounded-none transition-all flex items-center space-x-2 bg-white dark:bg-slate-700 text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-600 border border-slate-300 dark:border-slate-600 shadow-sm cursor-pointer";
+  // Lớp CSS bo góc nhẹ (rounded-lg)
+  const activeClass = "px-4 py-2 text-xs font-bold rounded-lg transition-all flex items-center space-x-2 bg-rose-700 text-white shadow-sm cursor-pointer border border-rose-800";
+  const inactiveClass = "px-4 py-2 text-xs font-semibold rounded-lg transition-all flex items-center space-x-2 bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-700 border border-slate-300 dark:border-slate-700 shadow-sm cursor-pointer";
 
   for (let i = 1; i <= 3; i++) {
     const btn = document.getElementById(`sub-btn-${i}`);
@@ -60,13 +60,13 @@ function switchSubMode(mode) {
       btn.className = activeClass;
       const badge = btn.querySelector('span:last-child');
       if (badge) {
-        badge.className = "text-[10px] font-mono bg-rose-900/60 text-rose-100 px-2 py-0.5 rounded-none border border-rose-500/40";
+        badge.className = "text-[10px] font-mono bg-rose-900/60 text-rose-100 px-2 py-0.5 rounded border border-rose-500/40";
       }
     } else {
       btn.className = inactiveClass;
       const badge = btn.querySelector('span:last-child');
       if (badge) {
-        badge.className = "text-[10px] font-mono bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 px-2 py-0.5 rounded-none border border-slate-200 dark:border-slate-700";
+        badge.className = "text-[10px] font-mono bg-slate-100 dark:bg-slate-900 text-slate-600 dark:text-slate-300 px-2 py-0.5 rounded border border-slate-200 dark:border-slate-700";
       }
     }
   }
