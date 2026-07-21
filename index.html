@@ -13,7 +13,7 @@
   <!-- JSZip library -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
   <!-- Custom Style -->
-  <link rel="stylesheet" href="css/style.css?v=15.0">
+  <link rel="stylesheet" href="css/style.css?v=16.0">
 </head>
 <body class="min-h-screen font-sans flex flex-col transition-colors duration-200 bg-slate-100 dark:bg-slate-950 text-slate-800 dark:text-slate-100">
 
@@ -35,26 +35,25 @@
         </div>
       </div>
 
-      <!-- NAV MENU CHÍNH + NÚT DARK MODE -->
+      <!-- NAV MENU CHÍNH (ĐÃ BỎ KHUNG XÁM CONTAINING) -->
       <div class="flex items-center space-x-3">
-        <!-- MENU CHÍNH -->
-        <nav class="flex bg-slate-200 dark:bg-slate-800/80 p-1.5 border border-slate-300 dark:border-slate-700/80 shadow-inner space-x-2 rounded-xl">
-          <button id="nav-btn-1" onclick="switchMainMenu(1)" class="px-4 py-1.5 text-xs font-bold rounded-lg transition-all flex items-center space-x-2 bg-rose-700 text-white shadow-sm cursor-pointer border border-rose-800">
+        <nav class="flex items-center space-x-1">
+          <button id="nav-btn-1" onclick="switchMainMenu(1)" class="px-4 py-2 text-xs font-bold rounded-lg transition-all flex items-center space-x-2 bg-white dark:bg-slate-800 text-slate-900 dark:text-white border border-slate-300 dark:border-slate-700 shadow-sm cursor-pointer">
             <i data-lucide="file-code-2" class="w-4 h-4"></i>
             <span>Chuẩn Hóa LaTeX</span>
           </button>
-          <button id="nav-btn-2" onclick="switchMainMenu(2)" class="px-4 py-1.5 text-xs font-semibold rounded-lg transition-all flex items-center space-x-2 bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-700 border border-slate-300 dark:border-slate-700 shadow-sm cursor-pointer">
-            <i data-lucide="scissors" class="w-4 h-4 text-slate-500 dark:text-slate-400"></i>
+          <button id="nav-btn-2" onclick="switchMainMenu(2)" class="px-4 py-2 text-xs font-semibold rounded-lg transition-all flex items-center space-x-2 bg-transparent text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200 hover:bg-slate-200/50 dark:hover:bg-slate-800/50 border border-transparent cursor-pointer">
+            <i data-lucide="scissors" class="w-4 h-4"></i>
             <span>Lọc TikZ</span>
           </button>
-          <button id="nav-btn-3" onclick="switchMainMenu(3)" class="px-4 py-1.5 text-xs font-semibold rounded-lg transition-all flex items-center space-x-2 bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-700 border border-slate-300 dark:border-slate-700 shadow-sm cursor-pointer">
-            <i data-lucide="file-image" class="w-4 h-4 text-slate-500 dark:text-slate-400"></i>
+          <button id="nav-btn-3" onclick="switchMainMenu(3)" class="px-4 py-2 text-xs font-semibold rounded-lg transition-all flex items-center space-x-2 bg-transparent text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200 hover:bg-slate-200/50 dark:hover:bg-slate-800/50 border border-transparent cursor-pointer">
+            <i data-lucide="file-image" class="w-4 h-4"></i>
             <span>Chuyển PDF Thành Ảnh</span>
           </button>
         </nav>
 
-        <!-- NÚT BẤM DARK MODE (BO GÓC NHẸ) -->
-        <button onclick="toggleDarkMode()" class="p-2 bg-slate-200 dark:bg-slate-800 hover:bg-slate-300 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 border border-slate-300 dark:border-slate-700 rounded-lg transition shadow-sm cursor-pointer flex items-center justify-center" title="Chuyển chế độ Tối / Sáng">
+        <!-- NÚT DARK MODE -->
+        <button onclick="toggleDarkMode()" class="p-2 bg-white dark:bg-slate-800 hover:bg-slate-100 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 border border-slate-300 dark:border-slate-700 rounded-lg transition shadow-sm cursor-pointer flex items-center justify-center" title="Chuyển chế độ Tối / Sáng">
           <i id="theme-icon" data-lucide="moon" class="w-5 h-5 pointer-events-none"></i>
         </button>
       </div>
@@ -68,33 +67,33 @@
     <!-- MENU 1: CHUẨN HÓA LATEX -->
     <section id="menu-section-1" class="space-y-4">
       
-      <!-- THANH CHỌN LOẠI CÂU HỎI -->
+      <!-- THANH CHỌN LOẠI CÂU HỎI (ĐÃ BỎ KHUNG XÁM CONTAINING) -->
       <div class="flex items-center justify-between border-b border-slate-300 dark:border-slate-800 pb-3 mb-2">
-        <div class="flex items-center space-x-2 p-1.5 bg-slate-200 dark:bg-slate-800/80 border border-slate-300 dark:border-slate-700/80 shadow-inner rounded-xl">
+        <div class="flex items-center space-x-1">
           
           <button id="sub-btn-1" onclick="switchSubMode(1)" 
-                  class="px-4 py-2 text-xs font-bold rounded-lg transition-all flex items-center space-x-2 bg-rose-700 text-white shadow-sm cursor-pointer border border-rose-800">
+                  class="px-4 py-2 text-xs font-bold rounded-lg transition-all flex items-center space-x-2 bg-white dark:bg-slate-800 text-slate-900 dark:text-white border border-slate-300 dark:border-slate-700 shadow-sm cursor-pointer">
             <i data-lucide="check-square" class="w-4 h-4"></i>
             <span>Trắc nghiệm 4 phương án</span>
-            <span class="text-[10px] font-mono bg-rose-900/60 text-rose-100 px-2 py-0.5 rounded border border-rose-500/40">
+            <span class="text-[10px] font-mono bg-slate-100 dark:bg-slate-700 text-slate-700 dark:text-slate-200 px-2 py-0.5 rounded border border-slate-200 dark:border-slate-600">
               \choice
             </span>
           </button>
 
           <button id="sub-btn-2" onclick="switchSubMode(2)" 
-                  class="px-4 py-2 text-xs font-semibold rounded-lg transition-all flex items-center space-x-2 bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-700 border border-slate-300 dark:border-slate-700 shadow-sm cursor-pointer">
-            <i data-lucide="list-checks" class="w-4 h-4 text-slate-500 dark:text-slate-400"></i>
+                  class="px-4 py-2 text-xs font-semibold rounded-lg transition-all flex items-center space-x-2 bg-transparent text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200 hover:bg-slate-200/50 dark:hover:bg-slate-800/50 border border-transparent cursor-pointer">
+            <i data-lucide="list-checks" class="w-4 h-4"></i>
             <span>Câu hỏi Đúng / Sai</span>
-            <span class="text-[10px] font-mono bg-slate-100 dark:bg-slate-900 text-slate-600 dark:text-slate-300 px-2 py-0.5 rounded border border-slate-200 dark:border-slate-700">
+            <span class="text-[10px] font-mono bg-slate-200/60 dark:bg-slate-800 text-slate-500 dark:text-slate-400 px-2 py-0.5 rounded border border-transparent">
               \choiceTF
             </span>
           </button>
 
           <button id="sub-btn-3" onclick="switchSubMode(3)" 
-                  class="px-4 py-2 text-xs font-semibold rounded-lg transition-all flex items-center space-x-2 bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-700 border border-slate-300 dark:border-slate-700 shadow-sm cursor-pointer">
-            <i data-lucide="pen-tool" class="w-4 h-4 text-slate-500 dark:text-slate-400"></i>
+                  class="px-4 py-2 text-xs font-semibold rounded-lg transition-all flex items-center space-x-2 bg-transparent text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200 hover:bg-slate-200/50 dark:hover:bg-slate-800/50 border border-transparent cursor-pointer">
+            <i data-lucide="pen-tool" class="w-4 h-4"></i>
             <span>Trả lời ngắn</span>
-            <span class="text-[10px] font-mono bg-slate-100 dark:bg-slate-900 text-slate-600 dark:text-slate-300 px-2 py-0.5 rounded border border-slate-200 dark:border-slate-700">
+            <span class="text-[10px] font-mono bg-slate-200/60 dark:bg-slate-800 text-slate-500 dark:text-slate-400 px-2 py-0.5 rounded border border-transparent">
               \shortans
             </span>
           </button>
@@ -410,12 +409,12 @@
   </footer>
 
   <!-- SCRIPT ENGINE CORE -->
-  <script src="js/editor.js?v=15.0"></script>
-  <script src="js/clean-tool.js?v=15.0"></script>
-  <script src="js/ex-processor.js?v=15.0"></script>
-  <script src="js/tikz-extractor.js?v=15.0"></script>
-  <script src="js/pdf-converter.js?v=15.0"></script>
-  <script src="js/answer-modal.js?v=15.0"></script>
-  <script src="js/app.js?v=15.0"></script>
+  <script src="js/editor.js?v=16.0"></script>
+  <script src="js/clean-tool.js?v=16.0"></script>
+  <script src="js/ex-processor.js?v=16.0"></script>
+  <script src="js/tikz-extractor.js?v=16.0"></script>
+  <script src="js/pdf-converter.js?v=16.0"></script>
+  <script src="js/answer-modal.js?v=16.0"></script>
+  <script src="js/app.js?v=16.0"></script>
 </body>
 </html>
