@@ -1,5 +1,5 @@
 /* =========================================================
-   PIMAX TOOL SYSTEM STYLESHEET
+   PIMAX TOOL SYSTEM STYLESHEET - FIXED OVERLAY & HOVER
    Main Color: #db3c6e (RGB: 219, 60, 110)
    ========================================================= */
 
@@ -17,7 +17,6 @@
   --border-color: #e2e8f0;
 }
 
-/* Theme Dark Variables */
 body.dark {
   --bg-main: #0f172a;
   --bg-card: #1e293b;
@@ -26,7 +25,6 @@ body.dark {
   --border-color: #334155;
 }
 
-/* Base Styles */
 body {
   background-color: var(--bg-main) !important;
   color: var(--text-main) !important;
@@ -59,7 +57,6 @@ body {
   border-color: var(--pimax-hover) !important;
 }
 
-/* Badges */
 .theme-badge-pimax {
   background-color: var(--pimax-light);
   color: var(--pimax-main);
@@ -80,10 +77,7 @@ body.dark .theme-badge-pimax {
   border-color: #8c1d3f;
 }
 
-/* =========================================================
-   HOVER EFFECTS FOR TOOLBAR BUTTONS
-   ========================================================= */
-
+/* Hover effects for toolbar buttons */
 .theme-sub-bg.hover-pimax {
   transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1) !important;
 }
@@ -103,7 +97,7 @@ body.dark .theme-sub-bg.hover-pimax:hover {
 }
 
 /* =========================================================
-   EDITOR ARCHITECTURE (Line Numbers + Highlight Overlay)
+   EDITOR OVERLAY ENGINE (ÉP KHÍT 100% CHỐNG ÁM MỜ KHU CUỘN)
    ========================================================= */
 
 .editor-container {
@@ -131,7 +125,7 @@ body.dark .theme-sub-bg.hover-pimax:hover {
   user-select: none !important;
   overflow: hidden !important;
   white-space: pre !important;
-  min-width: 42px !important;
+  min-width: 48px !important;
   box-sizing: border-box !important;
 }
 
@@ -143,14 +137,12 @@ body.dark .theme-sub-bg.hover-pimax:hover {
   overflow: hidden !important;
 }
 
-/* Ép 2 lớp Highlight và Textarea đè khít lên nhau */
+/* Định dạng chung cho 2 lớp trùng khít tuyệt đối */
 .code-input, 
 .code-highlight {
   position: absolute !important;
   top: 0 !important;
   left: 0 !important;
-  right: 0 !important;
-  bottom: 0 !important;
   width: 100% !important;
   height: 100% !important;
   padding: 0.5rem 0.75rem !important;
@@ -167,14 +159,16 @@ body.dark .theme-sub-bg.hover-pimax:hover {
   tab-size: 2 !important;
 }
 
+/* Lớp Highlight nằm dưới - không nhận cuộn độc lập */
 .code-highlight {
   pointer-events: none !important;
   z-index: 1 !important;
   color: transparent !important;
-  overflow: hidden !important;
+  overflow: hidden !important; /* Triệt tiêu thanh cuộn riêng gây lệch */
   background: transparent !important;
 }
 
+/* Lớp Textarea nằm trên - nhận phím gõ & cuộn chính */
 .code-input {
   z-index: 2 !important;
   background: transparent !important;
@@ -183,7 +177,7 @@ body.dark .theme-sub-bg.hover-pimax:hover {
   caret-color: var(--pimax-main) !important;
 }
 
-/* Tô màu cú pháp LaTeX (Highlighting) */
+/* Tô màu cú pháp LaTeX */
 .hl-keyword { color: #db3c6e !important; font-weight: bold !important; }
 .hl-env { color: #2563eb !important; font-weight: bold !important; }
 body.dark .hl-env { color: #60a5fa !important; font-weight: bold !important; }
@@ -198,10 +192,7 @@ body.dark .hl-math { color: #34d399 !important; }
 body.dark .custom-scroll::-webkit-scrollbar-thumb { background: #475569; }
 .custom-scroll::-webkit-scrollbar-thumb:hover { background: var(--pimax-main); }
 
-/* =========================================================
-   LATEX AUTOCOMPLETE DROPDOWN MENU
-   ========================================================= */
-
+/* Autocomplete Menu Style */
 .autocomplete-dropdown {
   position: absolute !important;
   z-index: 100 !important;
@@ -212,7 +203,7 @@ body.dark .custom-scroll::-webkit-scrollbar-thumb { background: #475569; }
   background-color: var(--bg-card) !important;
   border: 1px solid var(--pimax-main) !important;
   border-radius: 0.5rem !important;
-  box-shadow: 0 10px 25px -5px rgba(219, 60, 110, 0.25), 0 8px 10px -6px rgba(0, 0, 0, 0.1) !important;
+  box-shadow: 0 10px 25px -5px rgba(219, 60, 110, 0.25) !important;
   display: none;
   padding: 4px 0 !important;
 }
@@ -226,7 +217,6 @@ body.dark .custom-scroll::-webkit-scrollbar-thumb { background: #475569; }
   display: flex !important;
   align-items: center !important;
   justify-content: space-between !important;
-  transition: background-color 0.15s ease !important;
 }
 
 .autocomplete-item:hover,
@@ -246,7 +236,6 @@ body.dark .autocomplete-item.active {
   font-size: 0.6875rem !important;
   opacity: 0.6 !important;
   font-weight: normal !important;
-  margin-left: 8px !important;
 }
 
 textarea:focus, input:focus, select:focus {
