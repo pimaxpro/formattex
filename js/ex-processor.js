@@ -1,45 +1,17 @@
 /* =========================================================
-   PIMAX TOOL — EX ENVIRONMENT PROCESSOR (FIX FULL CN1, CN2, CN3)
+   PIMAX TOOL — EX ENVIRONMENT PROCESSOR (CN1, CN2, CN3 FULL FIX)
    ========================================================= */
-
-if (typeof window.subModeEx === 'undefined') {
-  window.subModeEx = 1;
-}
-
-function switchSubMode(mode) {
-  window.subModeEx = mode;
-  
-  [1, 2, 3].forEach(m => {
-    const btn = document.getElementById(`sub-btn-${m}`);
-    if (btn) {
-      if (m === mode) {
-        btn.className = "px-4 py-2 text-xs font-bold rounded transition-all flex items-center space-x-2 bg-white text-slate-900 border border-slate-300 shadow-sm cursor-pointer";
-      } else {
-        btn.className = "px-4 py-2 text-xs font-semibold rounded transition-all flex items-center space-x-2 bg-transparent text-slate-500 hover:text-slate-800 hover:bg-slate-200/50 border border-transparent cursor-pointer";
-      }
-    }
-  });
-
-  const descEl = document.getElementById('current-mode-label');
-  const btnLabelEl = document.getElementById('btn-ex-label');
-  
-  if (mode === 1) {
-    if (descEl) descEl.textContent = 'Chế độ: Trắc nghiệm 4 phương án (\\choice)';
-    if (btnLabelEl) btnLabelEl.innerText = 'Chuẩn Hóa Ngay (CN 1)';
-  } else if (mode === 2) {
-    if (descEl) descEl.textContent = 'Chế độ: Trắc nghiệm Đúng / Sai (a, b, c, d)';
-    if (btnLabelEl) btnLabelEl.innerText = 'Chuẩn Hóa Ngay (CN 2)';
-  } else if (mode === 3) {
-    if (descEl) descEl.textContent = 'Chế độ: Trả lời ngắn (\\shortans)';
-    if (btnLabelEl) btnLabelEl.innerText = 'Chuẩn Hóa Ngay (CN 3)';
-  }
-}
 
 function processExEnvironment() {
   const currentMode = window.subModeEx || 1;
-  if (currentMode === 1) processMode1();
-  else if (currentMode === 2) processMode2();
-  else if (currentMode === 3) processMode3();
+  
+  if (currentMode === 1) {
+    processMode1();
+  } else if (currentMode === 2) {
+    processMode2();
+  } else if (currentMode === 3) {
+    processMode3();
+  }
 }
 
 /* =========================================================
@@ -141,7 +113,7 @@ function processMode2() {
       solutionPart = content.substring(solMatch.index + solMatch[0].length).trim();
     }
 
-    // Tách mẫu Đúng/Sai dạng Đ S D S hoặc D, S, D, S
+    // Tách mẫu Đúng/Sai (Đ S D S)
     let tfPattern = null;
     const answerTFRegex = /(?:Đáp\s*án|Chọn)[\.\s:]*([DĐS[\s\-\,\.]+){4}/gi;
 
@@ -156,8 +128,8 @@ function processMode2() {
     questionPart = questionPart.replace(/(?:Đáp\s*án|Chọn)[\.\s:]*([DĐS[\s\-\,\.]+){4}\.?\s*/gi, '').trim();
     solutionPart = solutionPart.replace(/(?:Đáp\s*án|Chọn)[\.\s:]*([DĐS[\s\-\,\.]+){4}\.?\s*/gi, '').trim();
 
-    // Regex bắt linh hoạt a), b), c), d) hoặc a., b., c., d.
-    const choiceTFRegex = /(?:^|\n|\s)\s*([a-d])[\)\.]\s*([\s\S]*?)(?=(?:\n|\s)\s*[a-d][\)\.]|$)/gi;
+    // Regex linh hoạt bắt a), b), c), d) hoặc A), B), C), D)
+    const choiceTFRegex = /(?:^|\n|\s)\s*([a-dA-D])[\)\.]\s*([\s\S]*?)(?=(?:\n|\s)\s*[a-dA-D][\)\.]|$)/gi;
     let choices = {};
     let matches;
     let firstChoiceIndex = -1;
@@ -172,7 +144,7 @@ function processMode2() {
     let mainQuestion = firstChoiceIndex !== -1 ? questionPart.substring(0, firstChoiceIndex).trim() : questionPart;
     mainQuestion = fixMathSpacing(mainQuestion);
 
-    // XUẤT MÃ \choiceTF CỰC CHUẨN
+    // Xuất mã \choiceTF
     let exCode = `\\begin{ex}\n    ${mainQuestion}\n    \\choiceTF\n`;
     const keys = ['a', 'b', 'c', 'd'];
     keys.forEach((key, index) => {
@@ -232,6 +204,7 @@ function processMode3() {
 
     let mainQuestion = fixMathSpacing(questionPart);
 
+    // Xuất mã \shortans
     let exCode = `\\begin{ex}\n    ${mainQuestion}\n    \\shortans{${shortAnswerValue}}\n`;
     if (solutionPart) {
       let cleanSol = fixMathSpacing(solutionPart);
@@ -249,7 +222,7 @@ function processMode3() {
 }
 
 /* =========================================================
-   HÀM BỔ TRỢ & TỰ ĐỘNG CẬP NHẬT SỐ DÒNG (LINE NUMBERS)
+   HÀM BỔ TRỢ & TỰ ĐỘNG CẬP NHẬT SỐ DÒNG
    ========================================================= */
 
 function cleanHeaderPrefix(rawText) {
