@@ -1,49 +1,123 @@
 /* =========================================================
-   PIMAX TOOL — MAIN APP LOGIC
+   PIMAX TOOL — APPLICATION CONTROLLER (APP.JS FULL)
    ========================================================= */
 
-// Hàm chuyển đổi Menu chính (1: Chuẩn hóa LaTeX, 2: Lọc TikZ, 3: Chuyển PDF thành Ảnh)
-function switchMainMenu(menuNum) {
-  [1, 2, 3].forEach(n => {
-    const section = document.getElementById(`menu-section-${n}`);
-    const btn = document.getElementById(`nav-btn-${n}`);
-    if (section) section.classList.add('hidden');
-    if (btn) {
-      btn.classList.remove('theme-btn-pimax');
-      btn.classList.add('opacity-75');
-    }
-  });
+// Trạng thái ứng dụng hiện tại
+let currentMainMenu = 1;
+let currentSubMode = 1; // 1: \choice, 2: \choiceTF, 3: \shortans
 
-  const activeSection = document.getElementById(`menu-section-${menuNum}`);
-  const activeBtn = document.getElementById(`nav-btn-${menuNum}`);
-  if (activeSection) activeSection.classList.remove('hidden');
-  if (activeBtn) {
-    activeBtn.classList.add('theme-btn-pimax');
-    activeBtn.classList.remove('opacity-75');
+/* =========================================================
+   1. ĐIỀU HƯỚNG MENU CHÍNH (MAIN NAVIGATION)
+   ========================================================= */
+function switchMainMenu(menuIndex) {
+  currentMainMenu = menuIndex;
+
+  // Lớp CSS cho nút Menu chính được chọn và không chọn
+  const activeClass = "px-4 py-1.5 text-xs font-semibold rounded-lg transition-all flex items-center space-x-2 bg-white dark:bg-slate-700 text-slate-900 dark:text-white shadow";
+  const inactiveClass = "px-4 py-1.5 text-xs font-medium rounded-lg transition-all flex items-center space-x-2 text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white";
+
+  for (let i = 1; i <= 3; i++) {
+    const btn = document.getElementById(`nav-btn-${i}`);
+    const section = document.getElementById(`menu-section-${i}`);
+
+    if (btn) {
+      if (i === menuIndex) {
+        btn.className = activeClass;
+      } else {
+        btn.className = inactiveClass;
+      }
+    }
+
+    if (section) {
+      if (i === menuIndex) {
+        section.classList.remove('hidden');
+      } else {
+        section.classList.add('hidden');
+      }
+    }
   }
 
-  if (window.lucide) lucide.createIcons();
+  // Khôi phục lại icon Lucide nếu cần
+  if (window.lucide) {
+    lucide.createIcons();
+  }
 }
 
-// Bật/tắt Dark Mode
+/* =========================================================
+   2. ĐIỀU HƯỚNG MENU PHỤ (SUB-MODE: CHOICE / CHOICETF / SHORTANS)
+   ========================================================= */
+function switchSubMode(mode) {
+  currentSubMode = mode;
+
+  // Class CSS chuẩn đồng bộ 100% cho nút Active & Inactive
+  const activeClass = "px-4 py-2 text-xs font-bold rounded-lg transition-all flex items-center space-x-2 bg-rose-600 text-white shadow-md cursor-pointer";
+  const inactiveClass = "px-4 py-2 text-xs font-semibold rounded-lg transition-all flex items-center space-x-2 bg-white dark:bg-slate-700 text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-600 border border-slate-300 dark:border-slate-600 shadow-sm cursor-pointer";
+
+  for (let i = 1; i <= 3; i++) {
+    const btn = document.getElementById(`sub-btn-${i}`);
+    if (!btn) continue;
+
+    if (i === mode) {
+      btn.className = activeClass;
+      const badge = btn.querySelector('span:last-child');
+      if (badge) {
+        badge.className = "text-[10px] font-mono bg-rose-700/80 text-rose-100 px-2 py-0.5 rounded border border-rose-500/40";
+      }
+    } else {
+      btn.className = inactiveClass;
+      const badge = btn.querySelector('span:last-child');
+      if (badge) {
+        badge.className = "text-[10px] font-mono bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 px-2 py-0.5 rounded border border-slate-200 dark:border-slate-700";
+      }
+    }
+  }
+
+  // Cập nhật nhãn trạng thái chế độ
+  const labelEl = document.getElementById('current-mode-label');
+  const btnLabelEl = document.getElementById('btn-ex-label');
+
+  if (mode === 1) {
+    if (labelEl) labelEl.textContent = "Chế độ: Trắc nghiệm 4 phương án (\\choice)";
+    if (btnLabelEl) btnLabelEl.textContent = "Chuẩn Hóa Ngay (Trắc nghiệm)";
+  } else if (mode === 2) {
+    if (labelEl) labelEl.textContent = "Chế độ: Câu hỏi Đúng / Sai (\\choiceTF)";
+    if (btnLabelEl) btnLabelEl.textContent = "Chuẩn Hóa Ngay (Đúng / Sai)";
+  } else if (mode === 3) {
+    if (labelEl) labelEl.textContent = "Chế độ: Trả lời ngắn (\\shortans)";
+    if (btnLabelEl) btnLabelEl.textContent = "Chuẩn Hóa Ngay (Trả lời ngắn)";
+  }
+}
+
+/* =========================================================
+   3. CHUYỂN ĐỔI CHẾ ĐỘ SÁNG / TỐI (DARK / LIGHT MODE)
+   ========================================================= */
 function toggleDarkMode() {
   const isDark = document.body.classList.toggle('dark');
-  localStorage.setItem('pimax_theme', isDark ? 'dark' : 'light');
-  
   const icon = document.getElementById('theme-icon');
+
   if (icon) {
-    icon.setAttribute('data-lucide', isDark ? 'sun' : 'moon');
-    if (window.lucide) lucide.createIcons();
+    if (isDark) {
+      icon.setAttribute('data-lucide', 'sun');
+    } else {
+      icon.setAttribute('data-lucide', 'moon');
+    }
+  }
+
+  if (window.lucide) {
+    lucide.createIcons();
   }
 }
 
-// Khởi tạo ứng dụng
-document.addEventListener('DOMContentLoaded', () => {
-  const savedTheme = localStorage.getItem('pimax_theme');
-  if (savedTheme === 'dark') {
-    document.body.classList.add('dark');
-    const icon = document.getElementById('theme-icon');
-    if (icon) icon.setAttribute('data-lucide', 'sun');
+/* =========================================================
+   4. TỰ ĐỘNG KHỞI TẠO KHI TẢI TRANG DOM
+   ========================================================= */
+document.addEventListener("DOMContentLoaded", () => {
+  // Khởi tạo icons Lucide
+  if (window.lucide) {
+    lucide.createIcons();
   }
-  if (window.lucide) lucide.createIcons();
+
+  // Mặc định chọn Menu 1 và SubMode 1
+  switchMainMenu(1);
+  switchSubMode(1);
 });
