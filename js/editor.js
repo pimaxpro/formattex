@@ -1,8 +1,8 @@
 /* =========================================================
-   PIMAX TOOL — EDITOR ENGINE (COMPLETE & POLISHED)
+   PIMAX TOOL — COMPLETE EDITOR ENGINE & UTILITIES
    ========================================================= */
 
-// Hệ thống lưu trữ lịch sử Undo / Redo cho từng Editor
+// System history storage for Undo / Redo
 const editorHistories = {};
 
 function initEditorHistory(id) {
@@ -94,7 +94,7 @@ function updateBtnState(btn, isDisabled) {
 }
 
 /* =========================================================
-   FIND & REPLACE ENGINE (CHO PHÉP GÕ TRỌN VẸN TEXT RỒI MỚI TÌM)
+   FIND & REPLACE ENGINE
    ========================================================= */
 
 let searchMatches = [];
@@ -139,7 +139,7 @@ function findText(id) {
   if (searchMatches.length > 0) {
     currentSearchIndex = 0;
     if (countEl) {
-      countEl.textContent = `${currentSearchIndex + 1}/${searchMatches.length}`;
+      countEl.textContent = `1/${searchMatches.length}`;
     }
   } else {
     if (countEl) countEl.textContent = "0/0";
@@ -388,7 +388,141 @@ function escapeJsString(str) {
   return str.replace(/\\/g, '\\\\').replace(/'/g, "\\'").replace(/\n/g, '\\n');
 }
 
-// Tự động gán sự kiện tìm kiếm khi gõ phím hoặc nhấn Enter
+/* =========================================================
+   CÁC HÀM TIỆN ÍCH TIẾP THỊ VĂN BẢN (COPY, DOWNLOAD, CLEAR, LOAD)
+   ========================================================= */
+
+// 1. Sao chép nội dung ô Editor vào Clipboard
+function copyToClipboard(id) {
+  const textarea = document.getElementById(id);
+  if (!textarea) return;
+
+  const text = textarea.value;
+  if (!text) {
+    showToast("Chưa có nội dung để sao chép!", true);
+    return;
+  }
+
+  if (navigator.clipboard && window.isSecureContext) {
+    navigator.clipboard.writeText(text).then(() => {
+      showToast("Đã sao chép nội dung vào Clipboard!");
+    }).catch(() => {
+      fallbackCopyTextToClipboard(text);
+    });
+  } else {
+    fallbackCopyTextToClipboard(text);
+  }
+}
+
+function fallbackCopyTextToClipboard(text) {
+  const textArea = document.createElement("textarea");
+  textArea.value = text;
+  textArea.style.position = "fixed";
+  textArea.style.top = "0";
+  textArea.style.left = "0";
+  textArea.style.opacity = "0";
+  document.body.appendChild(textArea);
+  textArea.focus();
+  textArea.select();
+
+  try {
+    const successful = document.execCommand('copy');
+    if (successful) {
+      showToast("Đã sao chép nội dung vào Clipboard!");
+    } else {
+      showToast("Sao chép thất bại, thầy vui lòng chọn và copy thủ công!", true);
+    }
+  } catch (err) {
+    showToast("Không thể sao chép tự động!", true);
+  }
+
+  document.body.removeChild(textArea);
+}
+
+// 2. Tải nội dung ô Editor thành file văn bản (.tex / .txt)
+function downloadSingleText(id, defaultFileName) {
+  const textarea = document.getElementById(id);
+  if (!textarea) return;
+
+  const text = textarea.value;
+  if (!text.trim()) {
+    showToast("Không có nội dung để tải về!", true);
+    return;
+  }
+
+  const blob = new Blob([text], { type: 'text/plain;charset=utf-8' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = defaultFileName || 'file_pimax.tex';
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+  showToast(`Đã tải xuống file "${a.download}" thành công!`);
+}
+
+// 3. Xóa văn bản ô Editor
+function clearText(id) {
+  const textarea = document.getElementById(id);
+  if (!textarea) return;
+
+  if (textarea.value && confirm("Thầy có chắc chắn muốn xóa toàn bộ nội dung ô này?")) {
+    textarea.value = '';
+    handleInput(id);
+    showToast("Đã xóa toàn bộ nội dung ô!");
+  }
+}
+
+// 4. Nạp file từ máy tính vào ô Editor
+function loadFile(event, id) {
+  const input = event.target;
+  if (!input.files || !input.files[0]) return;
+
+  const file = input.files[0];
+  const reader = new FileReader();
+
+  reader.onload = function(e) {
+    const textarea = document.getElementById(id);
+    if (textarea) {
+      textarea.value = e.target.result;
+      handleInput(id);
+      showToast(`Đã nạp file "${file.name}" thành công!`);
+    }
+  };
+
+  reader.readAsText(file);
+  input.value = '';
+}
+
+// 5. Hiển thị thông báo Toast
+function showToast(message, isError = false) {
+  let toast = document.getElementById('pimax-toast');
+  if (!toast) {
+    toast = document.createElement('div');
+    toast.id = 'pimax-toast';
+    toast.className = 'fixed bottom-5 left-1/2 -translate-x-1/2 text-xs font-semibold px-4 py-2 rounded-lg shadow-xl z-[1000] transition-opacity duration-300 opacity-0 pointer-events-none flex items-center gap-2';
+    document.body.appendChild(toast);
+  }
+
+  if (isError) {
+    toast.className = 'fixed bottom-5 left-1/2 -translate-x-1/2 bg-rose-900 text-white text-xs font-semibold px-4 py-2 rounded-lg shadow-xl z-[1000] transition-opacity duration-300 opacity-0 pointer-events-none flex items-center gap-2 border border-rose-700';
+    toast.innerHTML = `<svg class="w-4 h-4 text-rose-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg> <span>${message}</span>`;
+  } else {
+    toast.className = 'fixed bottom-5 left-1/2 -translate-x-1/2 bg-slate-900 text-white text-xs font-semibold px-4 py-2 rounded-lg shadow-xl z-[1000] transition-opacity duration-300 opacity-0 pointer-events-none flex items-center gap-2 border border-slate-700';
+    toast.innerHTML = `<svg class="w-4 h-4 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg> <span>${message}</span>`;
+  }
+
+  toast.classList.remove('opacity-0');
+  toast.classList.add('opacity-100');
+
+  setTimeout(() => {
+    toast.classList.remove('opacity-100');
+    toast.classList.add('opacity-0');
+  }, 2200);
+}
+
+// Khởi tạo sự kiện khi tải trang
 document.addEventListener("DOMContentLoaded", () => {
   ['output-ex', 'input-ex', 'output-main', 'input-tikz', 'output-tikz-single'].forEach(id => {
     const el = document.getElementById(id);
