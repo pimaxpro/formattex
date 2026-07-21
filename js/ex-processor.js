@@ -1,13 +1,61 @@
+/* =========================================================
+   PIMAX TOOL — EX ENVIRONMENT PROCESSOR (FULL LOGIC GỐC)
+   ========================================================= */
+
+// Biến lưu trữ chế độ phụ (1: \choice, 2: \choiceTF, 3: \shortans)
+if (typeof window.subModeEx === 'undefined') {
+  window.subModeEx = 1;
+}
+
+// Hàm chuyển đổi tab chế độ (CN1, CN2, CN3)
+function switchSubMode(mode) {
+  window.subModeEx = mode;
+
+  [1, 2, 3].forEach(m => {
+    const btn = document.getElementById(`sub-btn-${m}`);
+    if (btn) {
+      if (m === mode) {
+        btn.className = "px-3 py-1.5 text-xs font-semibold rounded transition flex items-center justify-center space-x-1.5 theme-btn-pimax whitespace-nowrap";
+      } else {
+        btn.className = "px-3 py-1.5 text-xs font-semibold rounded transition flex items-center justify-center space-x-1.5 opacity-75 hover:opacity-100 whitespace-nowrap";
+      }
+    }
+  });
+
+  const descEl = document.getElementById('sub-mode-desc');
+  const btnLabelEl = document.getElementById('btn-ex-label');
+
+  if (mode === 1) {
+    if (descEl) descEl.innerHTML = 'Chế độ: <b>Trắc nghiệm 4 phương án (\\choice)</b>';
+    if (btnLabelEl) btnLabelEl.innerText = 'Chuẩn Hóa Ngay (CN 1)';
+  } else if (mode === 2) {
+    if (descEl) descEl.innerHTML = 'Chế độ: <b>Trắc nghiệm Đúng/Sai (\\choiceTF)</b>';
+    if (btnLabelEl) btnLabelEl.innerText = 'Chuẩn Hóa Ngay (CN 2)';
+  } else if (mode === 3) {
+    if (descEl) descEl.innerHTML = 'Chế độ: <b>Trả lời ngắn (\\shortans)</b>';
+    if (btnLabelEl) btnLabelEl.innerText = 'Chuẩn Hóa Ngay (CN 3)';
+  }
+}
+
+// Hàm điều hướng chính khi nhấn nút "Chuẩn Hóa Ngay"
 function processExEnvironment() {
-  if (subModeEx === 1) processMode1();
-  else if (subModeEx === 2) processMode2();
+  const mode = window.subModeEx || 1;
+  if (mode === 1) processMode1();
+  else if (mode === 2) processMode2();
   else processMode3();
 }
 
+/* =========================================================
+   MODE 1: CHUẨN HÓA TRẮC NGHIỆM 4 PHƯƠNG ÁN (\choice)
+   ========================================================= */
 function processMode1() {
-  const input = document.getElementById('input-ex').value;
-  if (!input.trim()) return;
+  const inputEl = document.getElementById('input-ex');
+  if (!inputEl || !inputEl.value.trim()) {
+    alert("Vui lòng nhập nội dung dữ liệu thô vào ô bên trái!");
+    return;
+  }
 
+  const input = inputEl.value;
   const questionBlocks = input.split(/(?=(?:^|\n)\s*Câu\s+\d+)/i).filter(b => b.trim());
   let results = [];
 
@@ -75,10 +123,17 @@ function processMode1() {
   setEditorValue('output-ex', cleanTextSpacingAndLines(results.join('\n\n')));
 }
 
+/* =========================================================
+   MODE 2: CHUẨN HÓA TRẮC NGHIỆM ĐÚNG/SAI (\choiceTF)
+   ========================================================= */
 function processMode2() {
-  const input = document.getElementById('input-ex').value;
-  if (!input.trim()) return;
+  const inputEl = document.getElementById('input-ex');
+  if (!inputEl || !inputEl.value.trim()) {
+    alert("Vui lòng nhập nội dung dữ liệu thô vào ô bên trái!");
+    return;
+  }
 
+  const input = inputEl.value;
   const questionBlocks = input.split(/(?=(?:^|\n)\s*Câu\s+\d+)/i).filter(b => b.trim());
   let results = [];
 
@@ -147,10 +202,17 @@ function processMode2() {
   setEditorValue('output-ex', cleanTextSpacingAndLines(results.join('\n\n')));
 }
 
+/* =========================================================
+   MODE 3: CHUẨN HÓA TRẢ LỜI NGẮN (\shortans)
+   ========================================================= */
 function processMode3() {
-  const input = document.getElementById('input-ex').value;
-  if (!input.trim()) return;
+  const inputEl = document.getElementById('input-ex');
+  if (!inputEl || !inputEl.value.trim()) {
+    alert("Vui lòng nhập nội dung dữ liệu thô vào ô bên trái!");
+    return;
+  }
 
+  const input = inputEl.value;
   const questionBlocks = input.split(/(?=(?:^|\n)\s*Câu\s+\d+)/i).filter(b => b.trim());
   let results = [];
 
@@ -193,4 +255,37 @@ function processMode3() {
   });
 
   setEditorValue('output-ex', cleanTextSpacingAndLines(results.join('\n\n')));
+}
+
+/* =========================================================
+   CÁC HÀM HELPER BỔ TRỢ (ĐẢM BẢO KHÔNG BỊ LỖI THIẾU HÀM)
+   ========================================================= */
+
+function cleanHeaderPrefix(str) {
+  return str.replace(/^(?:\s*Câu\s+\d+[\.\s:]*)/i, '').trim();
+}
+
+function formatOptionText(str) {
+  return str.trim();
+}
+
+function fixMathSpacing(str) {
+  if (typeof applyCleanSpacingTool === 'function') {
+    return applyCleanSpacingTool(null, str);
+  }
+  return str;
+}
+
+function cleanTextSpacingAndLines(str) {
+  return str.replace(/\n{3,}/g, '\n\n').trim();
+}
+
+function setEditorValue(id, val) {
+  const el = document.getElementById(id);
+  if (el) {
+    el.value = val;
+    if (typeof handleInput === 'function') {
+      handleInput(id);
+    }
+  }
 }
