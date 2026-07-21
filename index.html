@@ -60,48 +60,56 @@
       color: #fef08a;
     }
 
-    /* Code Editor Container */
+    /* --- CẤU TRÚC BỘ SOẠN THẢO VÀ ĐỒNG BỘ DÒNG CĂN CHUẨN --- */
     .editor-container {
       position: relative;
       flex: 1;
       display: flex;
       overflow: hidden;
     }
+
+    /* ĐỒNG BỘ TUYỆT ĐỐI KHÔNG LỆCH DÒNG */
+    .line-numbers, .code-input, .code-highlight {
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+      font-size: 0.875rem !important; /* 14px */
+      line-height: 1.5rem !important;  /* 24px */
+      padding-top: 0.75rem !important;  /* 12px */
+      padding-bottom: 0.75rem !important;
+      box-sizing: border-box !important;
+    }
+
     .line-numbers {
       user-select: none;
       text-align: right;
-      padding: 0.75rem 0.5rem 0.75rem 0.5rem;
+      padding-left: 0.5rem !important;
+      padding-right: 0.5rem !important;
       border-right: 1px solid;
-      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
-      font-size: 0.875rem;
-      line-height: 1.5rem;
       overflow: hidden;
       white-space: pre;
-      box-sizing: border-box;
     }
+
     .editor-area {
       position: relative;
       flex: 1;
       height: 100%;
       overflow: hidden;
     }
+
     .code-input, .code-highlight {
       position: absolute;
       top: 0;
       left: 0;
       width: 100%;
       height: 100%;
-      padding: 0.75rem;
+      padding-left: 0.75rem !important;
+      padding-right: 0.75rem !important;
       margin: 0;
       border: none;
-      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
-      font-size: 0.875rem;
-      line-height: 1.5rem;
       white-space: pre-wrap; 
       word-break: break-word;
       tab-size: 4;
-      box-sizing: border-box;
     }
+
     .code-input {
       color: transparent;
       background: transparent;
@@ -110,13 +118,13 @@
       overflow-y: auto;
       overflow-x: hidden;
     }
+
     .code-highlight {
       z-index: 1;
       pointer-events: none;
       overflow: hidden;
     }
 
-    /* --- THEME MAPPING --- */
     /* Light Mode Defaults */
     body { background-color: #f1f5f9; color: #1e293b; }
     .theme-bg { background-color: #ffffff; border-color: #cbd5e1; color: #1e293b; }
@@ -127,12 +135,10 @@
     .code-highlight { color: #1e293b; }
     .code-input { caret-color: #0f172a; }
 
-    /* Dark Mode Conversions: Nút tối lập tức chuyển thành màu sáng (#f8fafc / #e2e8f0) */
+    /* Dark Mode Conversions */
     body.dark { background-color: #0f172a; color: #f1f5f9; }
     body.dark .theme-bg { background-color: #1e293b; border-color: #334155; color: #f1f5f9; }
     body.dark .theme-sub-bg { background-color: #0f172a; border-color: #334155; color: #cbd5e1; }
-    
-    /* ĐẢO NGƯỢC NÚT TỐI -> SÁNG KHI KÍCH HOẠT DARK MODE */
     body.dark .theme-btn-dark { background-color: #f8fafc !important; color: #0f172a !important; border-color: #cbd5e1 !important; }
     body.dark .theme-btn-dark:hover { background-color: #e2e8f0 !important; }
 
@@ -993,7 +999,7 @@
       "\\textbf{}", "\\textit{}", "\\underline{}", "\\text{}", "\\textrm{}",
       "\\textsf{}", "\\texttt{}", "\\textmd{}", "\\textup{}", "\\mathbf{}",
       "\\mathit{}", "\\mathsf{}", "\\mathtt{}", "\\mathbb{}", "\\mathcal{}",
-      "\\mathfrak{}", "\\mathrm{}", "\\quad", "\\qquad", "\\,", "\\!", "\\;", "\\:",
+      "\\fontfamily{}", "\\mathrm{}", "\\quad", "\\qquad", "\\,", "\\!", "\\;", "\\:",
       "\\newpage", "\\clearpage", "\\linebreak", "\\nolinebreak", "\\pagebreak",
       "\\noindent", "\\indent", "\\par", "\\footnote{}", "\\url{}", "\\href{}{}",
 
