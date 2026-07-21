@@ -1,5 +1,5 @@
 /* =========================================================
-   PIMAX TOOL — EDITOR ENGINE (FIX SCROLL SHADOW & AUTOCOMPLETE)
+   PIMAX TOOL — CLEAN EDITOR & AUTOCOMPLETE ENGINE
    ========================================================= */
 
 const LATEX_SUGGESTIONS = [
@@ -22,15 +22,13 @@ const LATEX_SUGGESTIONS = [
 let activeIndex = 0;
 let filteredSuggestions = [];
 
-/* Xử lý nhập liệu & tô màu cú pháp */
+/* Đếm số dòng mượt mà */
 function handleInput(id) {
   const textarea = document.getElementById(id);
   const linesDiv = document.getElementById(`lines-${id}`);
-  const hlDiv = document.getElementById(`hl-${id}`);
 
   if (!textarea) return;
 
-  // 1. Cập nhật dòng số
   if (linesDiv) {
     const lineCount = textarea.value.split('\n').length;
     let linesHTML = '';
@@ -40,44 +38,21 @@ function handleInput(id) {
     linesDiv.textContent = linesHTML;
   }
 
-  // 2. Tô màu Highlighting
-  if (hlDiv) {
-    let code = textarea.value;
-    code = code.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
-    code = code.replace(/(\\begin\{[^}]+\}|\\end\{[^}]+\})/g, '<span class="hl-env">$1</span>');
-    code = code.replace(/(\\[a-zA-Key]+)/g, '<span class="hl-keyword">$1</span>');
-    code = code.replace(/(\$[^$]+\$)/g, '<span class="hl-math">$1</span>');
-    code = code.replace(/(%.*)/g, '<span class="hl-comment">$1</span>');
-    
-    hlDiv.innerHTML = code + '\n';
-  }
-
-  // 3. Đồng bộ cuộn tức thì
   syncScroll(id);
-
-  // 4. Kiểm tra bật Autocomplete
   checkAutocompleteTrigger(id);
 }
 
-/* ĐỒNG BỘ CUỘN TUYỆT ĐỐI KHÔNG BỊ ÁM MỜ (dùng Transform & ScrollTop) */
+/* Đồng bộ cuộn giữa số dòng và Textarea */
 function syncScroll(id) {
   const textarea = document.getElementById(id);
   const linesDiv = document.getElementById(`lines-${id}`);
-  const hlDiv = document.getElementById(`hl-${id}`);
 
-  if (textarea) {
-    if (linesDiv) {
-      linesDiv.scrollTop = textarea.scrollTop;
-    }
-    if (hlDiv) {
-      // Dùng scrollTop trực tiếp & đồng bộ scrollLeft chống tràn ngang
-      hlDiv.scrollTop = textarea.scrollTop;
-      hlDiv.scrollLeft = textarea.scrollLeft;
-    }
+  if (textarea && linesDiv) {
+    linesDiv.scrollTop = textarea.scrollTop;
   }
 }
 
-/* Xử lý bàn phím */
+/* Điều khiển Autocomplete bằng phím Mũi tên & Enter/Tab */
 function handleKeyDown(e, id) {
   const dropdown = document.getElementById(`autocomplete-${id}`);
   
@@ -105,6 +80,7 @@ function handleKeyDown(e, id) {
     }
   }
 
+  // Phím Tab thụt lề 4 khoảng trắng
   if (e.key === 'Tab') {
     e.preventDefault();
     const textarea = document.getElementById(id);
@@ -117,6 +93,7 @@ function handleKeyDown(e, id) {
   }
 }
 
+/* Kích hoạt gợi ý lệnh khi gõ \ */
 function checkAutocompleteTrigger(id) {
   const textarea = document.getElementById(id);
   const dropdown = document.getElementById(`autocomplete-${id}`);
@@ -136,8 +113,8 @@ function checkAutocompleteTrigger(id) {
       activeIndex = 0;
       renderAutocompleteItems(id);
       dropdown.style.display = 'block';
-      dropdown.style.top = '35px';
-      dropdown.style.left = '50px';
+      dropdown.style.top = '30px';
+      dropdown.style.left = '40px';
       return;
     }
   }
