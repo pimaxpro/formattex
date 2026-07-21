@@ -75,8 +75,8 @@
 
       <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
         <!-- Input Box 1 -->
-        <div class="theme-bg border p-4 shadow-sm flex flex-col justify-between h-[640px] rounded-md">
-          <div class="flex justify-between items-center text-xs font-bold h-8 mb-3 pb-2 border-b border-slate-200 dark:border-slate-700">
+        <div class="theme-bg border p-4 shadow-sm flex flex-col h-[640px] rounded-md">
+          <div class="flex justify-between items-center text-xs font-bold h-8 mb-3 pb-2 border-b border-slate-200 dark:border-slate-700 shrink-0">
             <span class="flex items-center gap-1.5"><i data-lucide="file-input" class="w-4 h-4 text-[#db3c6e]"></i> Dữ liệu thô đầu vào:</span>
             <div class="flex items-center space-x-1.5">
               <button id="btn-undo-input-ex" onclick="undo('input-ex')" disabled class="btn-history theme-sub-bg px-2 h-7 flex items-center gap-1 border rounded transition text-[11px]" title="Hoàn tác (Ctrl+Z)"><i data-lucide="undo-2" class="w-3.5 h-3.5"></i></button>
@@ -89,7 +89,7 @@
               <button onclick="clearText('input-ex')" class="hover:underline h-7 px-1 flex items-center opacity-75">Xóa</button>
             </div>
           </div>
-          <div class="editor-container border border-slate-200 dark:border-slate-700">
+          <div class="editor-container border border-slate-200 dark:border-slate-700 flex-1">
             <div id="lines-input-ex" class="line-numbers min-w-[42px]">1</div>
             <div class="editor-area">
               <div id="hl-input-ex" class="code-highlight"></div>
@@ -100,8 +100,8 @@
         </div>
 
         <!-- Output Box 1 -->
-        <div class="theme-bg border p-4 shadow-sm flex flex-col justify-between h-[640px] rounded-md">
-          <div class="flex justify-between items-center text-xs font-bold h-8 mb-2 pb-2 border-b border-slate-200 dark:border-slate-700">
+        <div class="theme-bg border p-4 shadow-sm flex flex-col h-[640px] rounded-md">
+          <div class="flex justify-between items-center text-xs font-bold h-8 mb-2 pb-2 border-b border-slate-200 dark:border-slate-700 shrink-0">
             <span class="flex items-center gap-1.5"><i data-lucide="file-output" class="w-4 h-4 text-[#db3c6e]"></i> Kết quả chuẩn hóa:</span>
             <div class="flex items-center space-x-1">
               <button id="btn-undo-output-ex" onclick="undo('output-ex')" disabled class="btn-history theme-sub-bg p-1.5 h-7 w-7 rounded flex items-center justify-center border transition" title="Hoàn tác"><i data-lucide="undo-2" class="w-3.5 h-3.5"></i></button>
@@ -124,7 +124,7 @@
           </div>
 
           <!-- Tìm kiếm & thay thế -->
-          <div class="theme-sub-bg p-2 border rounded mb-2 flex flex-col gap-2 text-xs">
+          <div class="theme-sub-bg p-2 border rounded mb-2 flex flex-col gap-2 text-xs shrink-0">
             <div class="flex items-center gap-2 flex-wrap">
               <div class="flex items-center space-x-1 flex-1 min-w-[150px]">
                 <i data-lucide="search" class="w-3.5 h-3.5 opacity-50"></i>
@@ -149,7 +149,7 @@
             </div>
           </div>
 
-          <div class="editor-container border border-slate-200 dark:border-slate-700">
+          <div class="editor-container border border-slate-200 dark:border-slate-700 flex-1">
             <div id="lines-output-ex" class="line-numbers min-w-[42px]">1</div>
             <div class="editor-area">
               <div id="hl-output-ex" class="code-highlight"></div>
@@ -173,8 +173,8 @@
       <div class="theme-bg p-4 border rounded-md shadow-sm"><p class="text-sm opacity-75">Tự động lọc và tách toàn bộ các khối <code class="font-bold">\begin{tikzpicture}...\end{tikzpicture}</code> ra khỏi file LaTeX gốc.</p></div>
       <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
         <!-- Input TikZ -->
-        <div class="theme-bg border p-4 shadow-sm flex flex-col justify-between h-[580px] rounded-md">
-          <div class="flex justify-between items-center text-xs font-bold h-8 mb-3 pb-2 border-b border-slate-200 dark:border-slate-700">
+        <div class="theme-bg border p-4 shadow-sm flex flex-col h-[580px] rounded-md">
+          <div class="flex justify-between items-center text-xs font-bold h-8 mb-3 pb-2 border-b border-slate-200 dark:border-slate-700 shrink-0">
             <span class="flex items-center gap-1.5"><i data-lucide="file-text" class="w-4 h-4 text-[#db3c6e]"></i> Code LaTeX gốc:</span>
             <div class="flex items-center space-x-1.5">
               <button id="btn-undo-input-tikz" onclick="undo('input-tikz')" disabled class="btn-history theme-sub-bg px-2 h-7 border rounded transition text-[11px]"><i data-lucide="undo-2" class="w-3.5 h-3.5"></i></button>
@@ -184,7 +184,7 @@
               <button onclick="clearText('input-tikz')" class="hover:underline h-7 px-1 flex items-center opacity-75">Xóa</button>
             </div>
           </div>
-          <div class="editor-container border border-slate-200 dark:border-slate-700">
+          <div class="editor-container border border-slate-200 dark:border-slate-700 flex-1">
             <div id="lines-input-tikz" class="line-numbers min-w-[42px]">1</div>
             <div class="editor-area">
               <div id="hl-input-tikz" class="code-highlight"></div>
@@ -195,8 +195,8 @@
         </div>
 
         <!-- Output Main -->
-        <div class="theme-bg border p-4 shadow-sm flex flex-col justify-between h-[580px] rounded-md">
-          <div class="flex justify-between items-center text-xs font-bold h-8 mb-2 pb-2 border-b border-slate-200 dark:border-slate-700">
+        <div class="theme-bg border p-4 shadow-sm flex flex-col h-[580px] rounded-md">
+          <div class="flex justify-between items-center text-xs font-bold h-8 mb-2 pb-2 border-b border-slate-200 dark:border-slate-700 shrink-0">
             <span class="flex items-center gap-1.5"><i data-lucide="file-check" class="w-4 h-4 text-[#db3c6e]"></i> File gốc (Đã gỡ TikZ):</span>
             <div class="flex items-center space-x-1">
               <button id="btn-undo-output-main" onclick="undo('output-main')" disabled class="btn-history theme-sub-bg p-1.5 h-7 w-7 border rounded transition"><i data-lucide="undo-2" class="w-3.5 h-3.5"></i></button>
@@ -212,7 +212,7 @@
               <button onclick="downloadSingleText('output-main', 'file_goc_no_tikz.tex')" class="theme-sub-bg p-1.5 h-7 w-7 border rounded transition"><i data-lucide="download" class="w-3.5 h-3.5"></i></button>
             </div>
           </div>
-          <div class="editor-container border border-slate-200 dark:border-slate-700">
+          <div class="editor-container border border-slate-200 dark:border-slate-700 flex-1">
             <div id="lines-output-main" class="line-numbers min-w-[42px]">1</div>
             <div class="editor-area">
               <div id="hl-output-main" class="code-highlight"></div>
