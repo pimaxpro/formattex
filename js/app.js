@@ -2,12 +2,12 @@
    PIMAX TOOL — APPLICATION CONTROLLER (APP.JS FULL)
    ========================================================= */
 
-if (typeof window.subModeEx === 'undefined') {
-  window.subModeEx = 1;
-}
+// Đồng bộ biến toàn cục chọn chế độ
+window.subModeEx = 1; // 1: \choice, 2: \choiceTF, 3: \shortans
+window.currentMainMenu = 1;
 
 /* =========================================================
-   1. ĐIỀU HƯỚNG MENU CHÍNH (3 CHỨC NĂNG LỚN)
+   1. ĐIỀU HƯỚNG MENU CHÍNH
    ========================================================= */
 function switchMainMenu(menuIndex) {
   window.currentMainMenu = menuIndex;
@@ -38,10 +38,11 @@ function switchMainMenu(menuIndex) {
 }
 
 /* =========================================================
-   2. ĐIỀU HƯỚNG SUB-MODE (CN1, CN2, CN3 TRONG MENU 1)
+   2. ĐIỀU HƯỚNG SUB-MODE (CN1, CN2, CN3)
    ========================================================= */
 function switchSubMode(mode) {
-  window.subModeEx = mode; // Gán đúng biến subModeEx
+  // Gán trực tiếp giá trị vào window.subModeEx
+  window.subModeEx = mode;
 
   const activeClass = "px-4 py-2 text-xs font-bold rounded transition-all flex items-center space-x-2 bg-white text-slate-900 border border-slate-300 shadow-sm cursor-pointer";
   const inactiveClass = "px-4 py-2 text-xs font-semibold rounded transition-all flex items-center space-x-2 bg-transparent text-slate-500 hover:text-slate-800 hover:bg-slate-200/50 border border-transparent cursor-pointer";
