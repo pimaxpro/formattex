@@ -94,7 +94,7 @@ function updateBtnState(btn, isDisabled) {
 }
 
 /* =========================================================
-   FIND & REPLACE ENGINE (HỖ TRỢ MATCH CASE & HIGHLIGHT TỰ ĐỘNG)
+   FIND & REPLACE ENGINE (CHO PHÉP GÕ TRỌN VẸN TEXT RỒI MỚI TÌM)
    ========================================================= */
 
 let searchMatches = [];
@@ -138,7 +138,9 @@ function findText(id) {
 
   if (searchMatches.length > 0) {
     currentSearchIndex = 0;
-    highlightMatch(id);
+    if (countEl) {
+      countEl.textContent = `${currentSearchIndex + 1}/${searchMatches.length}`;
+    }
   } else {
     if (countEl) countEl.textContent = "0/0";
   }
@@ -386,21 +388,12 @@ function escapeJsString(str) {
   return str.replace(/\\/g, '\\\\').replace(/'/g, "\\'").replace(/\n/g, '\\n');
 }
 
-// Khởi tạo trạng thái ban đầu khi trang tải xong
-document.addEventListener("DOMContentLoaded", () => {
-  ['input-ex', 'output-ex', 'input-tikz', 'output-main', 'output-tikz-single'].forEach(id => {
-    const el = document.getElementById(id);
-    if (el) {
-      saveState(id, true);
-    }
-  });
-});
-
-/* =========================================================
-   TỰ ĐỘNG KÍCH HOẠT TÌM KIẾM CHO MỌI EDITOR
-   ========================================================= */
+// Tự động gán sự kiện tìm kiếm khi gõ phím hoặc nhấn Enter
 document.addEventListener("DOMContentLoaded", () => {
   ['output-ex', 'input-ex', 'output-main', 'input-tikz', 'output-tikz-single'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) saveState(id, true);
+
     const findInput = document.getElementById(`find-${id}`);
     const matchCaseEl = document.getElementById(`match-case-${id}`);
     
