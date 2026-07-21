@@ -2,12 +2,12 @@
    PIMAX TOOL — APPLICATION CONTROLLER (APP.JS FULL)
    ========================================================= */
 
-// Trạng thái ứng dụng
-window.currentMainMenu = 1;
-window.currentSubMode = 1;
+if (typeof window.subModeEx === 'undefined') {
+  window.subModeEx = 1;
+}
 
 /* =========================================================
-   1. ĐIỀU HƯỚNG MENU CHÍNH
+   1. ĐIỀU HƯỚNG MENU CHÍNH (3 CHỨC NĂNG LỚN)
    ========================================================= */
 function switchMainMenu(menuIndex) {
   window.currentMainMenu = menuIndex;
@@ -38,10 +38,10 @@ function switchMainMenu(menuIndex) {
 }
 
 /* =========================================================
-   2. ĐIỀU HƯỚNG MENU PHỤ (SUB-MODE)
+   2. ĐIỀU HƯỚNG SUB-MODE (CN1, CN2, CN3 TRONG MENU 1)
    ========================================================= */
 function switchSubMode(mode) {
-  window.currentSubMode = mode;
+  window.subModeEx = mode; // Gán đúng biến subModeEx
 
   const activeClass = "px-4 py-2 text-xs font-bold rounded transition-all flex items-center space-x-2 bg-white text-slate-900 border border-slate-300 shadow-sm cursor-pointer";
   const inactiveClass = "px-4 py-2 text-xs font-semibold rounded transition-all flex items-center space-x-2 bg-transparent text-slate-500 hover:text-slate-800 hover:bg-slate-200/50 border border-transparent cursor-pointer";
@@ -70,13 +70,13 @@ function switchSubMode(mode) {
 
   if (mode === 1) {
     if (labelEl) labelEl.textContent = "Chế độ: Trắc nghiệm 4 phương án (\\choice)";
-    if (btnLabelEl) btnLabelEl.textContent = "Chuẩn Hóa Ngay";
+    if (btnLabelEl) btnLabelEl.textContent = "Chuẩn Hóa Ngay (CN 1)";
   } else if (mode === 2) {
-    if (labelEl) labelEl.textContent = "Chế độ: Câu hỏi Đúng / Sai (\\choiceTF)";
-    if (btnLabelEl) btnLabelEl.textContent = "Chuẩn Hóa Ngay";
+    if (labelEl) labelEl.textContent = "Chế độ: Trắc nghiệm Đúng / Sai (a, b, c, d)";
+    if (btnLabelEl) btnLabelEl.textContent = "Chuẩn Hóa Ngay (CN 2)";
   } else if (mode === 3) {
     if (labelEl) labelEl.textContent = "Chế độ: Trả lời ngắn (\\shortans)";
-    if (btnLabelEl) btnLabelEl.textContent = "Chuẩn Hóa Ngay";
+    if (btnLabelEl) btnLabelEl.textContent = "Chuẩn Hóa Ngay (CN 3)";
   }
 }
 
