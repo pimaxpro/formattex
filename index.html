@@ -12,8 +12,8 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.16.105/pdf.min.js"></script>
   <!-- JSZip library -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
-  <!-- Custom Style -->
-  <link rel="stylesheet" href="css/style.css">
+  <!-- Custom Style (Thêm version v=2.0 để buộc Trình duyệt xóa Cache CSS cũ) -->
+  <link rel="stylesheet" href="css/style.css?v=2.0">
 </head>
 <body class="min-h-screen font-sans flex flex-col transition-colors duration-200">
 
@@ -89,7 +89,7 @@
               <button onclick="clearText('input-ex')" class="hover:underline h-7 px-1 flex items-center opacity-75">Xóa</button>
             </div>
           </div>
-          <div class="editor-container border border-slate-200 dark:border-slate-700 flex-1">
+          <div class="editor-container">
             <div id="lines-input-ex" class="line-numbers min-w-[42px]">1</div>
             <div class="editor-area">
               <div id="hl-input-ex" class="code-highlight"></div>
@@ -149,7 +149,7 @@
             </div>
           </div>
 
-          <div class="editor-container border border-slate-200 dark:border-slate-700 flex-1">
+          <div class="editor-container">
             <div id="lines-output-ex" class="line-numbers min-w-[42px]">1</div>
             <div class="editor-area">
               <div id="hl-output-ex" class="code-highlight"></div>
@@ -184,7 +184,7 @@
               <button onclick="clearText('input-tikz')" class="hover:underline h-7 px-1 flex items-center opacity-75">Xóa</button>
             </div>
           </div>
-          <div class="editor-container border border-slate-200 dark:border-slate-700 flex-1">
+          <div class="editor-container">
             <div id="lines-input-tikz" class="line-numbers min-w-[42px]">1</div>
             <div class="editor-area">
               <div id="hl-input-tikz" class="code-highlight"></div>
@@ -212,7 +212,7 @@
               <button onclick="downloadSingleText('output-main', 'file_goc_no_tikz.tex')" class="theme-sub-bg p-1.5 h-7 w-7 border rounded transition"><i data-lucide="download" class="w-3.5 h-3.5"></i></button>
             </div>
           </div>
-          <div class="editor-container border border-slate-200 dark:border-slate-700 flex-1">
+          <div class="editor-container">
             <div id="lines-output-main" class="line-numbers min-w-[42px]">1</div>
             <div class="editor-area">
               <div id="hl-output-main" class="code-highlight"></div>
@@ -254,7 +254,7 @@
             <button onclick="downloadSingleText('output-tikz-single', getTikZFilename())" class="theme-sub-bg p-1.5 h-7 w-7 border rounded transition"><i data-lucide="download" class="w-3.5 h-3.5"></i></button>
           </div>
         </div>
-        <div class="editor-container h-80 border border-slate-200 dark:border-slate-700">
+        <div class="editor-container h-80">
           <div id="lines-output-tikz-single" class="line-numbers min-w-[42px]">1</div>
           <div class="editor-area">
             <div id="hl-output-tikz-single" class="code-highlight"></div>
