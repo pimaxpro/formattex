@@ -1,16 +1,15 @@
 /* =========================================================
-   PIMAX TOOL — EX ENVIRONMENT PROCESSOR (FULL LOGIC GỐC)
+   PIMAX TOOL — EX ENVIRONMENT PROCESSOR (FULL CORE GỐC)
    ========================================================= */
 
-// Biến lưu trữ chế độ phụ (1: \choice, 2: \choiceTF, 3: \shortans)
-if (typeof window.subModeEx === 'undefined') {
-  window.subModeEx = 1;
-}
+var subModeEx = 1;
 
-// Hàm chuyển đổi tab chế độ (CN1, CN2, CN3)
 function switchSubMode(mode) {
-  window.subModeEx = mode;
-
+  subModeEx = mode;
+  if (typeof window !== 'undefined') {
+    window.subModeEx = mode;
+  }
+  
   [1, 2, 3].forEach(m => {
     const btn = document.getElementById(`sub-btn-${m}`);
     if (btn) {
@@ -24,7 +23,7 @@ function switchSubMode(mode) {
 
   const descEl = document.getElementById('sub-mode-desc');
   const btnLabelEl = document.getElementById('btn-ex-label');
-
+  
   if (mode === 1) {
     if (descEl) descEl.innerHTML = 'Chế độ: <b>Trắc nghiệm 4 phương án (\\choice)</b>';
     if (btnLabelEl) btnLabelEl.innerText = 'Chuẩn Hóa Ngay (CN 1)';
@@ -37,25 +36,22 @@ function switchSubMode(mode) {
   }
 }
 
-// Hàm điều hướng chính khi nhấn nút "Chuẩn Hóa Ngay"
 function processExEnvironment() {
-  const mode = window.subModeEx || 1;
-  if (mode === 1) processMode1();
-  else if (mode === 2) processMode2();
+  const currentMode = subModeEx || (window.subModeEx ? window.subModeEx : 1);
+  if (currentMode === 1) processMode1();
+  else if (currentMode === 2) processMode2();
   else processMode3();
 }
 
 /* =========================================================
-   MODE 1: CHUẨN HÓA TRẮC NGHIỆM 4 PHƯƠNG ÁN (\choice)
+   CÁC HÀM XỬ LÝ CHÍNH
    ========================================================= */
+
 function processMode1() {
   const inputEl = document.getElementById('input-ex');
-  if (!inputEl || !inputEl.value.trim()) {
-    alert("Vui lòng nhập nội dung dữ liệu thô vào ô bên trái!");
-    return;
-  }
-
+  if (!inputEl || !inputEl.value.trim()) return;
   const input = inputEl.value;
+
   const questionBlocks = input.split(/(?=(?:^|\n)\s*Câu\s+\d+)/i).filter(b => b.trim());
   let results = [];
 
@@ -123,17 +119,11 @@ function processMode1() {
   setEditorValue('output-ex', cleanTextSpacingAndLines(results.join('\n\n')));
 }
 
-/* =========================================================
-   MODE 2: CHUẨN HÓA TRẮC NGHIỆM ĐÚNG/SAI (\choiceTF)
-   ========================================================= */
 function processMode2() {
   const inputEl = document.getElementById('input-ex');
-  if (!inputEl || !inputEl.value.trim()) {
-    alert("Vui lòng nhập nội dung dữ liệu thô vào ô bên trái!");
-    return;
-  }
-
+  if (!inputEl || !inputEl.value.trim()) return;
   const input = inputEl.value;
+
   const questionBlocks = input.split(/(?=(?:^|\n)\s*Câu\s+\d+)/i).filter(b => b.trim());
   let results = [];
 
@@ -202,17 +192,11 @@ function processMode2() {
   setEditorValue('output-ex', cleanTextSpacingAndLines(results.join('\n\n')));
 }
 
-/* =========================================================
-   MODE 3: CHUẨN HÓA TRẢ LỜI NGẮN (\shortans)
-   ========================================================= */
 function processMode3() {
   const inputEl = document.getElementById('input-ex');
-  if (!inputEl || !inputEl.value.trim()) {
-    alert("Vui lòng nhập nội dung dữ liệu thô vào ô bên trái!");
-    return;
-  }
-
+  if (!inputEl || !inputEl.value.trim()) return;
   const input = inputEl.value;
+
   const questionBlocks = input.split(/(?=(?:^|\n)\s*Câu\s+\d+)/i).filter(b => b.trim());
   let results = [];
 
@@ -258,26 +242,69 @@ function processMode3() {
 }
 
 /* =========================================================
-   CÁC HÀM HELPER BỔ TRỢ (ĐẢM BẢO KHÔNG BỊ LỖI THIẾU HÀM)
+   HÀM BỔ TRỢ GỐC CHUẨN XÁC KHÔNG BỊ TRÙNG VÒNG LẶP
    ========================================================= */
 
-function cleanHeaderPrefix(str) {
-  return str.replace(/^(?:\s*Câu\s+\d+[\.\s:]*)/i, '').trim();
-}
-
-function formatOptionText(str) {
-  return str.trim();
-}
-
-function fixMathSpacing(str) {
-  if (typeof applyCleanSpacingTool === 'function') {
-    return applyCleanSpacingTool(null, str);
-  }
+function cleanHeaderPrefix(rawText) {
+  let str = rawText.trim();
+  str = str.replace(/^Câu\s+\d+\s*[\.\:-]*/i, '').trim();
+  str = str.replace(/^\[[^\]]*\]\s*/i, '').trim();
+  str = str.replace(/^\([^\)]*\)\s*/i, '').trim();
+  str = str.replace(/^[:\.-]+\s*/, '').trim();
   return str;
 }
 
-function cleanTextSpacingAndLines(str) {
-  return str.replace(/\n{3,}/g, '\n\n').trim();
+function formatOptionText(str) {
+  if (!str) return '';
+  let text = str.trim();
+  const containsWords = /[a-zA-ZÀ-ỹ]/.test(text.replace(/\\[a-zA-Z]+/g, ''));
+  if (!containsWords && !text.startsWith('$') && !text.endsWith('$')) {
+    return `$${text}$`;
+  }
+  return fixMathSpacing(text);
+}
+
+function fixMathSpacing(str) {
+  if (!str) return '';
+  let text = str;
+
+  text = text.replace(/\$+/g, '$');
+  text = text.replace(/\$((?:\\.|[^$])+)\$/g, (m, inner) => `$${inner.trim()}$`);
+
+  text = text.replace(/([\p{L}\p{N}:,;\.\?!])\$/gu, '$1 $');
+  text = text.replace(/\$([\p{L}\p{N}])/gu, '$ $1');
+
+  text = text.replace(/[ \t]+/g, ' ');
+  text = text.replace(/\s+([\.,;\)])/g, '$1');
+  text = text.replace(/([\(\[])\s+/g, '$1');
+
+  text = text.replace(/\$((?:\\.|[^$])+)\$/g, (m, inner) => `$${inner.trim()}$`);
+
+  text = cleanTextSpacingAndLines(text);
+
+  return text.trim();
+}
+
+function cleanTextSpacingAndLines(text) {
+  if (!text) return '';
+
+  let cleaned = text.replace(/\s+([\?\,\.\!])/g, '$1');
+  let lines = cleaned.split('\n');
+  let filteredLines = [];
+
+  for (let i = 0; i < lines.length; i++) {
+    let line = lines[i];
+    if (line.trim() !== '') {
+      filteredLines.push(line.trimEnd());
+    }
+  }
+
+  let resultText = filteredLines.join('\n');
+  resultText = resultText.replace(/([^\n])\n+(\\begin\{[^}]+\})/g, '$1\n\n$2');
+  resultText = resultText.replace(/(\\end\{[^}]+\})\n+([^\n])/g, '$1\n\n$2');
+  resultText = resultText.replace(/\n\s*\n\s*\n+/g, '\n\n');
+
+  return resultText.trim();
 }
 
 function setEditorValue(id, val) {
