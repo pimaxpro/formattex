@@ -94,7 +94,7 @@ function updateBtnState(btn, isDisabled) {
 }
 
 /* =========================================================
-   FIND & REPLACE ENGINE (HỖ TRỢ MATCH CASE & HIGHLIGHT)
+   FIND & REPLACE ENGINE (HỖ TRỢ MATCH CASE & HIGHLIGHT TỰ ĐỘNG)
    ========================================================= */
 
 let searchMatches = [];
@@ -102,9 +102,9 @@ let currentSearchIndex = -1;
 
 function findText(id) {
   const textarea = document.getElementById(id);
-  const findInput = document.getElementById(`find-${id}`);
-  const countEl = document.getElementById(`count-${id}`);
-  const matchCaseEl = document.getElementById(`match-case-${id}`);
+  const findInput = document.getElementById(`find-${id}`) || document.getElementById(`find-output-ex`);
+  const countEl = document.getElementById(`count-${id}`) || document.getElementById(`count-output-ex`);
+  const matchCaseEl = document.getElementById(`match-case-${id}`) || document.getElementById(`match-case-output-ex`);
 
   if (!textarea || !findInput) return;
 
@@ -121,14 +121,19 @@ function findText(id) {
   const text = textarea.value;
   const flags = matchCase ? 'g' : 'gi';
   const escapedQuery = query.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-  const regex = new RegExp(escapedQuery, flags);
 
-  let match;
-  while ((match = regex.exec(text)) !== null) {
-    searchMatches.push({
-      start: match.index,
-      end: match.index + match[0].length
-    });
+  try {
+    const regex = new RegExp(escapedQuery, flags);
+    let match;
+    while ((match = regex.exec(text)) !== null) {
+      searchMatches.push({
+        start: match.index,
+        end: match.index + match[0].length
+      });
+      if (match[0].length === 0) break;
+    }
+  } catch (e) {
+    console.error("Lỗi tìm kiếm:", e);
   }
 
   if (searchMatches.length > 0) {
@@ -140,6 +145,9 @@ function findText(id) {
 }
 
 function navigateSearch(id, direction) {
+  if (searchMatches.length === 0) {
+    findText(id);
+  }
   if (searchMatches.length === 0) return;
 
   currentSearchIndex += direction;
@@ -154,17 +162,14 @@ function navigateSearch(id, direction) {
 
 function highlightMatch(id) {
   const textarea = document.getElementById(id);
-  const countEl = document.getElementById(`count-${id}`);
+  const countEl = document.getElementById(`count-${id}`) || document.getElementById(`count-output-ex`);
 
   if (!textarea || searchMatches.length === 0) return;
 
   const match = searchMatches[currentSearchIndex];
   textarea.focus();
-  
-  // Highlight trực quan từ tìm thấy bằng cách bôi đen vùng text đó trong textarea
   textarea.setSelectionRange(match.start, match.end);
 
-  // Cuộn mượt đến dòng chứa kết quả
   const textBefore = textarea.value.substring(0, match.start);
   const lineNum = textBefore.split('\n').length;
   textarea.scrollTop = Math.max(0, (lineNum - 3) * 24);
@@ -176,9 +181,9 @@ function highlightMatch(id) {
 
 function replaceText(id, all = false) {
   const textarea = document.getElementById(id);
-  const findInput = document.getElementById(`find-${id}`);
-  const replaceInput = document.getElementById(`replace-${id}`);
-  const matchCaseEl = document.getElementById(`match-case-${id}`);
+  const findInput = document.getElementById(`find-${id}`) || document.getElementById(`find-output-ex`);
+  const replaceInput = document.getElementById(`replace-${id}`) || document.getElementById(`replace-output-ex`);
+  const matchCaseEl = document.getElementById(`match-case-${id}`) || document.getElementById(`match-case-output-ex`);
 
   if (!textarea || !findInput || !replaceInput) return;
 
