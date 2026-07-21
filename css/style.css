@@ -64,6 +64,14 @@ body {
   background-color: var(--pimax-light);
   color: var(--pimax-main);
   border-color: #f7b4c8;
+  transition: all 0.2s ease !important;
+}
+
+.theme-badge-pimax:hover {
+  background-color: var(--pimax-main) !important;
+  color: #ffffff !important;
+  border-color: var(--pimax-main) !important;
+  box-shadow: 0 2px 6px rgba(219, 60, 110, 0.3);
 }
 
 body.dark .theme-badge-pimax {
@@ -73,10 +81,32 @@ body.dark .theme-badge-pimax {
 }
 
 /* =========================================================
-   KHÔI PHỤC BẮT BUỘC EDITOR (CĂN ĐÈ BẰNG !IMPORTANT)
+   HOVER EFFECTS FOR TOOLBAR BUTTONS
    ========================================================= */
 
-div.editor-container {
+.theme-sub-bg.hover-pimax {
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1) !important;
+}
+
+.theme-sub-bg.hover-pimax:hover {
+  background-color: var(--pimax-light) !important;
+  color: var(--pimax-main) !important;
+  border-color: #f7b4c8 !important;
+  transform: translateY(-1px);
+  box-shadow: 0 2px 4px rgba(219, 60, 110, 0.15);
+}
+
+body.dark .theme-sub-bg.hover-pimax:hover {
+  background-color: var(--pimax-dark-bg) !important;
+  color: #fca5c0 !important;
+  border-color: #8c1d3f !important;
+}
+
+/* =========================================================
+   EDITOR ARCHITECTURE (Line Numbers + Highlight Overlay)
+   ========================================================= */
+
+.editor-container {
   display: flex !important;
   flex-direction: row !important;
   flex: 1 1 0% !important;
@@ -89,22 +119,23 @@ div.editor-container {
   border: 1px solid var(--border-color) !important;
 }
 
-div.line-numbers {
+.line-numbers {
   background-color: var(--bg-sub) !important;
   color: #94a3b8 !important;
   border-right: 1px solid var(--border-color) !important;
-  padding: 0.5rem 0.25rem !important;
-  font-family: monospace !important;
+  padding: 0.5rem 0.35rem !important;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace !important;
   font-size: 0.8125rem !important;
   line-height: 1.5rem !important;
   text-align: right !important;
   user-select: none !important;
   overflow: hidden !important;
   white-space: pre !important;
+  min-width: 42px !important;
   box-sizing: border-box !important;
 }
 
-div.editor-area {
+.editor-area {
   position: relative !important;
   flex: 1 1 0% !important;
   height: 100% !important;
@@ -112,9 +143,9 @@ div.editor-area {
   overflow: hidden !important;
 }
 
-/* Ép 2 lớp đè lên nhau chuẩn xác */
-textarea.code-input, 
-div.code-highlight {
+/* Ép 2 lớp Highlight và Textarea đè khít lên nhau */
+.code-input, 
+.code-highlight {
   position: absolute !important;
   top: 0 !important;
   left: 0 !important;
@@ -124,7 +155,7 @@ div.code-highlight {
   height: 100% !important;
   padding: 0.5rem 0.75rem !important;
   margin: 0 !important;
-  font-family: monospace !important;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace !important;
   font-size: 0.8125rem !important;
   line-height: 1.5rem !important;
   white-space: pre-wrap !important;
@@ -136,7 +167,7 @@ div.code-highlight {
   tab-size: 2 !important;
 }
 
-div.code-highlight {
+.code-highlight {
   pointer-events: none !important;
   z-index: 1 !important;
   color: transparent !important;
@@ -144,15 +175,15 @@ div.code-highlight {
   background: transparent !important;
 }
 
-textarea.code-input {
+.code-input {
   z-index: 2 !important;
   background: transparent !important;
   color: var(--text-main) !important;
-  resize: none !important; /* Xóa bỏ góc kéo dãn */
+  resize: none !important;
   caret-color: var(--pimax-main) !important;
 }
 
-/* Cú pháp Highlight LaTeX */
+/* Tô màu cú pháp LaTeX (Highlighting) */
 .hl-keyword { color: #db3c6e !important; font-weight: bold !important; }
 .hl-env { color: #2563eb !important; font-weight: bold !important; }
 body.dark .hl-env { color: #60a5fa !important; font-weight: bold !important; }
@@ -166,6 +197,57 @@ body.dark .hl-math { color: #34d399 !important; }
 .custom-scroll::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
 body.dark .custom-scroll::-webkit-scrollbar-thumb { background: #475569; }
 .custom-scroll::-webkit-scrollbar-thumb:hover { background: var(--pimax-main); }
+
+/* =========================================================
+   LATEX AUTOCOMPLETE DROPDOWN MENU
+   ========================================================= */
+
+.autocomplete-dropdown {
+  position: absolute !important;
+  z-index: 100 !important;
+  min-width: 180px !important;
+  max-width: 280px !important;
+  max-height: 200px !important;
+  overflow-y: auto !important;
+  background-color: var(--bg-card) !important;
+  border: 1px solid var(--pimax-main) !important;
+  border-radius: 0.5rem !important;
+  box-shadow: 0 10px 25px -5px rgba(219, 60, 110, 0.25), 0 8px 10px -6px rgba(0, 0, 0, 0.1) !important;
+  display: none;
+  padding: 4px 0 !important;
+}
+
+.autocomplete-item {
+  padding: 6px 12px !important;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace !important;
+  font-size: 0.75rem !important;
+  color: var(--text-main) !important;
+  cursor: pointer !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: space-between !important;
+  transition: background-color 0.15s ease !important;
+}
+
+.autocomplete-item:hover,
+.autocomplete-item.active {
+  background-color: var(--pimax-light) !important;
+  color: var(--pimax-main) !important;
+  font-weight: bold !important;
+}
+
+body.dark .autocomplete-item:hover,
+body.dark .autocomplete-item.active {
+  background-color: var(--pimax-dark-bg) !important;
+  color: #fca5c0 !important;
+}
+
+.autocomplete-item-desc {
+  font-size: 0.6875rem !important;
+  opacity: 0.6 !important;
+  font-weight: normal !important;
+  margin-left: 8px !important;
+}
 
 textarea:focus, input:focus, select:focus {
   outline: none !important;
