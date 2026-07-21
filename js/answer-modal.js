@@ -2,7 +2,7 @@
 let parsedQuestions = [];
 
 /**
- * Hàm tách các tham số ngoặc nhọn {...} cấp 1 (xử lý tốt ngoặc lồng nhau như \frac{}{})
+ * Thuật toán đếm ngoặc lồng nhau chuẩn xác cho các hàm LaTeX
  */
 function extractCurlyBrackets(text) {
   const results = [];
@@ -55,18 +55,22 @@ function openAnswerModal() {
     let currentAnswers = [];
 
     if (isTF) {
-      const choicesBlockMatch = innerContent.match(/\\choiceTF\s*([\s\S]*?)(?=\\loigiai|\n\s*\n|$)/);
-      if (choicesBlockMatch) {
-        const optionMatches = extractCurlyBrackets(choicesBlockMatch[1]);
+      const tfIdx = innerContent.indexOf('\\choiceTF');
+      if (tfIdx !== -1) {
+        const afterTF = innerContent.substring(tfIdx + 9);
+        const optionMatches = extractCurlyBrackets(afterTF);
         currentAnswers = optionMatches.slice(0, 4).map(m => m.innerContent.includes('\\True'));
       } else {
         currentAnswers = [false, false, false, false];
       }
     } else if (!isShortAns) {
-      const choicesBlockMatch = innerContent.match(/\\choice\s*([\s\S]*?)(?=\\loigiai|\n\s*\n|$)/);
+      // Phân biệt chính xác \choice với \choiceTF
+      const choiceRegex = /\\choice\b/;
+      const choiceMatch = choiceRegex.exec(innerContent);
       let selectedOption = null;
-      if (choicesBlockMatch) {
-        const optionMatches = extractCurlyBrackets(choicesBlockMatch[1]);
+      if (choiceMatch) {
+        const afterChoice = innerContent.substring(choiceMatch.index + choiceMatch[0].length);
+        const optionMatches = extractCurlyBrackets(afterChoice);
         const labels = ['A', 'B', 'C', 'D'];
         optionMatches.slice(0, 4).forEach((m, idx) => {
           if (m.innerContent.includes('\\True')) {
@@ -243,32 +247,48 @@ function applyAnswersToOutput() {
     let updatedInner = innerContent;
 
     if (qData.isTF) {
-      updatedInner = updatedInner.replace(/(\\choiceTF[\s\S]*?)(?=\\loigiai|\n\s*\n|$)/, (choiceBlock) => {
-        const optionMatches = extractCurlyBrackets(choiceBlock);
-        if (optionMatches.length < 4) return choiceBlock;
+      const tfIdx = updatedInner.indexOf('\\choiceTF');
+      if (tfIdx !== -1) {
+        const prefix = updatedInner.substring(0, tfIdx + 9);
+        const suffixArea = updatedInner.substring(tfIdx + 9);
+        const optionMatches = extractCurlyBrackets(suffixArea);
 
-        const updatedOptions = optionMatches.slice(0, 4).map((m, idx) => {
-          let cleanContent = m.innerContent.replace(/\\True\s*/g, '').trim();
-          const isTrue = qData.selectedAnswer && qData.selectedAnswer[idx] === true;
-          return `{${isTrue ? '\\True ' : ''}${cleanContent}}`;
-        });
+        if (optionMatches.length >= 4) {
+          const lastOptionEnd = optionMatches[3].end;
+          const tail = suffixArea.substring(lastOptionEnd);
 
-        return `\\choiceTF\n    ${updatedOptions.join('\n    ')}\n    `;
-      });
+          const updatedOptionsStr = optionMatches.slice(0, 4).map((m, idx) => {
+            let cleanContent = m.innerContent.replace(/\\True\s*/g, '').trim();
+            const isTrue = qData.selectedAnswer && qData.selectedAnswer[idx] === true;
+            return `{${isTrue ? '\\True ' : ''}${cleanContent}}`;
+          }).join('\n    ');
+
+          updatedInner = `${prefix}\n    ${updatedOptionsStr}${tail}`;
+        }
+      }
     } else if (!qData.isShortAns) {
-      updatedInner = updatedInner.replace(/(\\choice[\s\S]*?)(?=\\loigiai|\n\s*\n|$)/, (choiceBlock) => {
-        const optionMatches = extractCurlyBrackets(choiceBlock);
-        if (optionMatches.length < 4) return choiceBlock;
+      const choiceRegex = /\\choice\b/;
+      const choiceMatch = choiceRegex.exec(updatedInner);
+      if (choiceMatch) {
+        const cPos = choiceMatch.index;
+        const prefix = updatedInner.substring(0, cPos + choiceMatch[0].length);
+        const suffixArea = updatedInner.substring(cPos + choiceMatch[0].length);
+        const optionMatches = extractCurlyBrackets(suffixArea);
 
-        const labels = ['A', 'B', 'C', 'D'];
-        const updatedOptions = optionMatches.slice(0, 4).map((m, idx) => {
-          let cleanContent = m.innerContent.replace(/\\True\s*/g, '').trim();
-          const isTrue = qData.selectedAnswer === labels[idx];
-          return `{${isTrue ? '\\True ' : ''}${cleanContent}}`;
-        });
+        if (optionMatches.length >= 4) {
+          const lastOptionEnd = optionMatches[3].end;
+          const tail = suffixArea.substring(lastOptionEnd);
+          const labels = ['A', 'B', 'C', 'D'];
 
-        return `\\choice\n    ${updatedOptions.join('\n    ')}\n    `;
-      });
+          const updatedOptionsStr = optionMatches.slice(0, 4).map((m, idx) => {
+            let cleanContent = m.innerContent.replace(/\\True\s*/g, '').trim();
+            const isTrue = qData.selectedAnswer === labels[idx];
+            return `{${isTrue ? '\\True ' : ''}${cleanContent}}`;
+          }).join('\n    ');
+
+          updatedInner = `${prefix}\n    ${updatedOptionsStr}${tail}`;
+        }
+      }
     }
 
     return `\\begin{ex}${updatedInner}\\end{ex}`;
