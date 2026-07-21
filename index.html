@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>PimaX Tool Beta — Bộ Công Cụ LaTeX & PDF Toàn Diện</title>
+  <title>PimaX Tool — Bộ Công Cụ LaTeX & PDF Toàn Diện</title>
   <!-- Tailwind CSS -->
   <script src="https://cdn.tailwindcss.com"></script>
   <!-- Lucide Icons -->
@@ -13,30 +13,30 @@
   <!-- JSZip library -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
   <!-- Custom Style -->
-  <link rel="stylesheet" href="css/style.css?v=9.0">
+  <link rel="stylesheet" href="css/style.css?v=10.0">
 </head>
-<body class="min-h-screen font-sans flex flex-col transition-colors duration-200 bg-slate-50 dark:bg-slate-900 text-slate-800 dark:text-slate-100">
+<body class="min-h-screen font-sans flex flex-col transition-colors duration-200 bg-slate-100 dark:bg-slate-900 text-slate-800 dark:text-slate-100">
 
   <!-- ==================== HEADER & TOP NAVIGATION ==================== -->
-  <header class="theme-bg border-b border-slate-200 dark:border-slate-800 sticky top-0 z-50 shadow-sm backdrop-blur-md bg-white/90 dark:bg-slate-900/90">
+  <header class="bg-white dark:bg-slate-900 border-b border-slate-300 dark:border-slate-800 sticky top-0 z-50 shadow-sm">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 py-3 flex flex-col md:flex-row justify-between items-center gap-4">
       <div class="flex items-center space-x-3">
-        <div class="bg-rose-500 text-white p-2 rounded-xl shadow-md shadow-rose-500/20">
+        <div class="bg-rose-600 text-white p-2 rounded-xl shadow-md">
           <i data-lucide="sparkles" class="w-5 h-5"></i>
         </div>
         <div>
-          <h1 class="text-lg font-bold tracking-tight flex items-center gap-2">
+          <h1 class="text-lg font-bold tracking-tight flex items-center gap-2 text-slate-900 dark:text-white">
             PimaX Tool
-            <span class="text-[10px] bg-rose-100 dark:bg-rose-950 text-rose-600 dark:text-rose-400 px-2 py-0.5 font-semibold border border-rose-200 dark:border-rose-800 rounded-full">Beta</span>
+            <span class="text-[10px] bg-rose-100 dark:bg-rose-950 text-rose-700 dark:text-rose-400 px-2 py-0.5 font-bold border border-rose-300 dark:border-rose-800 rounded-full">Beta</span>
           </h1>
           <p class="text-xs text-slate-500 dark:text-slate-400">Bộ công cụ chuẩn hóa LaTeX & Xử lý tài liệu toán</p>
         </div>
       </div>
 
       <!-- NAV MENU CHÍNH -->
-      <nav class="flex bg-slate-100 dark:bg-slate-800/80 p-1 rounded-xl border border-slate-200 dark:border-slate-700/60">
-        <button id="nav-btn-1" onclick="switchMainMenu(1)" class="px-4 py-1.5 text-xs font-semibold rounded-lg transition-all flex items-center space-x-2 bg-white dark:bg-slate-700 text-slate-800 dark:text-white shadow-sm">
-          <i data-lucide="file-code-2" class="w-4 h-4 text-rose-500"></i>
+      <nav class="flex bg-slate-200/80 dark:bg-slate-800 p-1 rounded-xl border border-slate-300 dark:border-slate-700">
+        <button id="nav-btn-1" onclick="switchMainMenu(1)" class="px-4 py-1.5 text-xs font-semibold rounded-lg transition-all flex items-center space-x-2 bg-white dark:bg-slate-700 text-slate-900 dark:text-white shadow">
+          <i data-lucide="file-code-2" class="w-4 h-4 text-rose-600"></i>
           <span>Chuẩn Hóa LaTeX</span>
         </button>
         <button id="nav-btn-2" onclick="switchMainMenu(2)" class="px-4 py-1.5 text-xs font-medium rounded-lg transition-all flex items-center space-x-2 text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white">
@@ -57,59 +57,59 @@
     <!-- MENU 1: CHUẨN HÓA LATEX -->
     <section id="menu-section-1" class="space-y-4">
       
-      <!-- THANH CHỌN CHỨC NĂNG PHONG CÁCH MODERN PILL UI -->
-      <div class="flex items-center justify-between border-b border-slate-200 dark:border-slate-800 pb-3 mb-2">
-        <div class="flex items-center space-x-1.5 p-1 bg-slate-200/60 dark:bg-slate-800/60 rounded-xl border border-slate-200 dark:border-slate-700/60">
+      <!-- THANH CHỌN LOẠI CÂU HỎI (THANH CÔNG CỤ TƯƠNG PHẢN CAO, ĐÚNG MÀU PIMAX) -->
+      <div class="flex items-center justify-between border-b border-slate-300 dark:border-slate-800 pb-3 mb-2">
+        <div class="flex items-center space-x-2 p-1.5 bg-slate-200 dark:bg-slate-800 rounded-xl border border-slate-300 dark:border-slate-700 shadow-inner">
           
           <button id="sub-btn-1" onclick="switchSubMode(1)" 
-                  class="px-4 py-1.5 text-xs font-medium rounded-lg transition-all duration-150 flex items-center space-x-2 bg-white dark:bg-slate-700 text-slate-900 dark:text-white shadow-sm border border-slate-200/80 dark:border-slate-600">
-            <i data-lucide="check-square" class="w-3.5 h-3.5 text-rose-500"></i>
+                  class="px-4 py-2 text-xs font-bold rounded-lg transition-all flex items-center space-x-2 bg-rose-600 text-white shadow-md">
+            <i data-lucide="check-square" class="w-4 h-4"></i>
             <span>Trắc nghiệm 4 phương án</span>
-            <span class="text-[10px] font-mono opacity-60 bg-slate-100 dark:bg-slate-800 px-1.5 py-0.5 rounded">
+            <span class="text-[10px] font-mono bg-rose-700/80 text-rose-100 px-2 py-0.5 rounded border border-rose-500/40">
               \choice
             </span>
           </button>
 
           <button id="sub-btn-2" onclick="switchSubMode(2)" 
-                  class="px-4 py-1.5 text-xs font-medium rounded-lg transition-all duration-150 flex items-center space-x-2 text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-white/50 dark:hover:bg-slate-700/50">
-            <i data-lucide="list-checks" class="w-3.5 h-3.5 opacity-70"></i>
+                  class="px-4 py-2 text-xs font-semibold rounded-lg transition-all flex items-center space-x-2 bg-white dark:bg-slate-700 text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-600 border border-slate-300 dark:border-slate-600 shadow-sm">
+            <i data-lucide="list-checks" class="w-4 h-4 text-slate-500 dark:text-slate-400"></i>
             <span>Câu hỏi Đúng / Sai</span>
-            <span class="text-[10px] font-mono opacity-60 bg-slate-200/60 dark:bg-slate-800 px-1.5 py-0.5 rounded">
+            <span class="text-[10px] font-mono bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 px-2 py-0.5 rounded border border-slate-200 dark:border-slate-700">
               \choiceTF
             </span>
           </button>
 
           <button id="sub-btn-3" onclick="switchSubMode(3)" 
-                  class="px-4 py-1.5 text-xs font-medium rounded-lg transition-all duration-150 flex items-center space-x-2 text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-white/50 dark:hover:bg-slate-700/50">
-            <i data-lucide="pen-tool" class="w-3.5 h-3.5 opacity-70"></i>
+                  class="px-4 py-2 text-xs font-semibold rounded-lg transition-all flex items-center space-x-2 bg-white dark:bg-slate-700 text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-600 border border-slate-300 dark:border-slate-600 shadow-sm">
+            <i data-lucide="pen-tool" class="w-4 h-4 text-slate-500 dark:text-slate-400"></i>
             <span>Trả lời ngắn</span>
-            <span class="text-[10px] font-mono opacity-60 bg-slate-200/60 dark:bg-slate-800 px-1.5 py-0.5 rounded">
+            <span class="text-[10px] font-mono bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 px-2 py-0.5 rounded border border-slate-200 dark:border-slate-700">
               \shortans
             </span>
           </button>
 
         </div>
 
-        <div class="hidden sm:flex items-center space-x-2 text-xs text-slate-500">
-          <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
-          <span id="current-mode-label" class="font-medium text-slate-700 dark:text-slate-300">Chế độ: Trắc nghiệm 4 phương án (\choice)</span>
+        <div class="hidden sm:flex items-center space-x-2 text-xs text-slate-600 dark:text-slate-400">
+          <span class="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse"></span>
+          <span id="current-mode-label" class="font-semibold text-slate-800 dark:text-slate-200">Chế độ: Trắc nghiệm 4 phương án (\choice)</span>
         </div>
       </div>
 
       <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
         <!-- Input Box 1 -->
-        <div class="theme-bg border border-slate-200 dark:border-slate-800 p-4 shadow-sm flex flex-col h-[640px] rounded-xl">
+        <div class="bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-800 p-4 shadow-sm flex flex-col h-[640px] rounded-xl">
           <div class="flex justify-between items-center text-xs font-bold h-8 mb-3 pb-2 border-b border-slate-200 dark:border-slate-800 shrink-0">
-            <span class="flex items-center gap-1.5 text-slate-700 dark:text-slate-200"><i data-lucide="file-input" class="w-4 h-4 text-rose-500"></i> Dữ liệu thô đầu vào:</span>
+            <span class="flex items-center gap-1.5 text-slate-800 dark:text-slate-200"><i data-lucide="file-input" class="w-4 h-4 text-rose-600"></i> Dữ liệu thô đầu vào:</span>
             <div class="flex items-center space-x-1.5">
-              <button id="btn-undo-input-ex" onclick="undo('input-ex')" disabled class="btn-history theme-sub-bg hover-pimax px-2 h-7 flex items-center gap-1 border border-slate-200 dark:border-slate-700 rounded-md transition text-[11px]" title="Hoàn tác (Ctrl+Z)"><i data-lucide="undo-2" class="w-3.5 h-3.5"></i></button>
-              <button id="btn-redo-input-ex" onclick="redo('input-ex')" disabled class="btn-history theme-sub-bg hover-pimax px-2 h-7 flex items-center gap-1 border border-slate-200 dark:border-slate-700 rounded-md transition text-[11px]" title="Làm lại (Ctrl+Y)"><i data-lucide="redo-2" class="w-3.5 h-3.5"></i></button>
+              <button id="btn-undo-input-ex" onclick="undo('input-ex')" disabled class="btn-history bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 px-2 h-7 flex items-center gap-1 border border-slate-300 dark:border-slate-700 rounded-md transition text-[11px]" title="Hoàn tác (Ctrl+Z)"><i data-lucide="undo-2" class="w-3.5 h-3.5"></i></button>
+              <button id="btn-redo-input-ex" onclick="redo('input-ex')" disabled class="btn-history bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 px-2 h-7 flex items-center gap-1 border border-slate-300 dark:border-slate-700 rounded-md transition text-[11px]" title="Làm lại (Ctrl+Y)"><i data-lucide="redo-2" class="w-3.5 h-3.5"></i></button>
               <span class="opacity-20">|</span>
-              <label class="cursor-pointer theme-sub-bg hover-pimax px-2.5 h-7 flex items-center transition border border-slate-200 dark:border-slate-700 rounded-md gap-1 text-xs">
-                <i data-lucide="upload" class="w-3 h-3"></i> Tải file
+              <label class="cursor-pointer bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 px-2.5 h-7 flex items-center transition border border-slate-300 dark:border-slate-700 rounded-md gap-1 text-xs font-semibold">
+                <i data-lucide="upload" class="w-3.5 h-3.5"></i> Tải file
                 <input type="file" accept=".tex,.txt" class="hidden" onchange="loadFile(event, 'input-ex')">
               </label>
-              <button onclick="clearText('input-ex')" class="hover:underline h-7 px-1 flex items-center opacity-75">Xóa</button>
+              <button onclick="clearText('input-ex')" class="hover:underline h-7 px-1 flex items-center text-rose-600 font-medium">Xóa</button>
             </div>
           </div>
           <!-- EDITOR CONTAINER -->
@@ -117,79 +117,82 @@
             <div id="lines-input-ex" class="line-numbers">1</div>
             <div class="editor-area">
               <textarea id="input-ex" oninput="handleInput('input-ex')" onkeydown="handleKeyDown(event, 'input-ex')" onscroll="syncScroll('input-ex')" class="code-input custom-scroll" placeholder="Dán nội dung câu hỏi thô vào đây..."></textarea>
-              <div id="autocomplete-input-ex" class="autocomplete-dropdown theme-bg"></div>
+              <div id="autocomplete-input-ex" class="autocomplete-dropdown bg-white dark:bg-slate-800"></div>
             </div>
           </div>
         </div>
 
         <!-- Output Box 1 -->
-        <div class="theme-bg border border-slate-200 dark:border-slate-800 p-4 shadow-sm flex flex-col h-[640px] rounded-xl">
+        <div class="bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-800 p-4 shadow-sm flex flex-col h-[640px] rounded-xl">
           <div class="flex justify-between items-center text-xs font-bold h-8 mb-2 pb-2 border-b border-slate-200 dark:border-slate-800 shrink-0">
-            <span class="flex items-center gap-1.5 text-slate-700 dark:text-slate-200"><i data-lucide="file-output" class="w-4 h-4 text-rose-500"></i> Kết quả chuẩn hóa:</span>
+            <span class="flex items-center gap-1.5 text-slate-800 dark:text-slate-200"><i data-lucide="file-output" class="w-4 h-4 text-rose-600"></i> Kết quả chuẩn hóa:</span>
             
+            <!-- TOOLBAR TRÊN OUTPUT: RÕ RÀNG & TƯƠNG PHẢN -->
             <div class="flex items-center space-x-1">
-              <button id="btn-undo-output-ex" onclick="undo('output-ex')" disabled class="btn-history theme-sub-bg hover-pimax p-1.5 h-7 w-7 rounded-md flex items-center justify-center border border-slate-200 dark:border-slate-700 transition" title="Hoàn tác (Ctrl+Z)">
+              <button id="btn-undo-output-ex" onclick="undo('output-ex')" disabled class="btn-history bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 p-1.5 h-7 w-7 rounded-md flex items-center justify-center border border-slate-300 dark:border-slate-700 transition" title="Hoàn tác (Ctrl+Z)">
                 <i data-lucide="undo-2" class="w-3.5 h-3.5"></i>
               </button>
-              <button id="btn-redo-output-ex" onclick="redo('output-ex')" disabled class="btn-history theme-sub-bg hover-pimax p-1.5 h-7 w-7 rounded-md flex items-center justify-center border border-slate-200 dark:border-slate-700 transition" title="Làm lại (Ctrl+Y)">
+              <button id="btn-redo-output-ex" onclick="redo('output-ex')" disabled class="btn-history bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 p-1.5 h-7 w-7 rounded-md flex items-center justify-center border border-slate-300 dark:border-slate-700 transition" title="Làm lại (Ctrl+Y)">
                 <i data-lucide="redo-2" class="w-3.5 h-3.5"></i>
               </button>
               <span class="opacity-20">|</span>
-              <button onclick="openAnswerModal()" class="bg-rose-500 hover:bg-rose-600 text-white px-2.5 h-7 flex items-center gap-1 rounded-md transition font-medium text-[11px] shadow-sm" title="Bảng chèn đáp án trắc nghiệm nhanh">
+              <button onclick="openAnswerModal()" class="bg-rose-600 hover:bg-rose-700 text-white px-2.5 h-7 flex items-center gap-1 rounded-md transition font-semibold text-[11px] shadow-sm" title="Bảng chèn đáp án trắc nghiệm nhanh">
                 <i data-lucide="grid" class="w-3.5 h-3.5"></i>
                 <span>Thêm đáp án</span>
               </button>
               <span class="opacity-20">|</span>
-              <button onclick="applyAutoMath('output-ex')" class="theme-sub-bg hover-pimax p-1.5 h-7 w-7 rounded-md flex items-center justify-center border border-slate-200 dark:border-slate-700 transition" title="Tự động bọc $">
-                <i data-lucide="variable" class="w-4 h-4 text-rose-500"></i>
+              <button onclick="applyAutoMath('output-ex')" class="bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 p-1.5 h-7 w-7 rounded-md flex items-center justify-center border border-slate-300 dark:border-slate-700 transition" title="Tự động bọc $">
+                <i data-lucide="variable" class="w-4 h-4 text-rose-600"></i>
               </button>
-              <button onclick="convertArrayToAligned('output-ex')" class="theme-sub-bg hover-pimax p-1.5 h-7 w-7 rounded-md flex items-center justify-center border border-slate-200 dark:border-slate-700 transition" title="Chuyển array thành aligned">
-                <i data-lucide="columns-2" class="w-4 h-4 text-rose-500"></i>
+              <button onclick="convertArrayToAligned('output-ex')" class="bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 p-1.5 h-7 w-7 rounded-md flex items-center justify-center border border-slate-300 dark:border-slate-700 transition" title="Chuyển array thành aligned">
+                <i data-lucide="columns-2" class="w-4 h-4 text-rose-600"></i>
               </button>
-              <button onclick="applyCleanSpacingTool('output-ex')" class="theme-sub-bg hover-pimax p-1.5 h-7 w-7 rounded-md flex items-center justify-center border border-slate-200 dark:border-slate-700 transition" title="Dọn dẹp khoảng trắng dấu câu">
-                <svg class="w-4 h-4 text-rose-500" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m2 22 10-10"/><path d="M9.5 12.5 14 17"/><path d="m15 11 3 3"/><path d="m17 7 2 2"/><path d="M19 2l3 3-7 7-3-3z"/></svg>
+              <button onclick="applyCleanSpacingTool('output-ex')" class="bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 p-1.5 h-7 w-7 rounded-md flex items-center justify-center border border-slate-300 dark:border-slate-700 transition" title="Dọn dẹp khoảng trắng dấu câu">
+                <svg class="w-4 h-4 text-rose-600" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m2 22 10-10"/><path d="M9.5 12.5 14 17"/><path d="m15 11 3 3"/><path d="m17 7 2 2"/><path d="M19 2l3 3-7 7-3-3z"/></svg>
               </button>
-              <button onclick="wrapSelectionWithEnv('output-ex', 'itemize')" class="theme-sub-bg hover-pimax p-1.5 h-7 w-7 rounded-md flex items-center justify-center border border-slate-200 dark:border-slate-700 transition" title="Chuyển itemize">
+              <button onclick="wrapSelectionWithEnv('output-ex', 'itemize')" class="bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 p-1.5 h-7 w-7 rounded-md flex items-center justify-center border border-slate-300 dark:border-slate-700 transition" title="Chuyển itemize">
                 <i data-lucide="list" class="w-4 h-4"></i>
               </button>
-              <button onclick="wrapSelectionWithEnv('output-ex', 'enumerate')" class="theme-sub-bg hover-pimax p-1.5 h-7 w-7 rounded-md flex items-center justify-center border border-slate-200 dark:border-slate-700 transition" title="Chuyển enumerate">
+              <button onclick="wrapSelectionWithEnv('output-ex', 'enumerate')" class="bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 p-1.5 h-7 w-7 rounded-md flex items-center justify-center border border-slate-300 dark:border-slate-700 transition" title="Chuyển enumerate">
                 <i data-lucide="list-ordered" class="w-4 h-4"></i>
               </button>
               <span class="opacity-20">|</span>
-              <button onclick="copyToClipboard('output-ex')" class="theme-sub-bg hover-pimax p-1.5 h-7 w-7 rounded-md flex items-center justify-center border border-slate-200 dark:border-slate-700 transition" title="Copy">
-                <i data-lucide="copy" class="w-3.5 h-3.5"></i>
+              
+              <!-- NÚT COPY & DOWNLOAD HOẠT ĐỘNG CHUẨN 100% -->
+              <button type="button" onclick="copyToClipboard('output-ex')" class="bg-slate-200 dark:bg-slate-700 hover:bg-slate-300 dark:hover:bg-slate-600 text-slate-800 dark:text-white p-1.5 h-7 w-7 rounded-md flex items-center justify-center border border-slate-400 dark:border-slate-500 transition shadow-sm" title="Sao chép toàn bộ">
+                <i data-lucide="copy" class="w-4 h-4"></i>
               </button>
-              <button onclick="downloadSingleText('output-ex', 'chuan_hoa_ex.tex')" class="theme-sub-bg hover-pimax p-1.5 h-7 w-7 rounded-md flex items-center justify-center border border-slate-200 dark:border-slate-700 transition" title="Tải file .tex">
-                <i data-lucide="download" class="w-3.5 h-3.5"></i>
+              <button type="button" onclick="downloadSingleText('output-ex', 'chuan_hoa_ex.tex')" class="bg-slate-200 dark:bg-slate-700 hover:bg-slate-300 dark:hover:bg-slate-600 text-slate-800 dark:text-white p-1.5 h-7 w-7 rounded-md flex items-center justify-center border border-slate-400 dark:border-slate-500 transition shadow-sm" title="Tải file .tex">
+                <i data-lucide="download" class="w-4 h-4"></i>
               </button>
             </div>
           </div>
 
           <!-- Tìm kiếm & thay thế -->
-          <div class="theme-sub-bg p-2 border border-slate-200 dark:border-slate-800 rounded-lg mb-2 flex flex-col gap-2 text-xs shrink-0">
+          <div class="bg-slate-100 dark:bg-slate-800/80 p-2 border border-slate-300 dark:border-slate-700 rounded-lg mb-2 flex flex-col gap-2 text-xs shrink-0">
             <div class="flex items-center gap-2 flex-wrap">
               <div class="flex items-center space-x-1 flex-1 min-w-[150px]">
-                <i data-lucide="search" class="w-3.5 h-3.5 opacity-50"></i>
-                <input type="text" id="find-output-ex" placeholder="Tìm kiếm..." oninput="findText('output-ex')" class="w-full theme-bg border border-slate-200 dark:border-slate-700 rounded px-2 py-1 outline-none">
+                <i data-lucide="search" class="w-3.5 h-3.5 opacity-60"></i>
+                <input type="text" id="find-output-ex" placeholder="Tìm kiếm..." oninput="findText('output-ex')" class="w-full bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded px-2 py-1 outline-none">
               </div>
-              <div class="flex items-center space-x-1 border border-slate-200 dark:border-slate-700 rounded theme-bg px-1 py-0.5">
-                <button onclick="navigateSearch('output-ex', -1)" class="hover:opacity-100 p-1 rounded opacity-75"><i data-lucide="chevron-left" class="w-3.5 h-3.5"></i></button>
-                <span id="count-output-ex" class="text-[11px] font-mono px-1 min-w-[50px] text-center">0/0</span>
-                <button onclick="navigateSearch('output-ex', 1)" class="hover:opacity-100 p-1 rounded opacity-75"><i data-lucide="chevron-right" class="w-3.5 h-3.5"></i></button>
+              <div class="flex items-center space-x-1 border border-slate-300 dark:border-slate-700 rounded bg-white dark:bg-slate-900 px-1 py-0.5">
+                <button onclick="navigateSearch('output-ex', -1)" class="hover:bg-slate-200 p-1 rounded"><i data-lucide="chevron-left" class="w-3.5 h-3.5"></i></button>
+                <span id="count-output-ex" class="text-[11px] font-mono px-1 min-w-[50px] text-center font-bold">0/0</span>
+                <button onclick="navigateSearch('output-ex', 1)" class="hover:bg-slate-200 p-1 rounded"><i data-lucide="chevron-right" class="w-3.5 h-3.5"></i></button>
               </div>
-              <label class="flex items-center space-x-1 cursor-pointer select-none opacity-75">
+              <label class="flex items-center space-x-1 cursor-pointer select-none font-medium text-slate-700 dark:text-slate-300">
                 <input type="checkbox" id="match-case-output-ex" onchange="findText('output-ex')" class="rounded">
                 <span>Match case</span>
               </label>
             </div>
             <div class="flex items-center gap-2">
               <div class="flex items-center space-x-1 flex-1">
-                <i data-lucide="replace" class="w-3.5 h-3.5 opacity-50"></i>
-                <input type="text" id="replace-output-ex" placeholder="Thay thế bằng..." class="w-full theme-bg border border-slate-200 dark:border-slate-700 rounded px-2 py-1 outline-none">
+                <i data-lucide="replace" class="w-3.5 h-3.5 opacity-60"></i>
+                <input type="text" id="replace-output-ex" placeholder="Thay thế bằng..." class="w-full bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded px-2 py-1 outline-none">
               </div>
               <div class="flex items-center space-x-1">
-                <button onclick="replaceText('output-ex', false)" class="theme-sub-bg hover-pimax border border-slate-200 dark:border-slate-700 rounded px-2.5 py-1 font-medium transition opacity-75 hover:opacity-100">Thay</button>
-                <button onclick="replaceText('output-ex', true)" class="bg-rose-500 hover:bg-rose-600 text-white rounded px-2.5 py-1 font-medium transition">Thay tất cả</button>
+                <button onclick="replaceText('output-ex', false)" class="bg-white dark:bg-slate-700 hover:bg-slate-200 border border-slate-300 dark:border-slate-600 rounded px-2.5 py-1 font-semibold transition">Thay</button>
+                <button onclick="replaceText('output-ex', true)" class="bg-rose-600 hover:bg-rose-700 text-white rounded px-2.5 py-1 font-semibold transition shadow-sm">Thay tất cả</button>
               </div>
             </div>
           </div>
@@ -198,14 +201,14 @@
             <div id="lines-output-ex" class="line-numbers">1</div>
             <div class="editor-area">
               <textarea id="output-ex" oninput="handleInput('output-ex')" onkeydown="handleKeyDown(event, 'output-ex')" onscroll="syncScroll('output-ex')" class="code-input custom-scroll" placeholder="Kết quả chuẩn hóa sẽ xuất hiện tại đây..."></textarea>
-              <div id="autocomplete-output-ex" class="autocomplete-dropdown theme-bg"></div>
+              <div id="autocomplete-output-ex" class="autocomplete-dropdown bg-white dark:bg-slate-800"></div>
             </div>
           </div>
         </div>
       </div>
 
       <div class="flex justify-end pt-2">
-        <button onclick="processExEnvironment()" class="bg-rose-500 hover:bg-rose-600 text-white font-semibold px-6 py-2.5 rounded-xl transition flex items-center space-x-2 shadow-md shadow-rose-500/20">
+        <button onclick="processExEnvironment()" class="bg-rose-600 hover:bg-rose-700 text-white font-bold px-7 py-2.5 rounded-xl transition flex items-center space-x-2 shadow-md">
           <i data-lucide="wand-2" class="w-4 h-4"></i>
           <span id="btn-ex-label">Chuẩn Hóa Ngay</span>
         </button>
@@ -214,93 +217,93 @@
 
     <!-- MENU 2: LỌC TIKZ -->
     <section id="menu-section-2" class="hidden space-y-4">
-      <div class="theme-bg p-4 border border-slate-200 dark:border-slate-800 rounded-xl shadow-sm"><p class="text-sm opacity-75">Tự động lọc và tách toàn bộ các khối <code class="font-bold">\begin{tikzpicture}...\end{tikzpicture}</code> ra khỏi file LaTeX gốc.</p></div>
+      <div class="bg-white dark:bg-slate-900 p-4 border border-slate-300 dark:border-slate-800 rounded-xl shadow-sm"><p class="text-sm font-medium">Tự động lọc và tách toàn bộ các khối <code class="font-bold text-rose-600">\begin{tikzpicture}...\end{tikzpicture}</code> ra khỏi file LaTeX gốc.</p></div>
       <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
         <!-- Input TikZ -->
-        <div class="theme-bg border border-slate-200 dark:border-slate-800 p-4 shadow-sm flex flex-col h-[580px] rounded-xl">
+        <div class="bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-800 p-4 shadow-sm flex flex-col h-[580px] rounded-xl">
           <div class="flex justify-between items-center text-xs font-bold h-8 mb-3 pb-2 border-b border-slate-200 dark:border-slate-800 shrink-0">
-            <span class="flex items-center gap-1.5"><i data-lucide="file-text" class="w-4 h-4 text-rose-500"></i> Code LaTeX gốc:</span>
+            <span class="flex items-center gap-1.5"><i data-lucide="file-text" class="w-4 h-4 text-rose-600"></i> Code LaTeX gốc:</span>
             <div class="flex items-center space-x-1.5">
-              <button id="btn-undo-input-tikz" onclick="undo('input-tikz')" disabled class="btn-history theme-sub-bg hover-pimax px-2 h-7 border border-slate-200 dark:border-slate-700 rounded-md transition text-[11px]"><i data-lucide="undo-2" class="w-3.5 h-3.5"></i></button>
-              <button id="btn-redo-input-tikz" onclick="redo('input-tikz')" disabled class="btn-history theme-sub-bg hover-pimax px-2 h-7 border border-slate-200 dark:border-slate-700 rounded-md transition text-[11px]"><i data-lucide="redo-2" class="w-3.5 h-3.5"></i></button>
+              <button id="btn-undo-input-tikz" onclick="undo('input-tikz')" disabled class="btn-history bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 px-2 h-7 border border-slate-300 dark:border-slate-700 rounded-md transition text-[11px]"><i data-lucide="undo-2" class="w-3.5 h-3.5"></i></button>
+              <button id="btn-redo-input-tikz" onclick="redo('input-tikz')" disabled class="btn-history bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 px-2 h-7 border border-slate-300 dark:border-slate-700 rounded-md transition text-[11px]"><i data-lucide="redo-2" class="w-3.5 h-3.5"></i></button>
               <span class="opacity-20">|</span>
-              <label class="cursor-pointer theme-sub-bg hover-pimax px-2.5 h-7 flex items-center transition border border-slate-200 dark:border-slate-700 rounded-md gap-1 text-xs"><i data-lucide="upload" class="w-3 h-3"></i> Tải file<input type="file" accept=".tex,.txt" class="hidden" onchange="loadFile(event, 'input-tikz')"></label>
-              <button onclick="clearText('input-tikz')" class="hover:underline h-7 px-1 flex items-center opacity-75">Xóa</button>
+              <label class="cursor-pointer bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 px-2.5 h-7 flex items-center transition border border-slate-300 dark:border-slate-700 rounded-md gap-1 text-xs font-semibold"><i data-lucide="upload" class="w-3.5 h-3.5"></i> Tải file<input type="file" accept=".tex,.txt" class="hidden" onchange="loadFile(event, 'input-tikz')"></label>
+              <button onclick="clearText('input-tikz')" class="hover:underline h-7 px-1 flex items-center text-rose-600 font-medium">Xóa</button>
             </div>
           </div>
           <div class="editor-container">
             <div id="lines-input-tikz" class="line-numbers">1</div>
             <div class="editor-area">
               <textarea id="input-tikz" oninput="handleInput('input-tikz')" onkeydown="handleKeyDown(event, 'input-tikz')" onscroll="syncScroll('input-tikz')" class="code-input custom-scroll" placeholder="Dán nội dung LaTeX chứa TikZ vào đây..."></textarea>
-              <div id="autocomplete-input-tikz" class="autocomplete-dropdown theme-bg"></div>
+              <div id="autocomplete-input-tikz" class="autocomplete-dropdown bg-white dark:bg-slate-800"></div>
             </div>
           </div>
         </div>
 
         <!-- Output Main -->
-        <div class="theme-bg border border-slate-200 dark:border-slate-800 p-4 shadow-sm flex flex-col h-[580px] rounded-xl">
+        <div class="bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-800 p-4 shadow-sm flex flex-col h-[580px] rounded-xl">
           <div class="flex justify-between items-center text-xs font-bold h-8 mb-2 pb-2 border-b border-slate-200 dark:border-slate-800 shrink-0">
-            <span class="flex items-center gap-1.5"><i data-lucide="file-check" class="w-4 h-4 text-rose-500"></i> File gốc (Đã gỡ TikZ):</span>
+            <span class="flex items-center gap-1.5"><i data-lucide="file-check" class="w-4 h-4 text-rose-600"></i> File gốc (Đã gỡ TikZ):</span>
             <div class="flex items-center space-x-1">
-              <button id="btn-undo-output-main" onclick="undo('output-main')" disabled class="btn-history theme-sub-bg p-1.5 h-7 w-7 border border-slate-200 dark:border-slate-700 rounded-md transition"><i data-lucide="undo-2" class="w-3.5 h-3.5"></i></button>
-              <button id="btn-redo-output-main" onclick="redo('output-main')" disabled class="btn-history theme-sub-bg p-1.5 h-7 w-7 border border-slate-200 dark:border-slate-700 rounded-md transition"><i data-lucide="redo-2" class="w-3.5 h-3.5"></i></button>
+              <button id="btn-undo-output-main" onclick="undo('output-main')" disabled class="btn-history bg-slate-100 dark:bg-slate-800 p-1.5 h-7 w-7 border border-slate-300 dark:border-slate-700 rounded-md transition"><i data-lucide="undo-2" class="w-3.5 h-3.5"></i></button>
+              <button id="btn-redo-output-main" onclick="redo('output-main')" disabled class="btn-history bg-slate-100 dark:bg-slate-800 p-1.5 h-7 w-7 border border-slate-300 dark:border-slate-700 rounded-md transition"><i data-lucide="redo-2" class="w-3.5 h-3.5"></i></button>
               <span class="opacity-20">|</span>
-              <button onclick="applyAutoMath('output-main')" class="theme-sub-bg hover-pimax p-1.5 h-7 w-7 border border-slate-200 dark:border-slate-700 rounded-md transition"><i data-lucide="variable" class="w-4 h-4 text-rose-500"></i></button>
-              <button onclick="convertArrayToAligned('output-main')" class="theme-sub-bg hover-pimax p-1.5 h-7 w-7 border border-slate-200 dark:border-slate-700 rounded-md transition"><i data-lucide="columns-2" class="w-4 h-4 text-rose-500"></i></button>
-              <button onclick="applyCleanSpacingTool('output-main')" class="theme-sub-bg hover-pimax p-1.5 h-7 w-7 border border-slate-200 dark:border-slate-700 rounded-md transition"><svg class="w-4 h-4 text-rose-500" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m2 22 10-10"/><path d="M9.5 12.5 14 17"/><path d="m15 11 3 3"/><path d="m17 7 2 2"/><path d="M19 2l3 3-7 7-3-3z"/></svg></button>
-              <button onclick="wrapSelectionWithEnv('output-main', 'itemize')" class="theme-sub-bg hover-pimax p-1.5 h-7 w-7 border border-slate-200 dark:border-slate-700 rounded-md transition"><i data-lucide="list" class="w-4 h-4"></i></button>
-              <button onclick="wrapSelectionWithEnv('output-main', 'enumerate')" class="theme-sub-bg hover-pimax p-1.5 h-7 w-7 border border-slate-200 dark:border-slate-700 rounded-md transition"><i data-lucide="list-ordered" class="w-4 h-4"></i></button>
+              <button onclick="applyAutoMath('output-main')" class="bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 p-1.5 h-7 w-7 border border-slate-300 dark:border-slate-700 rounded-md transition"><i data-lucide="variable" class="w-4 h-4 text-rose-600"></i></button>
+              <button onclick="convertArrayToAligned('output-main')" class="bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 p-1.5 h-7 w-7 border border-slate-300 dark:border-slate-700 rounded-md transition"><i data-lucide="columns-2" class="w-4 h-4 text-rose-600"></i></button>
+              <button onclick="applyCleanSpacingTool('output-main')" class="bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 p-1.5 h-7 w-7 border border-slate-300 dark:border-slate-700 rounded-md transition"><svg class="w-4 h-4 text-rose-600" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m2 22 10-10"/><path d="M9.5 12.5 14 17"/><path d="m15 11 3 3"/><path d="m17 7 2 2"/><path d="M19 2l3 3-7 7-3-3z"/></svg></button>
+              <button onclick="wrapSelectionWithEnv('output-main', 'itemize')" class="bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 p-1.5 h-7 w-7 border border-slate-300 dark:border-slate-700 rounded-md transition"><i data-lucide="list" class="w-4 h-4"></i></button>
+              <button onclick="wrapSelectionWithEnv('output-main', 'enumerate')" class="bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 p-1.5 h-7 w-7 border border-slate-300 dark:border-slate-700 rounded-md transition"><i data-lucide="list-ordered" class="w-4 h-4"></i></button>
               <span class="opacity-20">|</span>
-              <button onclick="copyToClipboard('output-main')" class="theme-sub-bg hover-pimax p-1.5 h-7 w-7 border border-slate-200 dark:border-slate-700 rounded-md transition"><i data-lucide="copy" class="w-3.5 h-3.5"></i></button>
-              <button onclick="downloadSingleText('output-main', 'file_goc_no_tikz.tex')" class="theme-sub-bg hover-pimax p-1.5 h-7 w-7 border border-slate-200 dark:border-slate-700 rounded-md transition"><i data-lucide="download" class="w-3.5 h-3.5"></i></button>
+              <button onclick="copyToClipboard('output-main')" class="bg-slate-200 dark:bg-slate-700 hover:bg-slate-300 p-1.5 h-7 w-7 border border-slate-400 dark:border-slate-500 rounded-md transition"><i data-lucide="copy" class="w-4 h-4"></i></button>
+              <button onclick="downloadSingleText('output-main', 'file_goc_no_tikz.tex')" class="bg-slate-200 dark:bg-slate-700 hover:bg-slate-300 p-1.5 h-7 w-7 border border-slate-400 dark:border-slate-500 rounded-md transition"><i data-lucide="download" class="w-4 h-4"></i></button>
             </div>
           </div>
           <div class="editor-container">
             <div id="lines-output-main" class="line-numbers">1</div>
             <div class="editor-area">
               <textarea id="output-main" oninput="handleInput('output-main')" onkeydown="handleKeyDown(event, 'output-main')" onscroll="syncScroll('output-main')" class="code-input custom-scroll" placeholder="File gốc sau khi gỡ các khối TikZ..."></textarea>
-              <div id="autocomplete-output-main" class="autocomplete-dropdown theme-bg"></div>
+              <div id="autocomplete-output-main" class="autocomplete-dropdown bg-white dark:bg-slate-800"></div>
             </div>
           </div>
         </div>
       </div>
 
-      <div class="theme-bg p-4 border border-slate-200 dark:border-slate-800 rounded-xl shadow-sm flex flex-wrap justify-between items-center gap-4">
+      <div class="bg-white dark:bg-slate-900 p-4 border border-slate-300 dark:border-slate-800 rounded-xl shadow-sm flex flex-wrap justify-between items-center gap-4">
         <div class="flex items-center space-x-3">
-          <label class="text-xs font-semibold opacity-75">Tên file TikZ tổng:</label>
-          <input type="text" id="file-name-tikz" value="tat_ca_hinh_tikz" class="theme-bg border border-slate-200 dark:border-slate-700 rounded-lg px-3 py-1.5 text-xs font-mono outline-none w-48">
-          <label class="text-xs font-semibold opacity-75 ml-2">Đuôi file:</label>
-          <select id="file-ext-tikz" class="theme-bg border border-slate-200 dark:border-slate-700 rounded-lg text-xs px-2 py-1.5 outline-none">
+          <label class="text-xs font-bold text-slate-700 dark:text-slate-300">Tên file TikZ tổng:</label>
+          <input type="text" id="file-name-tikz" value="tat_ca_hinh_tikz" class="bg-slate-100 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded-lg px-3 py-1.5 text-xs font-mono outline-none w-48">
+          <label class="text-xs font-bold text-slate-700 dark:text-slate-300 ml-2">Đuôi file:</label>
+          <select id="file-ext-tikz" class="bg-slate-100 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded-lg text-xs px-2 py-1.5 outline-none font-semibold">
             <option value=".tex" selected>.tex</option>
             <option value=".txt">.txt</option>
           </select>
         </div>
-        <button onclick="extractAllTikZToSingleFile()" class="bg-rose-500 hover:bg-rose-600 text-white font-semibold px-6 py-2.5 rounded-xl transition flex items-center space-x-2 shadow-md shadow-rose-500/20">
+        <button onclick="extractAllTikZToSingleFile()" class="bg-rose-600 hover:bg-rose-700 text-white font-bold px-6 py-2.5 rounded-xl transition flex items-center space-x-2 shadow-md">
           <i data-lucide="scissors" class="w-4 h-4"></i>
           <span>Tách & Gom Vào 1 File</span>
         </button>
       </div>
 
-      <div id="single-tikz-container" class="hidden theme-bg p-5 border border-slate-200 dark:border-slate-800 rounded-xl shadow-sm space-y-3">
+      <div id="single-tikz-container" class="hidden bg-white dark:bg-slate-900 p-5 border border-slate-300 dark:border-slate-800 rounded-xl shadow-sm space-y-3">
         <div class="flex justify-between items-center border-b border-slate-200 dark:border-slate-800 pb-3 flex-wrap gap-2">
           <div class="flex items-center space-x-2">
-            <i data-lucide="file-code-2" class="w-5 h-5 text-rose-500"></i>
+            <i data-lucide="file-code-2" class="w-5 h-5 text-rose-600"></i>
             <h3 class="font-bold text-sm">File chứa toàn bộ hình TikZ</h3>
-            <span id="tikz-count-badge" class="text-xs bg-rose-100 dark:bg-rose-950 text-rose-600 dark:text-rose-400 font-semibold px-2.5 py-0.5 border border-rose-200 dark:border-rose-800 rounded-full">0 hình</span>
+            <span id="tikz-count-badge" class="text-xs bg-rose-100 dark:bg-rose-950 text-rose-700 dark:text-rose-400 font-bold px-2.5 py-0.5 border border-rose-300 dark:border-rose-800 rounded-full">0 hình</span>
           </div>
           <div class="flex items-center space-x-1.5">
-            <button id="btn-undo-output-tikz-single" onclick="undo('output-tikz-single')" disabled class="btn-history theme-sub-bg hover-pimax p-1.5 h-7 w-7 border border-slate-200 dark:border-slate-700 rounded-md transition"><i data-lucide="undo-2" class="w-3.5 h-3.5"></i></button>
-            <button id="btn-redo-output-tikz-single" onclick="redo('output-tikz-single')" disabled class="btn-history theme-sub-bg hover-pimax p-1.5 h-7 w-7 border border-slate-200 dark:border-slate-700 rounded-md transition"><i data-lucide="redo-2" class="w-3.5 h-3.5"></i></button>
+            <button id="btn-undo-output-tikz-single" onclick="undo('output-tikz-single')" disabled class="btn-history bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 p-1.5 h-7 w-7 border border-slate-300 dark:border-slate-700 rounded-md transition"><i data-lucide="undo-2" class="w-3.5 h-3.5"></i></button>
+            <button id="btn-redo-output-tikz-single" onclick="redo('output-tikz-single')" disabled class="btn-history bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 p-1.5 h-7 w-7 border border-slate-300 dark:border-slate-700 rounded-md transition"><i data-lucide="redo-2" class="w-3.5 h-3.5"></i></button>
             <span class="opacity-20">|</span>
-            <button onclick="copyToClipboard('output-tikz-single')" class="theme-sub-bg hover-pimax p-1.5 h-7 w-7 border border-slate-200 dark:border-slate-700 rounded-md transition"><i data-lucide="copy" class="w-3.5 h-3.5"></i></button>
-            <button onclick="downloadSingleText('output-tikz-single', getTikZFilename())" class="theme-sub-bg hover-pimax p-1.5 h-7 w-7 border border-slate-200 dark:border-slate-700 rounded-md transition"><i data-lucide="download" class="w-3.5 h-3.5"></i></button>
+            <button onclick="copyToClipboard('output-tikz-single')" class="bg-slate-200 dark:bg-slate-700 hover:bg-slate-300 p-1.5 h-7 w-7 border border-slate-400 dark:border-slate-500 rounded-md transition"><i data-lucide="copy" class="w-4 h-4"></i></button>
+            <button onclick="downloadSingleText('output-tikz-single', getTikZFilename())" class="bg-slate-200 dark:bg-slate-700 hover:bg-slate-300 p-1.5 h-7 w-7 border border-slate-400 dark:border-slate-500 rounded-md transition"><i data-lucide="download" class="w-4 h-4"></i></button>
           </div>
         </div>
         <div class="editor-container h-80">
           <div id="lines-output-tikz-single" class="line-numbers">1</div>
           <div class="editor-area">
             <textarea id="output-tikz-single" oninput="handleInput('output-tikz-single')" onkeydown="handleKeyDown(event, 'output-tikz-single')" onscroll="syncScroll('output-tikz-single')" class="code-input custom-scroll" placeholder="Code các hình TikZ sẽ gom vào đây..."></textarea>
-            <div id="autocomplete-output-tikz-single" class="autocomplete-dropdown theme-bg"></div>
+            <div id="autocomplete-output-tikz-single" class="autocomplete-dropdown bg-white dark:bg-slate-800"></div>
           </div>
         </div>
       </div>
@@ -308,48 +311,48 @@
 
     <!-- MENU 3: CHUYỂN PDF THÀNH ẢNH -->
     <section id="menu-section-3" class="hidden space-y-4">
-      <div class="max-w-3xl mx-auto theme-bg p-6 sm:p-8 border border-slate-200 dark:border-slate-800 rounded-xl shadow-sm space-y-6">
+      <div class="max-w-3xl mx-auto bg-white dark:bg-slate-900 p-6 sm:p-8 border border-slate-300 dark:border-slate-800 rounded-xl shadow-sm space-y-6">
         <div>
-          <h2 class="text-lg font-bold flex items-center gap-2"><i data-lucide="file-image" class="w-5 h-5 text-rose-500"></i> Chuyển PDF sang Ảnh (PNG / JPG)</h2>
-          <p class="text-xs opacity-75 mt-1">Xuất các trang trong file PDF thành file ảnh chất lượng cao và đóng gói file ZIP.</p>
+          <h2 class="text-lg font-bold flex items-center gap-2"><i data-lucide="file-image" class="w-5 h-5 text-rose-600"></i> Chuyển PDF sang Ảnh (PNG / JPG)</h2>
+          <p class="text-xs text-slate-500 dark:text-slate-400 mt-1">Xuất các trang trong file PDF thành file ảnh chất lượng cao và đóng gói file ZIP.</p>
         </div>
         <div class="space-y-4">
           <div>
             <label class="block text-xs font-bold mb-1">Chọn file PDF:</label>
-            <input type="file" id="pdf-input" accept="application/pdf" class="w-full text-xs theme-sub-bg border border-slate-200 dark:border-slate-700 rounded-lg p-2.5 outline-none">
+            <input type="file" id="pdf-input" accept="application/pdf" class="w-full text-xs bg-slate-100 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded-lg p-2.5 outline-none font-medium">
           </div>
           <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
               <label class="block text-xs font-bold mb-1">Định dạng ảnh xuất:</label>
-              <select id="format-select" class="w-full text-xs theme-sub-bg border border-slate-200 dark:border-slate-700 rounded-lg p-2.5 outline-none font-medium">
+              <select id="format-select" class="w-full text-xs bg-slate-100 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded-lg p-2.5 outline-none font-semibold">
                 <option value="png" selected>PNG (Sắc nét, không nén)</option>
                 <option value="jpeg">JPG (Dung lượng nhẹ)</option>
               </select>
             </div>
             <div>
               <label class="block text-xs font-bold mb-1">Kiểu chỉnh độ phân giải:</label>
-              <select id="mode-select" class="w-full text-xs theme-sub-bg border border-slate-200 dark:border-slate-700 rounded-lg p-2.5 outline-none font-medium">
+              <select id="mode-select" class="w-full text-xs bg-slate-100 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded-lg p-2.5 outline-none font-semibold">
                 <option value="width">Cố định Chiều Rộng</option>
                 <option value="height">Cố định Chiều Cao</option>
                 <option value="exact">Cố định Cả 2</option>
               </select>
             </div>
           </div>
-          <div id="dimension-box" class="grid grid-cols-2 gap-4 theme-sub-bg p-4 border border-slate-200 dark:border-slate-700 rounded-lg">
+          <div id="dimension-box" class="grid grid-cols-2 gap-4 bg-slate-100 dark:bg-slate-800/80 p-4 border border-slate-300 dark:border-slate-700 rounded-lg">
             <div id="width-box">
               <label class="block text-xs font-bold mb-1">Chiều Rộng (px):</label>
-              <input type="number" id="width-input" value="1920" min="100" max="10000" class="w-full theme-bg border border-slate-200 dark:border-slate-700 rounded-lg p-2 text-xs outline-none font-mono" placeholder="VD: 1920">
+              <input type="number" id="width-input" value="1920" min="100" max="10000" class="w-full bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-lg p-2 text-xs outline-none font-mono" placeholder="VD: 1920">
             </div>
             <div id="height-box" class="opacity-50 pointer-events-none">
               <label class="block text-xs font-bold mb-1">Chiều Cao (px):</label>
-              <input type="number" id="height-input" value="1080" min="100" max="10000" class="w-full theme-bg border border-slate-200 dark:border-slate-700 rounded-lg p-2 text-xs outline-none font-mono" placeholder="VD: 1080">
+              <input type="number" id="height-input" value="1080" min="100" max="10000" class="w-full bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-lg p-2 text-xs outline-none font-mono" placeholder="VD: 1080">
             </div>
           </div>
-          <button id="convert-btn" class="w-full bg-rose-500 hover:bg-rose-600 text-white py-3 rounded-xl font-semibold transition shadow-md shadow-rose-500/20 disabled:opacity-50">Chuyển Đổi Sang Ảnh</button>
+          <button id="convert-btn" class="w-full bg-rose-600 hover:bg-rose-700 text-white py-3 rounded-xl font-bold transition shadow-md disabled:opacity-50">Chuyển Đổi Sang Ảnh</button>
         </div>
-        <div id="status" class="text-center text-xs font-semibold"></div>
+        <div id="status" class="text-center text-xs font-bold"></div>
         <div id="download-container" class="text-center hidden">
-          <button id="download-btn" class="bg-rose-500 hover:bg-rose-600 text-white px-6 py-2.5 text-xs font-semibold rounded-xl transition shadow-md shadow-rose-500/20 flex items-center justify-center space-x-2 mx-auto">
+          <button id="download-btn" class="bg-rose-600 hover:bg-rose-700 text-white px-6 py-2.5 text-xs font-bold rounded-xl transition shadow-md flex items-center justify-center space-x-2 mx-auto">
             <i data-lucide="download" class="w-4 h-4"></i>
             <span>Tải File ZIP Ảnh</span>
           </button>
@@ -361,52 +364,47 @@
 
   <!-- MODAL BẢNG TÍCH ĐÁP ÁN TRẮC NGHIỆM -->
   <div id="answer-modal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-[100] hidden flex items-center justify-center p-4">
-    <div class="theme-bg border border-slate-300 dark:border-slate-700 rounded-2xl shadow-2xl max-w-2xl w-full max-h-[85vh] flex flex-col overflow-hidden">
-      <div class="p-4 border-b border-slate-200 dark:border-slate-700 flex justify-between items-center theme-sub-bg">
+    <div class="bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-2xl shadow-2xl max-w-2xl w-full max-h-[85vh] flex flex-col overflow-hidden">
+      <div class="p-4 border-b border-slate-200 dark:border-slate-700 flex justify-between items-center bg-slate-100 dark:bg-slate-800">
         <div class="flex items-center space-x-2">
-          <i data-lucide="grid" class="w-5 h-5 text-rose-500"></i>
+          <i data-lucide="grid" class="w-5 h-5 text-rose-600"></i>
           <h3 class="font-bold text-sm" id="answer-modal-title">Bảng Tích Đáp Án Trắc Nghiệm</h3>
         </div>
-        <button onclick="closeAnswerModal()" class="hover:bg-slate-200 dark:hover:bg-slate-700 p-1 rounded-lg text-slate-500 hover:text-slate-800 dark:hover:text-slate-200 transition">
+        <button onclick="closeAnswerModal()" class="hover:bg-slate-200 dark:hover:bg-slate-700 p-1 rounded-lg text-slate-500 hover:text-slate-800 transition">
           <i data-lucide="x" class="w-5 h-5"></i>
         </button>
       </div>
 
-      <div class="px-4 py-2 text-xs opacity-75 border-b border-slate-100 dark:border-slate-800 theme-sub-bg">
-        Tích chọn đáp án đúng cho từng câu bên dưới. Hệ thống sẽ tự động cập nhật lệnh <code class="font-mono bg-slate-200 dark:bg-slate-800 px-1 py-0.5 rounded">\True</code> vào ô Output ngay lập tức.
+      <div class="px-4 py-2 text-xs font-medium text-slate-600 dark:text-slate-400 border-b border-slate-100 dark:border-slate-800 bg-slate-50 dark:bg-slate-900">
+        Tích chọn đáp án đúng cho từng câu bên dưới. Hệ thống sẽ tự động cập nhật lệnh <code class="font-mono bg-slate-200 dark:bg-slate-800 px-1 py-0.5 rounded text-rose-600 font-bold">\True</code> vào ô Output ngay lập tức.
       </div>
 
       <div class="flex-1 overflow-y-auto p-4 custom-scroll">
         <div id="answer-table-container"></div>
       </div>
 
-      <div class="p-3 border-t border-slate-200 dark:border-slate-700 flex justify-between items-center theme-sub-bg">
-        <button onclick="clearAllAnswersInModal()" class="text-xs text-rose-500 hover:underline font-medium flex items-center gap-1">
+      <div class="p-3 border-t border-slate-200 dark:border-slate-700 flex justify-between items-center bg-slate-100 dark:bg-slate-800">
+        <button onclick="clearAllAnswersInModal()" class="text-xs text-rose-600 hover:underline font-bold flex items-center gap-1">
           <i data-lucide="rotate-ccw" class="w-3.5 h-3.5"></i> Xóa tất cả tích
         </button>
-        <button onclick="saveAndCloseAnswerModal()" class="bg-rose-500 hover:bg-rose-600 text-white px-5 py-2 text-xs font-semibold rounded-lg shadow-sm transition flex items-center gap-1.5">
+        <button onclick="saveAndCloseAnswerModal()" class="bg-rose-600 hover:bg-rose-700 text-white px-5 py-2 text-xs font-bold rounded-lg shadow transition flex items-center gap-1.5">
           <i data-lucide="check" class="w-4 h-4"></i> Hoàn thành
         </button>
       </div>
     </div>
   </div>
 
-  <!-- Toggle Dark/Light Mode Button -->
-  <button onclick="toggleDarkMode()" class="fixed bottom-6 right-6 z-50 bg-slate-800 dark:bg-slate-100 text-white dark:text-slate-900 p-3.5 rounded-full shadow-xl hover:scale-105 transition flex items-center justify-center" title="Chuyển đổi giao diện Sáng / Tối">
-    <i id="theme-icon" data-lucide="moon" class="w-5 h-5"></i>
-  </button>
-
-  <footer class="theme-bg border-t border-slate-200 dark:border-slate-800 py-3 text-center text-xs opacity-75">
+  <footer class="bg-white dark:bg-slate-900 border-t border-slate-200 dark:border-slate-800 py-3 text-center text-xs font-medium text-slate-500">
     PimaX Tool Beta — Hệ sinh thái hỗ trợ soạn thảo LaTeX & Xử lý tài liệu
   </footer>
 
-  <!-- NẠP CÁC FILE SCRIPT DỰ ÁN (ĐÃ ÉP THAM SỐ ?v=999 ĐỂ TRIỆT TIEU CACHE CŨ) -->
-  <script src="js/editor.js?v=999"></script>
-  <script src="js/clean-tool.js?v=999"></script>
-  <script src="js/ex-processor.js?v=999"></script>
-  <script src="js/tikz-extractor.js?v=999"></script>
-  <script src="js/pdf-converter.js?v=999"></script>
-  <script src="js/answer-modal.js?v=999"></script>
-  <script src="js/app.js?v=999"></script>
+  <!-- SCRIPT ENGINE CORE -->
+  <script src="js/editor.js?v=10.0"></script>
+  <script src="js/clean-tool.js?v=10.0"></script>
+  <script src="js/ex-processor.js?v=10.0"></script>
+  <script src="js/tikz-extractor.js?v=10.0"></script>
+  <script src="js/pdf-converter.js?v=10.0"></script>
+  <script src="js/answer-modal.js?v=10.0"></script>
+  <script src="js/app.js?v=10.0"></script>
 </body>
 </html>
