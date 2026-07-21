@@ -395,3 +395,26 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   });
 });
+
+/* =========================================================
+   TỰ ĐỘNG KÍCH HOẠT TÌM KIẾM CHO MỌI EDITOR
+   ========================================================= */
+document.addEventListener("DOMContentLoaded", () => {
+  ['output-ex', 'input-ex', 'output-main', 'input-tikz', 'output-tikz-single'].forEach(id => {
+    const findInput = document.getElementById(`find-${id}`);
+    const matchCaseEl = document.getElementById(`match-case-${id}`);
+    
+    if (findInput) {
+      findInput.addEventListener('input', () => findText(id));
+      findInput.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter') {
+          e.preventDefault();
+          navigateSearch(id, e.shiftKey ? -1 : 1);
+        }
+      });
+    }
+    if (matchCaseEl) {
+      matchCaseEl.addEventListener('change', () => findText(id));
+    }
+  });
+});
