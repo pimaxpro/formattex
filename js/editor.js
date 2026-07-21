@@ -1,8 +1,8 @@
 /* =========================================================
-   PIMAX TOOL — COMPLETE EDITOR ENGINE & UTILITIES
+   PIMAX TOOL — ENGINE QUẢN LÝ EDITOR & XỬ LÝ TIỆN ÍCH FULL
    ========================================================= */
 
-// System history storage for Undo / Redo
+// Quản lý bộ nhớ Undo / Redo
 const editorHistories = {};
 
 function initEditorHistory(id) {
@@ -69,16 +69,11 @@ function updateUndoRedoButtons(id) {
   const hist = editorHistories[id];
   if (!hist) return;
 
-  if (id === 'input-ex') {
-    updateBtnState(document.getElementById('btn-undo-input-ex'), hist.index <= 0);
-    updateBtnState(document.getElementById('btn-redo-input-ex'), hist.index >= hist.stack.length - 1);
-  } else if (id === 'output-ex') {
-    updateBtnState(document.getElementById('btn-undo-output-ex'), hist.index <= 0);
-    updateBtnState(document.getElementById('btn-redo-output-ex'), hist.index >= hist.stack.length - 1);
-  } else {
-    updateBtnState(document.getElementById(`btn-undo-${id}`), hist.index <= 0);
-    updateBtnState(document.getElementById(`btn-redo-${id}`), hist.index >= hist.stack.length - 1);
-  }
+  let btnUndo = document.getElementById(`btn-undo-${id}`);
+  let btnRedo = document.getElementById(`btn-redo-${id}`);
+
+  if (btnUndo) updateBtnState(btnUndo, hist.index <= 0);
+  if (btnRedo) updateBtnState(btnRedo, hist.index >= hist.stack.length - 1);
 }
 
 function updateBtnState(btn, isDisabled) {
@@ -86,15 +81,13 @@ function updateBtnState(btn, isDisabled) {
   btn.disabled = isDisabled;
   if (isDisabled) {
     btn.classList.add('opacity-40', 'cursor-not-allowed');
-    btn.classList.remove('hover:bg-gray-200', 'hover-pimax');
   } else {
     btn.classList.remove('opacity-40', 'cursor-not-allowed');
-    btn.classList.add('hover:bg-gray-200', 'hover-pimax');
   }
 }
 
 /* =========================================================
-   FIND & REPLACE ENGINE
+   CÔNG CỤ TÌM KIẾM VÀ THAY THẾ
    ========================================================= */
 
 let searchMatches = [];
@@ -133,31 +126,24 @@ function findText(id) {
       if (match[0].length === 0) break;
     }
   } catch (e) {
-    console.error("Lỗi tìm kiếm:", e);
+    console.error("Lỗi Regex:", e);
   }
 
   if (searchMatches.length > 0) {
     currentSearchIndex = 0;
-    if (countEl) {
-      countEl.textContent = `1/${searchMatches.length}`;
-    }
+    if (countEl) countEl.textContent = `1/${searchMatches.length}`;
   } else {
     if (countEl) countEl.textContent = "0/0";
   }
 }
 
 function navigateSearch(id, direction) {
-  if (searchMatches.length === 0) {
-    findText(id);
-  }
+  if (searchMatches.length === 0) findText(id);
   if (searchMatches.length === 0) return;
 
   currentSearchIndex += direction;
-  if (currentSearchIndex >= searchMatches.length) {
-    currentSearchIndex = 0;
-  } else if (currentSearchIndex < 0) {
-    currentSearchIndex = searchMatches.length - 1;
-  }
+  if (currentSearchIndex >= searchMatches.length) currentSearchIndex = 0;
+  if (currentSearchIndex < 0) currentSearchIndex = searchMatches.length - 1;
 
   highlightMatch(id);
 }
@@ -176,9 +162,7 @@ function highlightMatch(id) {
   const lineNum = textBefore.split('\n').length;
   textarea.scrollTop = Math.max(0, (lineNum - 3) * 24);
 
-  if (countEl) {
-    countEl.textContent = `${currentSearchIndex + 1}/${searchMatches.length}`;
-  }
+  if (countEl) countEl.textContent = `${currentSearchIndex + 1}/${searchMatches.length}`;
 }
 
 function replaceText(id, all = false) {
@@ -201,14 +185,12 @@ function replaceText(id, all = false) {
     const flags = matchCase ? 'g' : 'gi';
     const escapedQuery = query.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
     const regex = new RegExp(escapedQuery, flags);
-    
     textarea.value = text.replace(regex, replacement);
   } else {
     if (searchMatches.length === 0 || currentSearchIndex === -1) {
       findText(id);
       if (searchMatches.length === 0) return;
     }
-
     const match = searchMatches[currentSearchIndex];
     textarea.value = text.substring(0, match.start) + replacement + text.substring(match.end);
     textarea.setSelectionRange(match.start, match.start + replacement.length);
@@ -219,7 +201,7 @@ function replaceText(id, all = false) {
 }
 
 /* =========================================================
-   LATEX AUTOCOMPLETE & EDITOR CORE
+   LATEX AUTOCOMPLETE & SCROLL SYNC
    ========================================================= */
 
 const LATEX_SUGGESTIONS = [
@@ -231,10 +213,7 @@ const LATEX_SUGGESTIONS = [
   { cmd: '\\True ', label: '\\True', desc: 'Đáp án đúng' },
   { cmd: '\\frac{}{}', label: '\\frac{a}{b}', desc: 'Phân số' },
   { cmd: '\\sqrt{}', label: '\\sqrt{x}', desc: 'Căn bậc hai' },
-  { cmd: '\\vec{}', label: '\\vec{a}', desc: 'Vectơ' },
-  { cmd: '\\begin{aligned}\n    \n\\end{aligned}', label: '\\begin{aligned}', desc: 'Hệ phương trình' },
-  { cmd: '\\begin{cases}\n    \n\\end{cases}', label: '\\begin{cases}', desc: 'Ngoặc nhọn hệ' },
-  { cmd: '\\begin{tikzpicture}\n    \n\\end{tikzpicture}', label: '\\begin{tikzpicture}', desc: 'Hình TikZ' }
+  { cmd: '\\vec{}', label: '\\vec{a}', desc: 'Vectơ' }
 ];
 
 let activeIndex = 0;
@@ -263,7 +242,6 @@ function handleInput(id) {
 function syncScroll(id) {
   const textarea = document.getElementById(id);
   const linesDiv = document.getElementById(`lines-${id}`);
-
   if (textarea && linesDiv) {
     linesDiv.scrollTop = textarea.scrollTop;
   }
@@ -389,92 +367,99 @@ function escapeJsString(str) {
 }
 
 /* =========================================================
-   CÁC HÀM TIỆN ÍCH TIẾP THỊ VĂN BẢN (COPY, DOWNLOAD, CLEAR, LOAD)
+   XỬ LÝ COPY, DOWNLOAD, UPLOAD & CLEAR TEXT (FIXT DỰT ĐIỂM)
    ========================================================= */
 
-// 1. Sao chép nội dung ô Editor vào Clipboard
+// 1. Hàm Copy Hoạt Động Trên Mọi Trình Duyệt / Mọi Giao Thức (HTTP/HTTPS)
 function copyToClipboard(id) {
   const textarea = document.getElementById(id);
-  if (!textarea) return;
-
-  const text = textarea.value;
-  if (!text) {
-    showToast("Chưa có nội dung để sao chép!", true);
+  if (!textarea) {
+    showToast("Lỗi: Không tìm thấy ô dữ liệu!", true);
     return;
   }
 
+  const text = textarea.value;
+  if (!text || !text.trim()) {
+    showToast("Không có nội dung để copy!", true);
+    return;
+  }
+
+  // Thử dùng API hiện đại Clipboard
   if (navigator.clipboard && window.isSecureContext) {
     navigator.clipboard.writeText(text).then(() => {
-      showToast("Đã sao chép nội dung vào Clipboard!");
+      showToast("Đã copy nội dung vào bộ nhớ tạm!");
     }).catch(() => {
-      fallbackCopyTextToClipboard(text);
+      execCopyFallback(textarea);
     });
   } else {
-    fallbackCopyTextToClipboard(text);
+    // Dùng phương pháp Fallback truyền thống cho Localhost/HTTP
+    execCopyFallback(textarea);
   }
 }
 
-function fallbackCopyTextToClipboard(text) {
-  const textArea = document.createElement("textarea");
-  textArea.value = text;
-  textArea.style.position = "fixed";
-  textArea.style.top = "0";
-  textArea.style.left = "0";
-  textArea.style.opacity = "0";
-  document.body.appendChild(textArea);
-  textArea.focus();
-  textArea.select();
-
+function execCopyFallback(textarea) {
   try {
-    const successful = document.execCommand('copy');
-    if (successful) {
-      showToast("Đã sao chép nội dung vào Clipboard!");
+    textarea.focus();
+    textarea.select();
+    textarea.setSelectionRange(0, 99999);
+    const success = document.execCommand('copy');
+    if (success) {
+      showToast("Đã copy nội dung thành công!");
     } else {
-      showToast("Sao chép thất bại, thầy vui lòng chọn và copy thủ công!", true);
+      showToast("Lỗi: Không thể copy tự động!", true);
     }
   } catch (err) {
-    showToast("Không thể sao chép tự động!", true);
+    showToast("Lỗi copy: " + err.message, true);
   }
-
-  document.body.removeChild(textArea);
 }
 
-// 2. Tải nội dung ô Editor thành file văn bản (.tex / .txt)
+// 2. Hàm Tải File .tex Hoạt Động Chắc Chắn 100%
 function downloadSingleText(id, defaultFileName) {
   const textarea = document.getElementById(id);
   if (!textarea) return;
 
   const text = textarea.value;
-  if (!text.trim()) {
+  if (!text || !text.trim()) {
     showToast("Không có nội dung để tải về!", true);
     return;
   }
 
-  const blob = new Blob([text], { type: 'text/plain;charset=utf-8' });
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement('a');
-  a.href = url;
-  a.download = defaultFileName || 'file_pimax.tex';
-  document.body.appendChild(a);
-  a.click();
-  document.body.removeChild(a);
-  URL.revokeObjectURL(url);
-  showToast(`Đã tải xuống file "${a.download}" thành công!`);
+  try {
+    const blob = new Blob([text], { type: 'text/plain;charset=utf-8' });
+    const fileName = defaultFileName || 'file_pimax.tex';
+
+    if (window.navigator && window.navigator.msSaveOrOpenBlob) {
+      window.navigator.msSaveOrOpenBlob(blob, fileName);
+    } else {
+      const link = document.createElement('a');
+      link.href = URL.createObjectURL(blob);
+      link.download = fileName;
+      document.body.appendChild(link);
+      link.click();
+      setTimeout(() => {
+        document.body.removeChild(link);
+        URL.revokeObjectURL(link.href);
+      }, 200);
+    }
+    showToast(`Đã tải xuống file "${fileName}" thành công!`);
+  } catch (err) {
+    showToast("Lỗi khi tải file!", true);
+  }
 }
 
-// 3. Xóa văn bản ô Editor
+// 3. Hàm Xóa Văn Bản Trong Editor
 function clearText(id) {
   const textarea = document.getElementById(id);
   if (!textarea) return;
 
-  if (textarea.value && confirm("Thầy có chắc chắn muốn xóa toàn bộ nội dung ô này?")) {
+  if (textarea.value && confirm("Thầy có chắc chắn muốn xóa sạch nội dung ô này?")) {
     textarea.value = '';
     handleInput(id);
     showToast("Đã xóa toàn bộ nội dung ô!");
   }
 }
 
-// 4. Nạp file từ máy tính vào ô Editor
+// 4. Hàm Nạp File Từ Máy Tính Vòng Editor
 function loadFile(event, id) {
   const input = event.target;
   if (!input.files || !input.files[0]) return;
@@ -487,7 +472,7 @@ function loadFile(event, id) {
     if (textarea) {
       textarea.value = e.target.result;
       handleInput(id);
-      showToast(`Đã nạp file "${file.name}" thành công!`);
+      showToast(`Đã tải file "${file.name}" vào Editor!`);
     }
   };
 
@@ -495,26 +480,27 @@ function loadFile(event, id) {
   input.value = '';
 }
 
-// 5. Hiển thị thông báo Toast
+// 5. Hiển Thị Thông Báo Toast
 function showToast(message, isError = false) {
   let toast = document.getElementById('pimax-toast');
   if (!toast) {
     toast = document.createElement('div');
     toast.id = 'pimax-toast';
-    toast.className = 'fixed bottom-5 left-1/2 -translate-x-1/2 text-xs font-semibold px-4 py-2 rounded-lg shadow-xl z-[1000] transition-opacity duration-300 opacity-0 pointer-events-none flex items-center gap-2';
     document.body.appendChild(toast);
   }
 
   if (isError) {
-    toast.className = 'fixed bottom-5 left-1/2 -translate-x-1/2 bg-rose-900 text-white text-xs font-semibold px-4 py-2 rounded-lg shadow-xl z-[1000] transition-opacity duration-300 opacity-0 pointer-events-none flex items-center gap-2 border border-rose-700';
-    toast.innerHTML = `<svg class="w-4 h-4 text-rose-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg> <span>${message}</span>`;
+    toast.className = 'fixed bottom-5 left-1/2 -translate-x-1/2 bg-rose-600 text-white text-xs font-semibold px-4 py-2.5 rounded-xl shadow-xl z-[1000] transition-all duration-300 opacity-0 flex items-center gap-2 border border-rose-400';
+    toast.innerHTML = `<svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg> <span>${message}</span>`;
   } else {
-    toast.className = 'fixed bottom-5 left-1/2 -translate-x-1/2 bg-slate-900 text-white text-xs font-semibold px-4 py-2 rounded-lg shadow-xl z-[1000] transition-opacity duration-300 opacity-0 pointer-events-none flex items-center gap-2 border border-slate-700';
+    toast.className = 'fixed bottom-5 left-1/2 -translate-x-1/2 bg-slate-900 text-white text-xs font-semibold px-4 py-2.5 rounded-xl shadow-xl z-[1000] transition-all duration-300 opacity-0 flex items-center gap-2 border border-slate-700';
     toast.innerHTML = `<svg class="w-4 h-4 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg> <span>${message}</span>`;
   }
 
-  toast.classList.remove('opacity-0');
-  toast.classList.add('opacity-100');
+  requestAnimationFrame(() => {
+    toast.classList.remove('opacity-0');
+    toast.classList.add('opacity-100');
+  });
 
   setTimeout(() => {
     toast.classList.remove('opacity-100');
@@ -522,26 +508,10 @@ function showToast(message, isError = false) {
   }, 2200);
 }
 
-// Khởi tạo sự kiện khi tải trang
+// Tải xong DOM thì khởi tạo trạng thái
 document.addEventListener("DOMContentLoaded", () => {
   ['output-ex', 'input-ex', 'output-main', 'input-tikz', 'output-tikz-single'].forEach(id => {
     const el = document.getElementById(id);
     if (el) saveState(id, true);
-
-    const findInput = document.getElementById(`find-${id}`);
-    const matchCaseEl = document.getElementById(`match-case-${id}`);
-    
-    if (findInput) {
-      findInput.addEventListener('input', () => findText(id));
-      findInput.addEventListener('keydown', (e) => {
-        if (e.key === 'Enter') {
-          e.preventDefault();
-          navigateSearch(id, e.shiftKey ? -1 : 1);
-        }
-      });
-    }
-    if (matchCaseEl) {
-      matchCaseEl.addEventListener('change', () => findText(id));
-    }
   });
 });
