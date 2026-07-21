@@ -13,7 +13,7 @@
   <!-- JSZip library -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
   <!-- Custom Style -->
-  <link rel="stylesheet" href="css/style.css?v=5.0">
+  <link rel="stylesheet" href="css/style.css?v=6.0">
 </head>
 <body class="min-h-screen font-sans flex flex-col transition-colors duration-200">
 
@@ -33,7 +33,7 @@
         </div>
       </div>
 
-      <!-- NAV MENU CHÍNH (3 CHỨC NĂNG CHÍNH GỐC) -->
+      <!-- NAV MENU CHÍNH (3 CHỨC NĂNG CHÍNH) -->
       <nav class="flex theme-sub-bg p-1 border rounded-md">
         <button id="nav-btn-1" onclick="switchMainMenu(1)" class="px-4 py-2 text-xs font-semibold rounded transition-all flex items-center space-x-2 theme-btn-pimax">
           <i data-lucide="file-code-2" class="w-4 h-4"></i>
@@ -90,10 +90,10 @@
               <button onclick="clearText('input-ex')" class="hover:underline h-7 px-1 flex items-center opacity-75">Xóa</button>
             </div>
           </div>
+          <!-- EDITOR CONTAINER (KHÔNG CÒN THẺ CODE-HIGHLIGHT GÂY BÓNG MỜ) -->
           <div class="editor-container">
             <div id="lines-input-ex" class="line-numbers">1</div>
             <div class="editor-area">
-              <div id="hl-input-ex" class="code-highlight"></div>
               <textarea id="input-ex" oninput="handleInput('input-ex')" onkeydown="handleKeyDown(event, 'input-ex')" onscroll="syncScroll('input-ex')" class="code-input custom-scroll" placeholder="Dán nội dung câu hỏi thô vào đây..."></textarea>
               <div id="autocomplete-input-ex" class="autocomplete-dropdown theme-bg"></div>
             </div>
@@ -105,7 +105,6 @@
           <div class="flex justify-between items-center text-xs font-bold h-8 mb-2 pb-2 border-b border-slate-200 dark:border-slate-700 shrink-0">
             <span class="flex items-center gap-1.5"><i data-lucide="file-output" class="w-4 h-4 text-[#db3c6e]"></i> Kết quả chuẩn hóa:</span>
             
-            <!-- HÀNG NÚT CHỨC NĂNG OUTPUT CÓ HIỆU ỨNG HOVER PIMAX -->
             <div class="flex items-center space-x-1">
               <button id="btn-undo-output-ex" onclick="undo('output-ex')" disabled class="btn-history theme-sub-bg hover-pimax p-1.5 h-7 w-7 rounded flex items-center justify-center border transition" title="Hoàn tác (Ctrl+Z)">
                 <i data-lucide="undo-2" class="w-3.5 h-3.5"></i>
@@ -173,7 +172,6 @@
           <div class="editor-container">
             <div id="lines-output-ex" class="line-numbers">1</div>
             <div class="editor-area">
-              <div id="hl-output-ex" class="code-highlight"></div>
               <textarea id="output-ex" oninput="handleInput('output-ex')" onkeydown="handleKeyDown(event, 'output-ex')" onscroll="syncScroll('output-ex')" class="code-input custom-scroll" placeholder="Kết quả chuẩn hóa sẽ xuất hiện tại đây..."></textarea>
               <div id="autocomplete-output-ex" class="autocomplete-dropdown theme-bg"></div>
             </div>
@@ -208,7 +206,6 @@
           <div class="editor-container">
             <div id="lines-input-tikz" class="line-numbers">1</div>
             <div class="editor-area">
-              <div id="hl-input-tikz" class="code-highlight"></div>
               <textarea id="input-tikz" oninput="handleInput('input-tikz')" onkeydown="handleKeyDown(event, 'input-tikz')" onscroll="syncScroll('input-tikz')" class="code-input custom-scroll" placeholder="Dán nội dung LaTeX chứa TikZ vào đây..."></textarea>
               <div id="autocomplete-input-tikz" class="autocomplete-dropdown theme-bg"></div>
             </div>
@@ -220,8 +217,8 @@
           <div class="flex justify-between items-center text-xs font-bold h-8 mb-2 pb-2 border-b border-slate-200 dark:border-slate-700 shrink-0">
             <span class="flex items-center gap-1.5"><i data-lucide="file-check" class="w-4 h-4 text-[#db3c6e]"></i> File gốc (Đã gỡ TikZ):</span>
             <div class="flex items-center space-x-1">
-              <button id="btn-undo-output-main" onclick="undo('output-main')" disabled class="btn-history theme-sub-bg hover-pimax p-1.5 h-7 w-7 border rounded transition"><i data-lucide="undo-2" class="w-3.5 h-3.5"></i></button>
-              <button id="btn-redo-output-main" onclick="redo('output-main')" disabled class="btn-history theme-sub-bg hover-pimax p-1.5 h-7 w-7 border rounded transition"><i data-lucide="redo-2" class="w-3.5 h-3.5"></i></button>
+              <button id="btn-undo-output-main" onclick="undo('output-main')" disabled class="btn-history theme-sub-bg p-1.5 h-7 w-7 border rounded transition"><i data-lucide="undo-2" class="w-3.5 h-3.5"></i></button>
+              <button id="btn-redo-output-main" onclick="redo('output-main')" disabled class="btn-history theme-sub-bg p-1.5 h-7 w-7 border rounded transition"><i data-lucide="redo-2" class="w-3.5 h-3.5"></i></button>
               <span class="opacity-30">|</span>
               <button onclick="applyAutoMath('output-main')" class="theme-sub-bg hover-pimax p-1.5 h-7 w-7 border rounded transition"><i data-lucide="variable" class="w-4 h-4 text-[#db3c6e]"></i></button>
               <button onclick="convertArrayToAligned('output-main')" class="theme-sub-bg hover-pimax p-1.5 h-7 w-7 border rounded transition"><i data-lucide="columns-2" class="w-4 h-4 text-[#db3c6e]"></i></button>
@@ -236,7 +233,6 @@
           <div class="editor-container">
             <div id="lines-output-main" class="line-numbers">1</div>
             <div class="editor-area">
-              <div id="hl-output-main" class="code-highlight"></div>
               <textarea id="output-main" oninput="handleInput('output-main')" onkeydown="handleKeyDown(event, 'output-main')" onscroll="syncScroll('output-main')" class="code-input custom-scroll" placeholder="File gốc sau khi gỡ các khối TikZ..."></textarea>
               <div id="autocomplete-output-main" class="autocomplete-dropdown theme-bg"></div>
             </div>
@@ -278,7 +274,6 @@
         <div class="editor-container h-80">
           <div id="lines-output-tikz-single" class="line-numbers">1</div>
           <div class="editor-area">
-            <div id="hl-output-tikz-single" class="code-highlight"></div>
             <textarea id="output-tikz-single" oninput="handleInput('output-tikz-single')" onkeydown="handleKeyDown(event, 'output-tikz-single')" onscroll="syncScroll('output-tikz-single')" class="code-input custom-scroll" placeholder="Code các hình TikZ sẽ gom vào đây..."></textarea>
             <div id="autocomplete-output-tikz-single" class="autocomplete-dropdown theme-bg"></div>
           </div>
