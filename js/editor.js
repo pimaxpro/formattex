@@ -1,7 +1,91 @@
 /* =========================================================
-   PIMAX TOOL — CLEAN EDITOR ENGINE (CHỈ ĐẾM DÒNG & AUTOCOMPLETE)
+   PIMAX TOOL — EDITOR ENGINE (UNDO/REDO + LINE NUMBERS + AUTOCOMPLETE)
    ========================================================= */
 
+// Hệ thống lưu trữ lịch sử Undo / Redo cho từng Editor
+const editorHistories = {};
+
+function initEditorHistory(id) {
+  if (!editorHistories[id]) {
+    editorHistories[id] = {
+      stack: [],
+      index: -1,
+      isApplying: false
+    };
+  }
+}
+
+function saveState(id, force = false) {
+  const textarea = document.getElementById(id);
+  if (!textarea) return;
+
+  initEditorHistory(id);
+  const hist = editorHistories[id];
+  const val = textarea.value;
+
+  if (hist.isApplying) return;
+
+  // Nếu trạng thái hiện tại khác trạng thái cuối trong stack thì đẩy vào
+  if (hist.index === -1 || hist.stack[hist.index] !== val) {
+    if (force || hist.index === -1 || val !== hist.stack[hist.index]) {
+      // Cắt bỏ phần dư nếu đang đứng ở giữa lịch sử
+      hist.stack = hist.stack.slice(0, hist.index + 1);
+      hist.stack.push(val);
+      hist.index = hist.stack.length - 1;
+      updateUndoRedoButtons(id);
+    }
+  }
+}
+
+function undo(id) {
+  initEditorHistory(id);
+  const hist = editorHistories[id];
+  if (hist.index > 0) {
+    hist.index--;
+    applyHistoryState(id, hist.stack[hist.index]);
+  }
+}
+
+function redo(id) {
+  initEditorHistory(id);
+  const hist = editorHistories[id];
+  if (hist.index < hist.stack.length - 1) {
+    hist.index++;
+    applyHistoryState(id, hist.stack[hist.index]);
+  }
+}
+
+function applyHistoryState(id, val) {
+  const textarea = document.getElementById(id);
+  if (!textarea) return;
+
+  const hist = editorHistories[id];
+  hist.isApplying = true;
+  textarea.value = val;
+  handleInput(id);
+  hist.isApplying = false;
+  updateUndoRedoButtons(id);
+}
+
+function updateUndoRedoButtons(id) {
+  const hist = editorHistories[id];
+  if (!hist) return;
+
+  // Tùy chỉnh trạng thái sáng/mờ của nút Undo / Redo trên giao diện tương ứng
+  const undoBtn = document.getElementById(`btn-undo-${id}`);
+  const redoBtn = document.getElementById(`btn-redo-${id}`);
+
+  if (undoBtn) {
+    undoBtn.disabled = hist.index <= 0;
+    undoBtn.style.opacity = undoBtn.disabled ? "0.4" : "1";
+  }
+  if (redoBtn) {
+    redoBtn.disabled = hist.index >= hist.stack.length - 1;
+    redoBtn.style.opacity = redoBtn.disabled ? "0.4" : "1";
+  }
+}
+
+/* Danh sách gợi ý lệnh LaTeX Toán nâng cao */
 const LATEX_SUGGESTIONS = [
   { cmd: '\\begin{ex}\n    \n    \\choice\n    {}\n    {}\n    {}\n    {}\n    \\loigiai{\n    \n    }\n\\end{ex}', label: '\\begin{ex}...\\end{ex}', desc: 'Khối câu hỏi' },
   { cmd: '\\choice\n    {}\n    {}\n    {}\n    {}', label: '\\choice', desc: '4 phương án' },
@@ -20,13 +104,14 @@ const LATEX_SUGGESTIONS = [
 let activeIndex = 0;
 let filteredSuggestions = [];
 
-/* Chỉ đếm dòng, đồng bộ cuộn và kiểm tra gợi ý code */
+/* Xử lý nhập liệu chung */
 function handleInput(id) {
   const textarea = document.getElementById(id);
   const linesDiv = document.getElementById(`lines-${id}`);
 
   if (!textarea) return;
 
+  // 1. Cập nhật số dòng
   if (linesDiv) {
     const lineCount = textarea.value.split('\n').length;
     let linesHTML = '';
@@ -36,6 +121,10 @@ function handleInput(id) {
     linesDiv.textContent = linesHTML;
   }
 
+  // 2. Lưu trạng thái lịch sử Undo/Redo
+  saveState(id);
+
+  // 3. Đồng bộ cuộn và kiểm tra gợi ý code
   syncScroll(id);
   checkAutocompleteTrigger(id);
 }
@@ -167,3 +256,13 @@ function escapeHtml(str) {
 function escapeJsString(str) {
   return str.replace(/\\/g, '\\\\').replace(/'/g, "\\'").replace(/\n/g, '\\n');
 }
+
+// Khởi tạo trạng thái ban đầu khi trang tải xong
+document.addEventListener("DOMContentLoaded", () => {
+  ['input-ex', 'output-ex', 'input-tikz', 'output-main', 'output-tikz-single'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) {
+      saveState(id, true);
+    }
+  });
+});
