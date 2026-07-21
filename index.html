@@ -13,7 +13,7 @@
   <!-- JSZip library -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
   <!-- Custom Style -->
-  <link rel="stylesheet" href="css/style.css?v=22.0">
+  <link rel="stylesheet" href="css/style.css?v=26.0">
 </head>
 <body class="min-h-screen font-sans flex flex-col transition-colors duration-200 bg-slate-100 text-slate-800">
 
@@ -122,7 +122,7 @@
             <div id="lines-input-ex" class="line-numbers">1</div>
             <div class="editor-area">
               <textarea id="input-ex" oninput="handleInput('input-ex')" onkeydown="handleKeyDown(event, 'input-ex')" onscroll="syncScroll('input-ex')" class="code-input custom-scroll" placeholder="Dán nội dung câu hỏi thô vào đây..."></textarea>
-              <div id="autocomplete-input-ex" class="autocomplete-dropdown bg-white rounded border"></div>
+              <div id="autocomplete-input-ex" class="autocomplete-dropdown shadow-lg"></div>
             </div>
           </div>
         </div>
@@ -215,7 +215,7 @@
       <div class="flex justify-end pt-2">
         <button onclick="processExEnvironment()" class="bg-rose-700 hover:bg-rose-800 text-white font-bold px-7 py-2.5 rounded transition flex items-center space-x-2 shadow-md cursor-pointer border border-rose-800">
           <i data-lucide="wand-2" class="w-4 h-4"></i>
-          <span id="btn-ex-label">Chuẩn Hóa Ngay</span>
+          <span id="btn-ex-label">Chuẩn Hóa Ngay (CN 1)</span>
         </button>
       </div>
     </section>
@@ -360,7 +360,7 @@
         </div>
         <div id="status" class="text-center text-xs font-bold"></div>
         <div id="download-container" class="text-center hidden">
-          <button id="download-btn" class="bg-rose-700 hover:bg-rose-800 text-white px-6 py-2.5 text-xs font-bold rounded transition shadow-md flex items-center justify-center space-x-2 mx-auto cursor-pointer border border-rose-800">
+          <button id="download-btn" onclick="downloadZip()" class="bg-rose-700 hover:bg-rose-800 text-white px-6 py-2.5 text-xs font-bold rounded transition shadow-md flex items-center justify-center space-x-2 mx-auto cursor-pointer border border-rose-800">
             <i data-lucide="download" class="w-4 h-4"></i>
             <span>Tải File ZIP Ảnh</span>
           </button>
@@ -407,12 +407,12 @@
   </footer>
 
   <!-- SCRIPT ENGINE CORE -->
-  <script src="js/editor.js?v=22.0"></script>
-  <script src="js/clean-tool.js?v=22.0"></script>
-  <script src="js/ex-processor.js?v=22.0"></script>
-  <script src="js/tikz-extractor.js?v=22.0"></script>
-  <script src="js/pdf-converter.js?v=22.0"></script>
-  <script src="js/answer-modal.js?v=22.0"></script>
-  <script src="js/app.js?v=22.0"></script>
+  <script src="js/editor.js?v=26.0"></script>
+  <script src="js/clean-tool.js?v=26.0"></script>
+  <script src="js/ex-processor.js?v=26.0"></script>
+  <script src="js/tikz-extractor.js?v=26.0"></script>
+  <script src="js/pdf-converter.js?v=26.0"></script>
+  <script src="js/answer-modal.js?v=26.0"></script>
+  <script src="js/app.js?v=26.0"></script>
 </body>
 </html>
