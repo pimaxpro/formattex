@@ -6,15 +6,21 @@
   --pimax-dark-bg: #4a0d20;
 }
 
-/* Các class đồng bộ màu sắc PimaX */
+/* Ghi đè class theme-btn-dark cũ sang màu PimaX #db3c6e */
+.theme-btn-dark,
 .theme-btn-pimax {
   background-color: var(--pimax-main) !important;
   color: #ffffff !important;
-}
-.theme-btn-pimax:hover {
-  background-color: var(--pimax-hover) !important;
+  border-color: var(--pimax-main) !important;
 }
 
+.theme-btn-dark:hover,
+.theme-btn-pimax:hover {
+  background-color: var(--pimax-hover) !important;
+  border-color: var(--pimax-hover) !important;
+}
+
+/* Badge & Highlights */
 .theme-badge-pimax {
   background-color: var(--pimax-light);
   color: var(--pimax-main);
@@ -27,9 +33,9 @@
   border-color: #8c1d3f;
 }
 
-/* Đồng bộ thanh cuộn và viền focus */
+/* Đồng bộ ô nhập liệu khi Focus */
 textarea:focus, input:focus, select:focus {
   outline: none !important;
   border-color: var(--pimax-main) !important;
-  box-shadow: 0 0 0 2px rgba(219, 60, 110, 0.2) !important;
+  box-shadow: 0 0 0 2px rgba(219, 60, 110, 0.25) !important;
 }
