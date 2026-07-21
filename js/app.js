@@ -3,18 +3,18 @@
    ========================================================= */
 
 // Trạng thái ứng dụng hiện tại
-let currentMainMenu = 1;
-let currentSubMode = 1; // 1: \choice, 2: \choiceTF, 3: \shortans
+let currentMainMenu = 1; // 1: Chuẩn hóa LaTeX, 2: Lọc TikZ, 3: Chuyển PDF thành ảnh
+let currentSubMode = 1;  // 1: \choice, 2: \choiceTF, 3: \shortans
 
 /* =========================================================
-   1. ĐIỀU HƯỚNG MENU CHÍNH (MAIN NAVIGATION)
+   1. ĐIỀU HƯỚNG MENU CHÍNH (MAIN NAVIGATION - ĐỒNG BỘ NÚT ĐỎ PIMAX)
    ========================================================= */
 function switchMainMenu(menuIndex) {
   currentMainMenu = menuIndex;
 
-  // Lớp CSS cho nút Menu chính được chọn và không chọn
-  const activeClass = "px-4 py-1.5 text-xs font-semibold rounded-lg transition-all flex items-center space-x-2 bg-white dark:bg-slate-700 text-slate-900 dark:text-white shadow";
-  const inactiveClass = "px-4 py-1.5 text-xs font-medium rounded-lg transition-all flex items-center space-x-2 text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white";
+  // Lớp CSS chuẩn đồng bộ 100% cho Menu Chính
+  const activeClass = "px-4 py-1.5 text-xs font-bold rounded-lg transition-all flex items-center space-x-2 bg-rose-600 text-white shadow-md cursor-pointer";
+  const inactiveClass = "px-4 py-1.5 text-xs font-semibold rounded-lg transition-all flex items-center space-x-2 bg-white dark:bg-slate-700 text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-600 border border-slate-300 dark:border-slate-600 shadow-sm cursor-pointer";
 
   for (let i = 1; i <= 3; i++) {
     const btn = document.getElementById(`nav-btn-${i}`);
@@ -49,7 +49,7 @@ function switchMainMenu(menuIndex) {
 function switchSubMode(mode) {
   currentSubMode = mode;
 
-  // Class CSS chuẩn đồng bộ 100% cho nút Active & Inactive
+  // Class CSS chuẩn đồng bộ 100% cho nút Sub-Mode
   const activeClass = "px-4 py-2 text-xs font-bold rounded-lg transition-all flex items-center space-x-2 bg-rose-600 text-white shadow-md cursor-pointer";
   const inactiveClass = "px-4 py-2 text-xs font-semibold rounded-lg transition-all flex items-center space-x-2 bg-white dark:bg-slate-700 text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-600 border border-slate-300 dark:border-slate-600 shadow-sm cursor-pointer";
 
