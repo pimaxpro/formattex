@@ -1,8 +1,7 @@
 /* =========================================================
-   PIMAX TOOL — EDITOR CORE (LINE NUMBERS + HIGHLIGHT + AUTOCOMPLETE)
+   PIMAX TOOL — EDITOR ENGINE (FIX SCROLL SHADOW & AUTOCOMPLETE)
    ========================================================= */
 
-// Danh sách gợi ý lệnh LaTeX Toán nâng cao
 const LATEX_SUGGESTIONS = [
   { cmd: '\\begin{ex}\n    \n    \\choice\n    {}\n    {}\n    {}\n    {}\n    \\loigiai{\n    \n    }\n\\end{ex}', label: '\\begin{ex}...\\end{ex}', desc: 'Khối câu hỏi' },
   { cmd: '\\choice\n    {}\n    {}\n    {}\n    {}', label: '\\choice', desc: '4 phương án' },
@@ -16,7 +15,6 @@ const LATEX_SUGGESTIONS = [
   { cmd: '\\begin{aligned}\n    \n\\end{aligned}', label: '\\begin{aligned}', desc: 'Hệ phương trình' },
   { cmd: '\\begin{cases}\n    \n\\end{cases}', label: '\\begin{cases}', desc: 'Ngoặc nhọn hệ' },
   { cmd: '\\begin{tikzpicture}\n    \n\\end{tikzpicture}', label: '\\begin{tikzpicture}', desc: 'Hình TikZ' },
-  { cmd: '\\xrightarrow{}', label: '\\xrightarrow{}', desc: 'Mũi tên suy ra' },
   { cmd: '\\int_{}^{}', label: '\\int', desc: 'Tích phân' },
   { cmd: '\\lim_{x \\to }', label: '\\lim', desc: 'Giới hạn' }
 ];
@@ -24,7 +22,7 @@ const LATEX_SUGGESTIONS = [
 let activeIndex = 0;
 let filteredSuggestions = [];
 
-/* Xử lý Input: Đếm số dòng, Tô màu Highlighting & Kích hoạt Autocomplete */
+/* Xử lý nhập liệu & tô màu cú pháp */
 function handleInput(id) {
   const textarea = document.getElementById(id);
   const linesDiv = document.getElementById(`lines-${id}`);
@@ -32,7 +30,7 @@ function handleInput(id) {
 
   if (!textarea) return;
 
-  // 1. Đếm và hiển thị số dòng (Line Numbers)
+  // 1. Cập nhật dòng số
   if (linesDiv) {
     const lineCount = textarea.value.split('\n').length;
     let linesHTML = '';
@@ -42,7 +40,7 @@ function handleInput(id) {
     linesDiv.textContent = linesHTML;
   }
 
-  // 2. Cập nhật Lớp Highlight bên dưới
+  // 2. Tô màu Highlighting
   if (hlDiv) {
     let code = textarea.value;
     code = code.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
@@ -54,29 +52,32 @@ function handleInput(id) {
     hlDiv.innerHTML = code + '\n';
   }
 
-  // 3. Đồng bộ Cuộn
+  // 3. Đồng bộ cuộn tức thì
   syncScroll(id);
 
   // 4. Kiểm tra bật Autocomplete
   checkAutocompleteTrigger(id);
 }
 
-/* Đồng bộ vị trí cuộn giữa Textarea, Line Numbers và Highlight */
+/* ĐỒNG BỘ CUỘN TUYỆT ĐỐI KHÔNG BỊ ÁM MỜ (dùng Transform & ScrollTop) */
 function syncScroll(id) {
   const textarea = document.getElementById(id);
   const linesDiv = document.getElementById(`lines-${id}`);
   const hlDiv = document.getElementById(`hl-${id}`);
 
   if (textarea) {
-    if (linesDiv) linesDiv.scrollTop = textarea.scrollTop;
+    if (linesDiv) {
+      linesDiv.scrollTop = textarea.scrollTop;
+    }
     if (hlDiv) {
+      // Dùng scrollTop trực tiếp & đồng bộ scrollLeft chống tràn ngang
       hlDiv.scrollTop = textarea.scrollTop;
       hlDiv.scrollLeft = textarea.scrollLeft;
     }
   }
 }
 
-/* Điều khiển bàn phím (Tab, Phím Mũi tên chọn gợi ý Autocomplete) */
+/* Xử lý bàn phím */
 function handleKeyDown(e, id) {
   const dropdown = document.getElementById(`autocomplete-${id}`);
   
@@ -104,7 +105,6 @@ function handleKeyDown(e, id) {
     }
   }
 
-  // Xử lý phím Tab thụt lề 4 khoảng trắng
   if (e.key === 'Tab') {
     e.preventDefault();
     const textarea = document.getElementById(id);
@@ -117,7 +117,6 @@ function handleKeyDown(e, id) {
   }
 }
 
-/* Bật menu Autocomplete khi phát hiện từ bắt đầu bằng dấu \ */
 function checkAutocompleteTrigger(id) {
   const textarea = document.getElementById(id);
   const dropdown = document.getElementById(`autocomplete-${id}`);
@@ -125,7 +124,6 @@ function checkAutocompleteTrigger(id) {
 
   const cursorPos = textarea.selectionStart;
   const textBeforeCursor = textarea.value.substring(0, cursorPos);
-  
   const match = textBeforeCursor.match(/\\([a-zA-Z]*)$/);
 
   if (match) {
@@ -137,14 +135,12 @@ function checkAutocompleteTrigger(id) {
     if (filteredSuggestions.length > 0) {
       activeIndex = 0;
       renderAutocompleteItems(id);
-      
       dropdown.style.display = 'block';
       dropdown.style.top = '35px';
       dropdown.style.left = '50px';
       return;
     }
   }
-
   hideAutocomplete(id);
 }
 
@@ -190,9 +186,7 @@ function insertSuggestion(id, cmd) {
 
 function hideAutocomplete(id) {
   const dropdown = document.getElementById(`autocomplete-${id}`);
-  if (dropdown) {
-    dropdown.style.display = 'none';
-  }
+  if (dropdown) dropdown.style.display = 'none';
 }
 
 function escapeHtml(str) {
