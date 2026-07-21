@@ -1,4 +1,8 @@
-/* Custom Palette PimaX: #db3c6e (RGB: 219, 60, 110) */
+/* =========================================================
+   PIMAX TOOL SYSTEM STYLESHEET
+   Main Color: #db3c6e (RGB: 219, 60, 110)
+   ========================================================= */
+
 :root {
   --pimax-main: #db3c6e;
   --pimax-hover: #c42f5e;
@@ -22,7 +26,7 @@ body.dark {
   --border-color: #334155;
 }
 
-/* Base Style Controls */
+/* Base Styles */
 body {
   background-color: var(--bg-main) !important;
   color: var(--text-main) !important;
@@ -41,7 +45,7 @@ body {
   border-color: var(--border-color) !important;
 }
 
-/* Ghi đè class theme-btn-dark và theme-btn-pimax */
+/* Primary PimaX Buttons */
 .theme-btn-dark,
 .theme-btn-pimax {
   background-color: var(--pimax-main) !important;
@@ -55,7 +59,7 @@ body {
   border-color: var(--pimax-hover) !important;
 }
 
-/* Badge & Highlights */
+/* Badges */
 .theme-badge-pimax {
   background-color: var(--pimax-light);
   color: var(--pimax-main);
@@ -68,7 +72,10 @@ body.dark .theme-badge-pimax {
   border-color: #8c1d3f;
 }
 
-/* Editor Specific Layout Fixing */
+/* =========================================================
+   CUSTOM CODE EDITOR ARCHITECTURE (Line Numbers + Highlight)
+   ========================================================= */
+
 .editor-container {
   display: flex !important;
   flex: 1 1 0% !important;
@@ -77,6 +84,7 @@ body.dark .theme-badge-pimax {
   border-radius: 0.375rem;
   overflow: hidden;
   background-color: var(--bg-card) !important;
+  border: 1px solid var(--border-color);
 }
 
 .line-numbers {
@@ -84,34 +92,128 @@ body.dark .theme-badge-pimax {
   color: #94a3b8 !important;
   border-right: 1px solid var(--border-color) !important;
   padding: 0.5rem 0.25rem;
-  font-family: monospace;
-  font-size: 0.75rem;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  font-size: 0.8125rem;
   line-height: 1.5rem;
   text-align: right;
   user-select: none;
+  overflow: hidden;
+  white-space: pre;
 }
 
 .editor-area {
-  position: relative;
-  flex: 1 1 0%;
-  height: 100%;
+  position: relative !important;
+  flex: 1 1 0% !important;
+  height: 100% !important;
+  overflow: hidden !important;
 }
 
-.code-input, .code-highlight {
-  width: 100%;
-  height: 100%;
-  padding: 0.5rem;
-  font-family: monospace;
-  font-size: 0.875rem;
-  line-height: 1.5rem;
-  border: none;
-  background: transparent;
-  outline: none;
-  resize: none;
+/* Căn đè hoàn hảo 2 lớp Highlight và Textarea */
+.code-input, 
+.code-highlight {
+  position: absolute !important;
+  top: 0 !important;
+  left: 0 !important;
+  width: 100% !important;
+  height: 100% !important;
+  padding: 0.5rem 0.75rem !important;
+  margin: 0 !important;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace !important;
+  font-size: 0.8125rem !important;
+  line-height: 1.5rem !important;
+  white-space: pre-wrap !important;
+  word-wrap: break-word !important;
+  overflow-wrap: break-word !important;
+  border: none !important;
+  outline: none !important;
+  tab-size: 2;
+}
+
+/* Lớp Highlight ở dưới */
+.code-highlight {
+  pointer-events: none !important;
+  z-index: 1 !important;
+  color: transparent !important;
+  overflow: hidden !important;
+}
+
+/* Lớp Textarea gõ chữ ở trên */
+.code-input {
+  z-index: 2 !important;
+  background: transparent !important;
   color: var(--text-main) !important;
+  resize: none !important; /* Xóa bỏ nút co giãn góc dưới */
+  caret-color: var(--pimax-main) !important;
 }
 
-/* Focus Glow */
+/* Cú pháp Highlight LaTeX */
+.hl-keyword { color: #db3c6e; font-weight: bold; }
+.hl-env { color: #2563eb; font-weight: bold; }
+body.dark .hl-env { color: #60a5fa; font-weight: bold; }
+.hl-math { color: #059669; }
+body.dark .hl-math { color: #34d399; }
+.hl-comment { color: #94a3b8; font-style: italic; }
+
+/* =========================================================
+   CUSTOM SCROLLBAR & AUTOCOMPLETE DROPDOWN
+   ========================================================= */
+
+.custom-scroll::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+.custom-scroll::-webkit-scrollbar-track {
+  background: var(--bg-sub);
+}
+
+.custom-scroll::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 4px;
+}
+
+body.dark .custom-scroll::-webkit-scrollbar-thumb {
+  background: #475569;
+}
+
+.custom-scroll::-webkit-scrollbar-thumb:hover {
+  background: var(--pimax-main);
+}
+
+/* Autocomplete Menu Pop-up */
+.autocomplete-dropdown {
+  position: absolute;
+  z-index: 50;
+  max-height: 180px;
+  overflow-y: auto;
+  border: 1px solid var(--border-color);
+  border-radius: 0.375rem;
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+  display: none;
+}
+
+.autocomplete-item {
+  padding: 0.375rem 0.75rem;
+  font-family: monospace;
+  font-size: 0.75rem;
+  cursor: pointer;
+  transition: background-color 0.15s ease;
+}
+
+.autocomplete-item:hover,
+.autocomplete-item.active {
+  background-color: var(--pimax-light);
+  color: var(--pimax-main);
+  font-weight: bold;
+}
+
+body.dark .autocomplete-item:hover,
+body.dark .autocomplete-item.active {
+  background-color: var(--pimax-dark-bg);
+  color: #fca5c0;
+}
+
+/* Focus glow effect */
 textarea:focus, input:focus, select:focus {
   outline: none !important;
   border-color: var(--pimax-main) !important;
