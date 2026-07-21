@@ -1,5 +1,5 @@
 /* =========================================================
-   PIMAX TOOL — EDITOR ENGINE (UNDO/REDO + LINE NUMBERS + AUTOCOMPLETE)
+   PIMAX TOOL — EDITOR ENGINE (COMPLETE & POLISHED)
    ========================================================= */
 
 // Hệ thống lưu trữ lịch sử Undo / Redo cho từng Editor
@@ -69,7 +69,6 @@ function updateUndoRedoButtons(id) {
   const hist = editorHistories[id];
   if (!hist) return;
 
-  // Liên kết chính xác với ID trên HTML của Input và Output
   if (id === 'input-ex') {
     updateBtnState(document.getElementById('btn-undo-input-ex'), hist.index <= 0);
     updateBtnState(document.getElementById('btn-redo-input-ex'), hist.index >= hist.stack.length - 1);
@@ -94,7 +93,128 @@ function updateBtnState(btn, isDisabled) {
   }
 }
 
-/* Danh sách gợi ý lệnh LaTeX Toán nâng cao */
+/* =========================================================
+   FIND & REPLACE ENGINE (HỖ TRỢ MATCH CASE & HIGHLIGHT)
+   ========================================================= */
+
+let searchMatches = [];
+let currentSearchIndex = -1;
+
+function findText(id) {
+  const textarea = document.getElementById(id);
+  const findInput = document.getElementById(`find-${id}`);
+  const countEl = document.getElementById(`count-${id}`);
+  const matchCaseEl = document.getElementById(`match-case-${id}`);
+
+  if (!textarea || !findInput) return;
+
+  const query = findInput.value;
+  const matchCase = matchCaseEl ? matchCaseEl.checked : false;
+  searchMatches = [];
+  currentSearchIndex = -1;
+
+  if (!query) {
+    if (countEl) countEl.textContent = "0/0";
+    return;
+  }
+
+  const text = textarea.value;
+  const flags = matchCase ? 'g' : 'gi';
+  const escapedQuery = query.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+  const regex = new RegExp(escapedQuery, flags);
+
+  let match;
+  while ((match = regex.exec(text)) !== null) {
+    searchMatches.push({
+      start: match.index,
+      end: match.index + match[0].length
+    });
+  }
+
+  if (searchMatches.length > 0) {
+    currentSearchIndex = 0;
+    highlightMatch(id);
+  } else {
+    if (countEl) countEl.textContent = "0/0";
+  }
+}
+
+function navigateSearch(id, direction) {
+  if (searchMatches.length === 0) return;
+
+  currentSearchIndex += direction;
+  if (currentSearchIndex >= searchMatches.length) {
+    currentSearchIndex = 0;
+  } else if (currentSearchIndex < 0) {
+    currentSearchIndex = searchMatches.length - 1;
+  }
+
+  highlightMatch(id);
+}
+
+function highlightMatch(id) {
+  const textarea = document.getElementById(id);
+  const countEl = document.getElementById(`count-${id}`);
+
+  if (!textarea || searchMatches.length === 0) return;
+
+  const match = searchMatches[currentSearchIndex];
+  textarea.focus();
+  
+  // Highlight trực quan từ tìm thấy bằng cách bôi đen vùng text đó trong textarea
+  textarea.setSelectionRange(match.start, match.end);
+
+  // Cuộn mượt đến dòng chứa kết quả
+  const textBefore = textarea.value.substring(0, match.start);
+  const lineNum = textBefore.split('\n').length;
+  textarea.scrollTop = Math.max(0, (lineNum - 3) * 24);
+
+  if (countEl) {
+    countEl.textContent = `${currentSearchIndex + 1}/${searchMatches.length}`;
+  }
+}
+
+function replaceText(id, all = false) {
+  const textarea = document.getElementById(id);
+  const findInput = document.getElementById(`find-${id}`);
+  const replaceInput = document.getElementById(`replace-${id}`);
+  const matchCaseEl = document.getElementById(`match-case-${id}`);
+
+  if (!textarea || !findInput || !replaceInput) return;
+
+  const query = findInput.value;
+  const replacement = replaceInput.value;
+  const matchCase = matchCaseEl ? matchCaseEl.checked : false;
+
+  if (!query) return;
+
+  const text = textarea.value;
+
+  if (all) {
+    const flags = matchCase ? 'g' : 'gi';
+    const escapedQuery = query.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+    const regex = new RegExp(escapedQuery, flags);
+    
+    textarea.value = text.replace(regex, replacement);
+  } else {
+    if (searchMatches.length === 0 || currentSearchIndex === -1) {
+      findText(id);
+      if (searchMatches.length === 0) return;
+    }
+
+    const match = searchMatches[currentSearchIndex];
+    textarea.value = text.substring(0, match.start) + replacement + text.substring(match.end);
+    textarea.setSelectionRange(match.start, match.start + replacement.length);
+  }
+
+  handleInput(id);
+  findText(id);
+}
+
+/* =========================================================
+   LATEX AUTOCOMPLETE & EDITOR CORE
+   ========================================================= */
+
 const LATEX_SUGGESTIONS = [
   { cmd: '\\begin{ex}\n    \n    \\choice\n    {}\n    {}\n    {}\n    {}\n    \\loigiai{\n    \n    }\n\\end{ex}', label: '\\begin{ex}...\\end{ex}', desc: 'Khối câu hỏi' },
   { cmd: '\\choice\n    {}\n    {}\n    {}\n    {}', label: '\\choice', desc: '4 phương án' },
@@ -113,14 +233,12 @@ const LATEX_SUGGESTIONS = [
 let activeIndex = 0;
 let filteredSuggestions = [];
 
-/* Xử lý nhập liệu chung */
 function handleInput(id) {
   const textarea = document.getElementById(id);
   const linesDiv = document.getElementById(`lines-${id}`);
 
   if (!textarea) return;
 
-  // 1. Cập nhật số dòng
   if (linesDiv) {
     const lineCount = textarea.value.split('\n').length;
     let linesHTML = '';
@@ -130,10 +248,7 @@ function handleInput(id) {
     linesDiv.textContent = linesHTML;
   }
 
-  // 2. Lưu trạng thái lịch sử Undo/Redo
   saveState(id);
-
-  // 3. Đồng bộ cuộn và kiểm tra gợi ý code
   syncScroll(id);
   checkAutocompleteTrigger(id);
 }
