@@ -1,18 +1,17 @@
 /* =========================================================
-   PIMAX TOOL — APPLICATION CONTROLLER (APP.JS FULL - ULTRA-LIGHT ROUNDED)
+   PIMAX TOOL — APPLICATION CONTROLLER (APP.JS FULL)
    ========================================================= */
 
-// Trạng thái ứng dụng hiện tại
-let currentMainMenu = 1; // 1: Chuẩn hóa LaTeX, 2: Lọc TikZ, 3: Chuyển PDF thành ảnh
-let currentSubMode = 1;  // 1: \choice, 2: \choiceTF, 3: \shortans
+// Trạng thái ứng dụng
+window.currentMainMenu = 1;
+window.currentSubMode = 1;
 
 /* =========================================================
-   1. ĐIỀU HƯỚNG MENU CHÍNH (BO GÓC SIÊU NHẸ - ROUNDED)
+   1. ĐIỀU HƯỚNG MENU CHÍNH
    ========================================================= */
 function switchMainMenu(menuIndex) {
-  currentMainMenu = menuIndex;
+  window.currentMainMenu = menuIndex;
 
-  // Lớp CSS bo góc siêu nhẹ (rounded)
   const activeClass = "px-4 py-2 text-xs font-bold rounded transition-all flex items-center space-x-2 bg-white text-slate-900 border border-slate-300 shadow-sm cursor-pointer";
   const inactiveClass = "px-4 py-2 text-xs font-semibold rounded transition-all flex items-center space-x-2 bg-transparent text-slate-500 hover:text-slate-800 hover:bg-slate-200/50 border border-transparent cursor-pointer";
 
@@ -39,12 +38,11 @@ function switchMainMenu(menuIndex) {
 }
 
 /* =========================================================
-   2. ĐIỀU HƯỚNG MENU PHỤ (SUB-MODE: BO GÓC SIÊU NHẸ - ROUNDED)
+   2. ĐIỀU HƯỚNG MENU PHỤ (SUB-MODE)
    ========================================================= */
 function switchSubMode(mode) {
-  currentSubMode = mode;
+  window.currentSubMode = mode;
 
-  // Lớp CSS bo góc siêu nhẹ (rounded)
   const activeClass = "px-4 py-2 text-xs font-bold rounded transition-all flex items-center space-x-2 bg-white text-slate-900 border border-slate-300 shadow-sm cursor-pointer";
   const inactiveClass = "px-4 py-2 text-xs font-semibold rounded transition-all flex items-center space-x-2 bg-transparent text-slate-500 hover:text-slate-800 hover:bg-slate-200/50 border border-transparent cursor-pointer";
 
@@ -67,19 +65,18 @@ function switchSubMode(mode) {
     }
   }
 
-  // Cập nhật nhãn trạng thái chế độ
   const labelEl = document.getElementById('current-mode-label');
   const btnLabelEl = document.getElementById('btn-ex-label');
 
   if (mode === 1) {
     if (labelEl) labelEl.textContent = "Chế độ: Trắc nghiệm 4 phương án (\\choice)";
-    if (btnLabelEl) btnLabelEl.textContent = "Chuẩn Hóa Ngay (Trắc nghiệm)";
+    if (btnLabelEl) btnLabelEl.textContent = "Chuẩn Hóa Ngay";
   } else if (mode === 2) {
     if (labelEl) labelEl.textContent = "Chế độ: Câu hỏi Đúng / Sai (\\choiceTF)";
-    if (btnLabelEl) btnLabelEl.textContent = "Chuẩn Hóa Ngay (Đúng / Sai)";
+    if (btnLabelEl) btnLabelEl.textContent = "Chuẩn Hóa Ngay";
   } else if (mode === 3) {
     if (labelEl) labelEl.textContent = "Chế độ: Trả lời ngắn (\\shortans)";
-    if (btnLabelEl) btnLabelEl.textContent = "Chuẩn Hóa Ngay (Trả lời ngắn)";
+    if (btnLabelEl) btnLabelEl.textContent = "Chuẩn Hóa Ngay";
   }
 }
 
