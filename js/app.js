@@ -7,14 +7,14 @@ let currentMainMenu = 1; // 1: Chuẩn hóa LaTeX, 2: Lọc TikZ, 3: Chuyển PD
 let currentSubMode = 1;  // 1: \choice, 2: \choiceTF, 3: \shortans
 
 /* =========================================================
-   1. ĐIỀU HƯỚNG MENU CHÍNH (MAIN NAVIGATION - ĐỒNG BỘ NÚT ĐỎ PIMAX)
+   1. ĐIỀU HƯỚNG MENU CHÍNH (ĐỒNG BỘ 100% MÀU PIMAX)
    ========================================================= */
 function switchMainMenu(menuIndex) {
   currentMainMenu = menuIndex;
 
-  // Lớp CSS chuẩn đồng bộ 100% cho Menu Chính
-  const activeClass = "px-4 py-1.5 text-xs font-bold rounded-lg transition-all flex items-center space-x-2 bg-rose-600 text-white shadow-md cursor-pointer";
-  const inactiveClass = "px-4 py-1.5 text-xs font-semibold rounded-lg transition-all flex items-center space-x-2 bg-white dark:bg-slate-700 text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-600 border border-slate-300 dark:border-slate-600 shadow-sm cursor-pointer";
+  // Lớp CSS chuẩn đồng bộ tuyệt đối cho Menu Chính (Tông Đỏ Pimax)
+  const activeClass = "px-4 py-2 text-xs font-bold rounded-xl transition-all flex items-center space-x-2 bg-rose-700 text-white shadow-md cursor-pointer border border-rose-800";
+  const inactiveClass = "px-4 py-2 text-xs font-semibold rounded-xl transition-all flex items-center space-x-2 bg-white dark:bg-slate-700 text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-600 border border-slate-300 dark:border-slate-600 shadow-sm cursor-pointer";
 
   for (let i = 1; i <= 3; i++) {
     const btn = document.getElementById(`nav-btn-${i}`);
@@ -37,21 +37,21 @@ function switchMainMenu(menuIndex) {
     }
   }
 
-  // Khôi phục lại icon Lucide nếu cần
+  // Khôi phục lại icon Lucide
   if (window.lucide) {
     lucide.createIcons();
   }
 }
 
 /* =========================================================
-   2. ĐIỀU HƯỚNG MENU PHỤ (SUB-MODE: CHOICE / CHOICETF / SHORTANS)
+   2. ĐIỀU HƯỚNG MENU PHỤ (SUB-MODE: ĐỒNG BỘ NỔI BẬT TÔNG PIMAX)
    ========================================================= */
 function switchSubMode(mode) {
   currentSubMode = mode;
 
-  // Class CSS chuẩn đồng bộ 100% cho nút Sub-Mode
-  const activeClass = "px-4 py-2 text-xs font-bold rounded-lg transition-all flex items-center space-x-2 bg-rose-600 text-white shadow-md cursor-pointer";
-  const inactiveClass = "px-4 py-2 text-xs font-semibold rounded-lg transition-all flex items-center space-x-2 bg-white dark:bg-slate-700 text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-600 border border-slate-300 dark:border-slate-600 shadow-sm cursor-pointer";
+  // Lớp CSS chuẩn đồng bộ tuyệt đối cho Sub-Mode
+  const activeClass = "px-4 py-2 text-xs font-bold rounded-xl transition-all flex items-center space-x-2 bg-rose-700 text-white shadow-md cursor-pointer border border-rose-800";
+  const inactiveClass = "px-4 py-2 text-xs font-semibold rounded-xl transition-all flex items-center space-x-2 bg-white dark:bg-slate-700 text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-600 border border-slate-300 dark:border-slate-600 shadow-sm cursor-pointer";
 
   for (let i = 1; i <= 3; i++) {
     const btn = document.getElementById(`sub-btn-${i}`);
@@ -61,7 +61,7 @@ function switchSubMode(mode) {
       btn.className = activeClass;
       const badge = btn.querySelector('span:last-child');
       if (badge) {
-        badge.className = "text-[10px] font-mono bg-rose-700/80 text-rose-100 px-2 py-0.5 rounded border border-rose-500/40";
+        badge.className = "text-[10px] font-mono bg-rose-900/60 text-rose-100 px-2 py-0.5 rounded border border-rose-500/40";
       }
     } else {
       btn.className = inactiveClass;
@@ -112,12 +112,11 @@ function toggleDarkMode() {
    4. TỰ ĐỘNG KHỞI TẠO KHI TẢI TRANG DOM
    ========================================================= */
 document.addEventListener("DOMContentLoaded", () => {
-  // Khởi tạo icons Lucide
   if (window.lucide) {
     lucide.createIcons();
   }
 
-  // Mặc định chọn Menu 1 và SubMode 1
+  // Mặc định nạp Menu 1 và SubMode 1 đồng bộ
   switchMainMenu(1);
   switchSubMode(1);
 });
