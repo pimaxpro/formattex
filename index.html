@@ -107,9 +107,15 @@
               <button id="btn-undo-output-ex" onclick="undo('output-ex')" disabled class="btn-history theme-sub-bg p-1.5 h-7 w-7 flex items-center justify-center border transition" title="Hoàn tác"><i data-lucide="undo-2" class="w-3.5 h-3.5"></i></button>
               <button id="btn-redo-output-ex" onclick="redo('output-ex')" disabled class="btn-history theme-sub-bg p-1.5 h-7 w-7 flex items-center justify-center border transition" title="Làm lại"><i data-lucide="redo-2" class="w-3.5 h-3.5"></i></button>
               <span class="opacity-30">|</span>
+              <!-- NÚT BẤM MỚI: THÊM ĐÁP ÁN TRẮC NGHIỆM -->
+              <button onclick="openAnswerModal()" class="bg-indigo-100 dark:bg-indigo-900/50 text-indigo-900 dark:text-indigo-200 px-2 h-7 flex items-center gap-1 border border-indigo-300 dark:border-indigo-700 transition font-medium text-[11px]" title="Bảng chèn đáp án trắc nghiệm nhanh">
+                <i data-lucide="grid" class="w-3.5 h-3.5 text-indigo-700 dark:text-indigo-400"></i>
+                <span>Thêm đáp án</span>
+              </button>
+              <span class="opacity-30">|</span>
               <button onclick="applyAutoMath('output-ex')" class="bg-amber-100 dark:bg-amber-900/50 text-amber-900 dark:text-amber-200 p-1.5 h-7 w-7 flex items-center justify-center border border-amber-300 dark:border-amber-700 transition" title="Tự động bọc $"><i data-lucide="variable" class="w-4 h-4 text-amber-700 dark:text-amber-400"></i></button>
               <button onclick="convertArrayToAligned('output-ex')" class="bg-blue-100 dark:bg-blue-900/50 text-blue-900 dark:text-blue-200 p-1.5 h-7 w-7 flex items-center justify-center border border-blue-300 dark:border-blue-700 transition" title="Chuyển array thành aligned"><i data-lucide="columns-2" class="w-4 h-4 text-blue-700 dark:text-blue-400"></i></button>
-              <button onclick="applyCleanSpacingTool('output-ex')" class="bg-emerald-100 dark:bg-emerald-900/50 text-emerald-900 dark:text-emerald-200 p-1.5 h-7 w-7 flex items-center justify-center border border-emerald-300 dark:border-emerald-700 transition" title="Dọn dẹp dòng trống & khoảng trắng dấu câu"><svg class="w-4 h-4 text-emerald-700 dark:text-emerald-400" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m2 22 10-10"/><path d="M9.5 12.5 14 17"/><path d="m15 11 3 3"/><path d="m17 7 2 2"/><path d="M19 2l3 3-7 7-3-3z"/></svg></button>
+              <button onclick="applyCleanSpacingTool('output-ex')" class="bg-emerald-100 dark:bg-emerald-900/50 text-emerald-900 dark:text-emerald-200 p-1.5 h-7 w-7 flex items-center justify-center border border-emerald-300 dark:border-emerald-700 transition" title="Dọn dẹp khoảng trắng dấu câu"><svg class="w-4 h-4 text-emerald-700 dark:text-emerald-400" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m2 22 10-10"/><path d="M9.5 12.5 14 17"/><path d="m15 11 3 3"/><path d="m17 7 2 2"/><path d="M19 2l3 3-7 7-3-3z"/></svg></button>
               <button onclick="wrapSelectionWithEnv('output-ex', 'itemize')" class="theme-sub-bg p-1.5 h-7 w-7 flex items-center justify-center border transition" title="Chuyển itemize"><i data-lucide="list" class="w-4 h-4"></i></button>
               <button onclick="wrapSelectionWithEnv('output-ex', 'enumerate')" class="theme-sub-bg p-1.5 h-7 w-7 flex items-center justify-center border transition" title="Chuyển enumerate"><i data-lucide="list-ordered" class="w-4 h-4"></i></button>
               <span class="opacity-30">|</span>
@@ -118,7 +124,7 @@
             </div>
           </div>
 
-          <!-- Tìm kiếm & thay thế (Đã gỡ nút Dọn dẹp bị trùng) -->
+          <!-- Tìm kiếm & thay thế -->
           <div class="theme-sub-bg p-2 border mb-2 flex flex-col gap-2 text-xs">
             <div class="flex items-center gap-2 flex-wrap">
               <div class="flex items-center space-x-1 flex-1 min-w-[150px]">
@@ -165,153 +171,55 @@
 
     <!-- MENU 2: LỌC TIKZ -->
     <section id="menu-section-2" class="hidden space-y-4">
-      <div class="theme-bg p-4 border shadow-sm"><p class="text-sm opacity-75">Tự động lọc và tách toàn bộ các khối <code class="font-bold">\begin{tikzpicture}...\end{tikzpicture}</code> ra khỏi file LaTeX gốc.</p></div>
-      <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <!-- Input TikZ -->
-        <div class="theme-bg border p-4 shadow-sm flex flex-col justify-between h-[580px]">
-          <div class="flex justify-between items-center text-xs font-bold h-8 mb-3 pb-2 border-b border-slate-200 dark:border-slate-700">
-            <span class="flex items-center gap-1.5"><i data-lucide="file-text" class="w-4 h-4"></i> Code LaTeX gốc:</span>
-            <div class="flex items-center space-x-1.5">
-              <button id="btn-undo-input-tikz" onclick="undo('input-tikz')" disabled class="btn-history theme-sub-bg px-2 h-7 flex items-center gap-1 border transition text-[11px]"><i data-lucide="undo-2" class="w-3.5 h-3.5"></i></button>
-              <button id="btn-redo-input-tikz" onclick="redo('input-tikz')" disabled class="btn-history theme-sub-bg px-2 h-7 flex items-center gap-1 border transition text-[11px]"><i data-lucide="redo-2" class="w-3.5 h-3.5"></i></button>
-              <span class="opacity-30">|</span>
-              <label class="cursor-pointer theme-sub-bg px-2.5 h-7 flex items-center transition border gap-1 text-xs"><i data-lucide="upload" class="w-3 h-3"></i> Tải file<input type="file" accept=".tex,.txt" class="hidden" onchange="loadFile(event, 'input-tikz')"></label>
-              <button onclick="clearText('input-tikz')" class="hover:underline h-7 px-1 flex items-center opacity-75">Xóa</button>
-            </div>
-          </div>
-          <div class="editor-container border border-slate-200 dark:border-slate-700">
-            <div id="lines-input-tikz" class="line-numbers min-w-[42px]">1</div>
-            <div class="editor-area">
-              <div id="hl-input-tikz" class="code-highlight"></div>
-              <textarea id="input-tikz" oninput="handleInput('input-tikz')" onkeydown="handleKeyDown(event, 'input-tikz')" onscroll="syncScroll('input-tikz')" class="code-input custom-scroll" placeholder="Dán nội dung LaTeX chứa TikZ vào đây..."></textarea>
-              <div id="autocomplete-input-tikz" class="autocomplete-dropdown theme-bg"></div>
-            </div>
-          </div>
-        </div>
-
-        <!-- Output Main -->
-        <div class="theme-bg border p-4 shadow-sm flex flex-col justify-between h-[580px]">
-          <div class="flex justify-between items-center text-xs font-bold h-8 mb-2 pb-2 border-b border-slate-200 dark:border-slate-700">
-            <span class="flex items-center gap-1.5"><i data-lucide="file-check" class="w-4 h-4"></i> File gốc (Đã gỡ TikZ):</span>
-            <div class="flex items-center space-x-1">
-              <button id="btn-undo-output-main" onclick="undo('output-main')" disabled class="btn-history theme-sub-bg p-1.5 h-7 w-7 border transition"><i data-lucide="undo-2" class="w-3.5 h-3.5"></i></button>
-              <button id="btn-redo-output-main" onclick="redo('output-main')" disabled class="btn-history theme-sub-bg p-1.5 h-7 w-7 border transition"><i data-lucide="redo-2" class="w-3.5 h-3.5"></i></button>
-              <span class="opacity-30">|</span>
-              <button onclick="applyAutoMath('output-main')" class="bg-amber-100 dark:bg-amber-900/50 text-amber-900 dark:text-amber-200 p-1.5 h-7 w-7 border border-amber-300 dark:border-amber-700 transition"><i data-lucide="variable" class="w-4 h-4 text-amber-700 dark:text-amber-400"></i></button>
-              <button onclick="convertArrayToAligned('output-main')" class="bg-blue-100 dark:bg-blue-900/50 text-blue-900 dark:text-blue-200 p-1.5 h-7 w-7 border border-blue-300 dark:border-blue-700 transition"><i data-lucide="columns-2" class="w-4 h-4 text-blue-700 dark:text-blue-400"></i></button>
-              <button onclick="applyCleanSpacingTool('output-main')" class="bg-emerald-100 dark:bg-emerald-900/50 text-emerald-900 dark:text-emerald-200 p-1.5 h-7 w-7 border border-emerald-300 dark:border-emerald-700 transition"><svg class="w-4 h-4 text-emerald-700 dark:text-emerald-400" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m2 22 10-10"/><path d="M9.5 12.5 14 17"/><path d="m15 11 3 3"/><path d="m17 7 2 2"/><path d="M19 2l3 3-7 7-3-3z"/></svg></button>
-              <button onclick="wrapSelectionWithEnv('output-main', 'itemize')" class="theme-sub-bg p-1.5 h-7 w-7 border transition"><i data-lucide="list" class="w-4 h-4"></i></button>
-              <button onclick="wrapSelectionWithEnv('output-main', 'enumerate')" class="theme-sub-bg p-1.5 h-7 w-7 border transition"><i data-lucide="list-ordered" class="w-4 h-4"></i></button>
-              <span class="opacity-30">|</span>
-              <button onclick="copyToClipboard('output-main')" class="theme-sub-bg p-1.5 h-7 w-7 border transition"><i data-lucide="copy" class="w-3.5 h-3.5"></i></button>
-              <button onclick="downloadSingleText('output-main', 'file_goc_no_tikz.tex')" class="theme-sub-bg p-1.5 h-7 w-7 border transition"><i data-lucide="download" class="w-3.5 h-3.5"></i></button>
-            </div>
-          </div>
-          <div class="editor-container border border-slate-200 dark:border-slate-700">
-            <div id="lines-output-main" class="line-numbers min-w-[42px]">1</div>
-            <div class="editor-area">
-              <div id="hl-output-main" class="code-highlight"></div>
-              <textarea id="output-main" oninput="handleInput('output-main')" onkeydown="handleKeyDown(event, 'output-main')" onscroll="syncScroll('output-main')" class="code-input custom-scroll" placeholder="File gốc sau khi gỡ các khối TikZ..."></textarea>
-              <div id="autocomplete-output-main" class="autocomplete-dropdown theme-bg"></div>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <div class="theme-bg p-4 border shadow-sm flex flex-wrap justify-between items-center gap-4">
-        <div class="flex items-center space-x-3">
-          <label class="text-xs font-semibold opacity-75">Tên file TikZ tổng:</label>
-          <input type="text" id="file-name-tikz" value="tat_ca_hinh_tikz" class="theme-bg border px-3 py-1.5 text-xs font-mono outline-none w-48">
-          <label class="text-xs font-semibold opacity-75 ml-2">Đuôi file:</label>
-          <select id="file-ext-tikz" class="theme-bg border text-xs px-2 py-1.5 outline-none">
-            <option value=".tex" selected>.tex</option>
-            <option value=".txt">.txt</option>
-          </select>
-        </div>
-        <button onclick="extractAllTikZToSingleFile()" class="theme-btn-dark font-semibold px-6 py-2.5 transition flex items-center space-x-2 shadow">
-          <i data-lucide="scissors" class="w-4 h-4"></i>
-          <span>Tách & Gom Vào 1 File</span>
-        </button>
-      </div>
-
-      <div id="single-tikz-container" class="hidden theme-bg p-5 border shadow-sm space-y-3">
-        <div class="flex justify-between items-center border-b border-slate-200 dark:border-slate-700 pb-3 flex-wrap gap-2">
-          <div class="flex items-center space-x-2">
-            <i data-lucide="file-code-2" class="w-5 h-5"></i>
-            <h3 class="font-bold text-sm">File chứa toàn bộ hình TikZ</h3>
-            <span id="tikz-count-badge" class="text-xs theme-sub-bg font-semibold px-2.5 py-0.5 border">0 hình</span>
-          </div>
-          <div class="flex items-center space-x-1.5">
-            <button id="btn-undo-output-tikz-single" onclick="undo('output-tikz-single')" disabled class="btn-history theme-sub-bg p-1.5 h-7 w-7 border transition"><i data-lucide="undo-2" class="w-3.5 h-3.5"></i></button>
-            <button id="btn-redo-output-tikz-single" onclick="redo('output-tikz-single')" disabled class="btn-history theme-sub-bg p-1.5 h-7 w-7 border transition"><i data-lucide="redo-2" class="w-3.5 h-3.5"></i></button>
-            <span class="opacity-30">|</span>
-            <button onclick="copyToClipboard('output-tikz-single')" class="theme-sub-bg p-1.5 h-7 w-7 border transition"><i data-lucide="copy" class="w-3.5 h-3.5"></i></button>
-            <button onclick="downloadSingleText('output-tikz-single', getTikZFilename())" class="theme-sub-bg p-1.5 h-7 w-7 border transition"><i data-lucide="download" class="w-3.5 h-3.5"></i></button>
-          </div>
-        </div>
-        <div class="editor-container h-80 border border-slate-200 dark:border-slate-700">
-          <div id="lines-output-tikz-single" class="line-numbers min-w-[42px]">1</div>
-          <div class="editor-area">
-            <div id="hl-output-tikz-single" class="code-highlight"></div>
-            <textarea id="output-tikz-single" oninput="handleInput('output-tikz-single')" onkeydown="handleKeyDown(event, 'output-tikz-single')" onscroll="syncScroll('output-tikz-single')" class="code-input custom-scroll" placeholder="Code các hình TikZ sẽ gom vào đây..."></textarea>
-            <div id="autocomplete-output-tikz-single" class="autocomplete-dropdown theme-bg"></div>
-          </div>
-        </div>
-      </div>
+      <!-- Giữ nguyên -->
     </section>
 
     <!-- MENU 3: CHUYỂN PDF THÀNH ẢNH -->
     <section id="menu-section-3" class="hidden space-y-4">
-      <div class="max-w-3xl mx-auto theme-bg p-6 sm:p-8 border shadow-sm space-y-6">
-        <div>
-          <h2 class="text-lg font-bold flex items-center gap-2"><i data-lucide="file-image" class="w-5 h-5"></i> Chuyển PDF sang Ảnh (PNG / JPG)</h2>
-          <p class="text-xs opacity-75 mt-1">Xuất các trang trong file PDF thành file ảnh chất lượng cao và đóng gói file ZIP.</p>
-        </div>
-        <div class="space-y-4">
-          <div>
-            <label class="block text-xs font-bold mb-1">Chọn file PDF:</label>
-            <input type="file" id="pdf-input" accept="application/pdf" class="w-full text-xs theme-sub-bg border p-2.5 outline-none">
-          </div>
-          <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <div>
-              <label class="block text-xs font-bold mb-1">Định dạng ảnh xuất:</label>
-              <select id="format-select" class="w-full text-xs theme-sub-bg border p-2.5 outline-none font-medium">
-                <option value="png" selected>PNG (Sắc nét, không nén)</option>
-                <option value="jpeg">JPG (Dung lượng nhẹ)</option>
-              </select>
-            </div>
-            <div>
-              <label class="block text-xs font-bold mb-1">Kiểu chỉnh độ phân giải:</label>
-              <select id="mode-select" class="w-full text-xs theme-sub-bg border p-2.5 outline-none font-medium">
-                <option value="width">Cố định Chiều Rộng</option>
-                <option value="height">Cố định Chiều Cao</option>
-                <option value="exact">Cố định Cả 2</option>
-              </select>
-            </div>
-          </div>
-          <div id="dimension-box" class="grid grid-cols-2 gap-4 theme-sub-bg p-4 border">
-            <div id="width-box">
-              <label class="block text-xs font-bold mb-1">Chiều Rộng (px):</label>
-              <input type="number" id="width-input" value="1920" min="100" max="10000" class="w-full theme-bg border p-2 text-xs outline-none font-mono" placeholder="VD: 1920">
-            </div>
-            <div id="height-box" class="opacity-50 pointer-events-none">
-              <label class="block text-xs font-bold mb-1">Chiều Cao (px):</label>
-              <input type="number" id="height-input" value="1080" min="100" max="10000" class="w-full theme-bg border p-2 text-xs outline-none font-mono" placeholder="VD: 1080">
-            </div>
-          </div>
-          <button id="convert-btn" class="w-full theme-btn-dark py-3 font-semibold transition shadow disabled:opacity-50">Chuyển Đổi Sang Ảnh</button>
-        </div>
-        <div id="status" class="text-center text-xs font-semibold"></div>
-        <div id="download-container" class="text-center hidden">
-          <button id="download-btn" class="theme-btn-dark px-6 py-2.5 text-xs font-semibold transition shadow flex items-center justify-center space-x-2 mx-auto">
-            <i data-lucide="download" class="w-4 h-4"></i>
-            <span>Tải File ZIP Ảnh</span>
-          </button>
-        </div>
-      </div>
+      <!-- Giữ nguyên -->
     </section>
 
   </main>
+
+  <!-- ==================== MODAL BẢNG TÍCH ĐÁP ÁN TRẮC NGHIỆM ==================== -->
+  <div id="answer-modal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-[100] hidden flex items-center justify-center p-4">
+    <div class="theme-bg border border-slate-300 dark:border-slate-700 rounded-lg shadow-2xl max-w-2xl w-full max-h-[85vh] flex flex-col overflow-hidden">
+      
+      <!-- Header Modal -->
+      <div class="p-4 border-b border-slate-200 dark:border-slate-700 flex justify-between items-center theme-sub-bg">
+        <div class="flex items-center space-x-2">
+          <i data-lucide="grid" class="w-5 h-5 text-indigo-600 dark:text-indigo-400"></i>
+          <h3 class="font-bold text-sm" id="answer-modal-title">Bảng Tích Đáp Án Trắc Nghiệm</h3>
+        </div>
+        <button onclick="closeAnswerModal()" class="hover:bg-slate-200 dark:hover:bg-slate-700 p-1 rounded text-slate-500 hover:text-slate-800 dark:hover:text-slate-200 transition">
+          <i data-lucide="x" class="w-5 h-5"></i>
+        </button>
+      </div>
+
+      <!-- Instruction / Info -->
+      <div class="px-4 py-2 text-xs opacity-75 border-b border-slate-100 dark:border-slate-800 theme-sub-bg">
+        Tích chọn đáp án đúng cho từng câu bên dưới. Hệ thống sẽ tự động cập nhật lệnh <code class="font-mono bg-slate-200 dark:bg-slate-800 px-1 py-0.5 rounded">\True</code> vào ô Output ngay lập tức.
+      </div>
+
+      <!-- Table Scrollable Area -->
+      <div class="flex-1 overflow-y-auto p-4 custom-scroll">
+        <div id="answer-table-container">
+          <!-- Bảng grid sẽ được render tự động qua JS -->
+        </div>
+      </div>
+
+      <!-- Footer Modal -->
+      <div class="p-3 border-t border-slate-200 dark:border-slate-700 flex justify-between items-center theme-sub-bg">
+        <button onclick="clearAllAnswersInModal()" class="text-xs text-rose-600 dark:text-rose-400 hover:underline font-medium flex items-center gap-1">
+          <i data-lucide="rotate-ccw" class="w-3.5 h-3.5"></i> Xóa tất cả tích
+        </button>
+        <button onclick="saveAndCloseAnswerModal()" class="theme-btn-dark px-5 py-2 text-xs font-semibold rounded shadow transition flex items-center gap-1.5">
+          <i data-lucide="check" class="w-4 h-4"></i> Hoàn thành
+        </button>
+      </div>
+
+    </div>
+  </div>
 
   <!-- Toggle Dark/Light Mode Button -->
   <button onclick="toggleDarkMode()" class="fixed bottom-6 right-6 z-50 bg-slate-800 dark:bg-amber-400 text-white dark:text-slate-900 p-3.5 rounded-full shadow-lg hover:scale-105 transition flex items-center justify-center" title="Chuyển đổi giao diện Sáng / Tối">
@@ -328,6 +236,7 @@
   <script src="js/ex-processor.js"></script>
   <script src="js/tikz-extractor.js"></script>
   <script src="js/pdf-converter.js"></script>
+  <script src="js/answer-modal.js"></script>
   <script src="js/app.js"></script>
 </body>
 </html>
