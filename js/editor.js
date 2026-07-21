@@ -1,8 +1,8 @@
 /* =========================================================
-   PIMAX TOOL — ENGINE QUẢN LÝ EDITOR & XỬ LÝ TIỆN ÍCH FULL
+   PIMAX TOOL — ENGINE EDITOR CORE & UTILITIES
    ========================================================= */
 
-// Quản lý bộ nhớ Undo / Redo
+// Hệ thống quản lý Undo / Redo
 const editorHistories = {};
 
 function initEditorHistory(id) {
@@ -87,7 +87,7 @@ function updateBtnState(btn, isDisabled) {
 }
 
 /* =========================================================
-   CÔNG CỤ TÌM KIẾM VÀ THAY THẾ
+   TÌM KIẾM VÀ THAY THẾ
    ========================================================= */
 
 let searchMatches = [];
@@ -201,7 +201,7 @@ function replaceText(id, all = false) {
 }
 
 /* =========================================================
-   LATEX AUTOCOMPLETE & SCROLL SYNC
+   LATEX AUTOCOMPLETE & EDITOR LOGIC
    ========================================================= */
 
 const LATEX_SUGGESTIONS = [
@@ -367,14 +367,14 @@ function escapeJsString(str) {
 }
 
 /* =========================================================
-   XỬ LÝ COPY, DOWNLOAD, UPLOAD & CLEAR TEXT (FIXT DỰT ĐIỂM)
+   XỬ LÝ COPY, DOWNLOAD, UPLOAD & CLEAR TEXT (DỰT ĐIỂM 100%)
    ========================================================= */
 
-// 1. Hàm Copy Hoạt Động Trên Mọi Trình Duyệt / Mọi Giao Thức (HTTP/HTTPS)
+// 1. Sao chép nội dung
 function copyToClipboard(id) {
   const textarea = document.getElementById(id);
   if (!textarea) {
-    showToast("Lỗi: Không tìm thấy ô dữ liệu!", true);
+    showToast("Không tìm thấy ô dữ liệu!", true);
     return;
   }
 
@@ -384,7 +384,6 @@ function copyToClipboard(id) {
     return;
   }
 
-  // Thử dùng API hiện đại Clipboard
   if (navigator.clipboard && window.isSecureContext) {
     navigator.clipboard.writeText(text).then(() => {
       showToast("Đã copy nội dung vào bộ nhớ tạm!");
@@ -392,7 +391,6 @@ function copyToClipboard(id) {
       execCopyFallback(textarea);
     });
   } else {
-    // Dùng phương pháp Fallback truyền thống cho Localhost/HTTP
     execCopyFallback(textarea);
   }
 }
@@ -413,7 +411,7 @@ function execCopyFallback(textarea) {
   }
 }
 
-// 2. Hàm Tải File .tex Hoạt Động Chắc Chắn 100%
+// 2. Tải xuống file .tex
 function downloadSingleText(id, defaultFileName) {
   const textarea = document.getElementById(id);
   if (!textarea) return;
@@ -428,26 +426,24 @@ function downloadSingleText(id, defaultFileName) {
     const blob = new Blob([text], { type: 'text/plain;charset=utf-8' });
     const fileName = defaultFileName || 'file_pimax.tex';
 
-    if (window.navigator && window.navigator.msSaveOrOpenBlob) {
-      window.navigator.msSaveOrOpenBlob(blob, fileName);
-    } else {
-      const link = document.createElement('a');
-      link.href = URL.createObjectURL(blob);
-      link.download = fileName;
-      document.body.appendChild(link);
-      link.click();
-      setTimeout(() => {
-        document.body.removeChild(link);
-        URL.revokeObjectURL(link.href);
-      }, 200);
-    }
-    showToast(`Đã tải xuống file "${fileName}" thành công!`);
+    const link = document.createElement('a');
+    link.href = URL.createObjectURL(blob);
+    link.download = fileName;
+    document.body.appendChild(link);
+    link.click();
+    
+    setTimeout(() => {
+      document.body.removeChild(link);
+      URL.revokeObjectURL(link.href);
+    }, 200);
+
+    showToast(`Đã tải file "${fileName}" thành công!`);
   } catch (err) {
     showToast("Lỗi khi tải file!", true);
   }
 }
 
-// 3. Hàm Xóa Văn Bản Trong Editor
+// 3. Xóa văn bản
 function clearText(id) {
   const textarea = document.getElementById(id);
   if (!textarea) return;
@@ -459,7 +455,7 @@ function clearText(id) {
   }
 }
 
-// 4. Hàm Nạp File Từ Máy Tính Vòng Editor
+// 4. Tải file từ máy tính
 function loadFile(event, id) {
   const input = event.target;
   if (!input.files || !input.files[0]) return;
@@ -472,7 +468,7 @@ function loadFile(event, id) {
     if (textarea) {
       textarea.value = e.target.result;
       handleInput(id);
-      showToast(`Đã tải file "${file.name}" vào Editor!`);
+      showToast(`Đã nạp file "${file.name}"!`);
     }
   };
 
@@ -480,7 +476,7 @@ function loadFile(event, id) {
   input.value = '';
 }
 
-// 5. Hiển Thị Thông Báo Toast
+// 5. Thông báo Toast
 function showToast(message, isError = false) {
   let toast = document.getElementById('pimax-toast');
   if (!toast) {
@@ -490,10 +486,10 @@ function showToast(message, isError = false) {
   }
 
   if (isError) {
-    toast.className = 'fixed bottom-5 left-1/2 -translate-x-1/2 bg-rose-600 text-white text-xs font-semibold px-4 py-2.5 rounded-xl shadow-xl z-[1000] transition-all duration-300 opacity-0 flex items-center gap-2 border border-rose-400';
+    toast.className = 'fixed bottom-5 left-1/2 -translate-x-1/2 bg-rose-700 text-white text-xs font-bold px-4 py-2.5 rounded-xl shadow-2xl z-[1000] transition-all duration-300 opacity-0 flex items-center gap-2 border border-rose-500';
     toast.innerHTML = `<svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg> <span>${message}</span>`;
   } else {
-    toast.className = 'fixed bottom-5 left-1/2 -translate-x-1/2 bg-slate-900 text-white text-xs font-semibold px-4 py-2.5 rounded-xl shadow-xl z-[1000] transition-all duration-300 opacity-0 flex items-center gap-2 border border-slate-700';
+    toast.className = 'fixed bottom-5 left-1/2 -translate-x-1/2 bg-slate-900 text-white text-xs font-bold px-4 py-2.5 rounded-xl shadow-2xl z-[1000] transition-all duration-300 opacity-0 flex items-center gap-2 border border-slate-700';
     toast.innerHTML = `<svg class="w-4 h-4 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg> <span>${message}</span>`;
   }
 
@@ -508,10 +504,13 @@ function showToast(message, isError = false) {
   }, 2200);
 }
 
-// Tải xong DOM thì khởi tạo trạng thái
+// Khởi tạo sự kiện khi trang tải xong
 document.addEventListener("DOMContentLoaded", () => {
   ['output-ex', 'input-ex', 'output-main', 'input-tikz', 'output-tikz-single'].forEach(id => {
     const el = document.getElementById(id);
     if (el) saveState(id, true);
   });
+  if (window.lucide) {
+    lucide.createIcons();
+  }
 });
