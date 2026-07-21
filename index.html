@@ -77,7 +77,7 @@
         <!-- Input Box 1 -->
         <div class="theme-bg border p-4 shadow-sm flex flex-col justify-between h-[640px]">
           <div class="flex justify-between items-center text-xs font-bold h-8 mb-3 pb-2 border-b border-slate-200 dark:border-slate-700">
-            <span class="flex items-center gap-1.5"><i data-lucide="file-input" class="w-4 h-4"></i> Input:</span>
+            <span class="flex items-center gap-1.5"><i data-lucide="file-input" class="w-4 h-4"></i> Dữ liệu thô đầu vào:</span>
             <div class="flex items-center space-x-1.5">
               <button id="btn-undo-input-ex" onclick="undo('input-ex')" disabled class="btn-history theme-sub-bg px-2 h-7 flex items-center gap-1 border transition text-[11px]" title="Hoàn tác (Ctrl+Z)"><i data-lucide="undo-2" class="w-3.5 h-3.5"></i></button>
               <button id="btn-redo-input-ex" onclick="redo('input-ex')" disabled class="btn-history theme-sub-bg px-2 h-7 flex items-center gap-1 border transition text-[11px]" title="Làm lại (Ctrl+Y)"><i data-lucide="redo-2" class="w-3.5 h-3.5"></i></button>
@@ -102,14 +102,14 @@
         <!-- Output Box 1 -->
         <div class="theme-bg border p-4 shadow-sm flex flex-col justify-between h-[640px]">
           <div class="flex justify-between items-center text-xs font-bold h-8 mb-2 pb-2 border-b border-slate-200 dark:border-slate-700">
-            <span class="flex items-center gap-1.5"><i data-lucide="file-output" class="w-4 h-4"></i> Output:</span>
+            <span class="flex items-center gap-1.5"><i data-lucide="file-output" class="w-4 h-4"></i> Kết quả chuẩn hóa:</span>
             <div class="flex items-center space-x-1">
               <button id="btn-undo-output-ex" onclick="undo('output-ex')" disabled class="btn-history theme-sub-bg p-1.5 h-7 w-7 flex items-center justify-center border transition" title="Hoàn tác"><i data-lucide="undo-2" class="w-3.5 h-3.5"></i></button>
               <button id="btn-redo-output-ex" onclick="redo('output-ex')" disabled class="btn-history theme-sub-bg p-1.5 h-7 w-7 flex items-center justify-center border transition" title="Làm lại"><i data-lucide="redo-2" class="w-3.5 h-3.5"></i></button>
               <span class="opacity-30">|</span>
               <button onclick="applyAutoMath('output-ex')" class="bg-amber-100 dark:bg-amber-900/50 text-amber-900 dark:text-amber-200 p-1.5 h-7 w-7 flex items-center justify-center border border-amber-300 dark:border-amber-700 transition" title="Tự động bọc $"><i data-lucide="variable" class="w-4 h-4 text-amber-700 dark:text-amber-400"></i></button>
               <button onclick="convertArrayToAligned('output-ex')" class="bg-blue-100 dark:bg-blue-900/50 text-blue-900 dark:text-blue-200 p-1.5 h-7 w-7 flex items-center justify-center border border-blue-300 dark:border-blue-700 transition" title="Chuyển array thành aligned"><i data-lucide="columns-2" class="w-4 h-4 text-blue-700 dark:text-blue-400"></i></button>
-              <button onclick="applyCleanSpacingTool('output-ex')" class="bg-emerald-100 dark:bg-emerald-900/50 text-emerald-900 dark:text-emerald-200 p-1.5 h-7 w-7 flex items-center justify-center border border-emerald-300 dark:border-emerald-700 transition" title="Dọn dẹp khoảng trắng"><svg class="w-4 h-4 text-emerald-700 dark:text-emerald-400" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m2 22 10-10"/><path d="M9.5 12.5 14 17"/><path d="m15 11 3 3"/><path d="m17 7 2 2"/><path d="M19 2l3 3-7 7-3-3z"/></svg></button>
+              <button onclick="applyCleanSpacingTool('output-ex')" class="bg-emerald-100 dark:bg-emerald-900/50 text-emerald-900 dark:text-emerald-200 p-1.5 h-7 w-7 flex items-center justify-center border border-emerald-300 dark:border-emerald-700 transition" title="Dọn dẹp dòng trống & khoảng trắng dấu câu"><svg class="w-4 h-4 text-emerald-700 dark:text-emerald-400" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m2 22 10-10"/><path d="M9.5 12.5 14 17"/><path d="m15 11 3 3"/><path d="m17 7 2 2"/><path d="M19 2l3 3-7 7-3-3z"/></svg></button>
               <button onclick="wrapSelectionWithEnv('output-ex', 'itemize')" class="theme-sub-bg p-1.5 h-7 w-7 flex items-center justify-center border transition" title="Chuyển itemize"><i data-lucide="list" class="w-4 h-4"></i></button>
               <button onclick="wrapSelectionWithEnv('output-ex', 'enumerate')" class="theme-sub-bg p-1.5 h-7 w-7 flex items-center justify-center border transition" title="Chuyển enumerate"><i data-lucide="list-ordered" class="w-4 h-4"></i></button>
               <span class="opacity-30">|</span>
@@ -118,17 +118,13 @@
             </div>
           </div>
 
-          <!-- Tìm kiếm & thay thế -->
+          <!-- Tìm kiếm & thay thế (Đã gỡ nút Dọn dẹp bị trùng) -->
           <div class="theme-sub-bg p-2 border mb-2 flex flex-col gap-2 text-xs">
             <div class="flex items-center gap-2 flex-wrap">
               <div class="flex items-center space-x-1 flex-1 min-w-[150px]">
                 <i data-lucide="search" class="w-3.5 h-3.5 opacity-50"></i>
                 <input type="text" id="find-output-ex" placeholder="Tìm kiếm..." oninput="findText('output-ex')" class="w-full theme-bg border px-2 py-1 outline-none">
               </div>
-              <button onclick="applyCleanSpacingTool('output-ex')" class="bg-emerald-100 dark:bg-emerald-900/50 text-emerald-900 dark:text-emerald-200 px-2.5 py-1 flex items-center gap-1 border border-emerald-300 dark:border-emerald-700 transition font-medium">
-                <svg class="w-3.5 h-3.5 text-emerald-700 dark:text-emerald-400" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m2 22 10-10"/><path d="M9.5 12.5 14 17"/><path d="m15 11 3 3"/><path d="m17 7 2 2"/><path d="M19 2l3 3-7 7-3-3z"/></svg>
-                <span>Dọn dẹp</span>
-              </button>
               <div class="flex items-center space-x-1 border theme-bg px-1 py-0.5">
                 <button onclick="navigateSearch('output-ex', -1)" class="hover:opacity-100 p-1 rounded opacity-75"><i data-lucide="chevron-left" class="w-3.5 h-3.5"></i></button>
                 <span id="count-output-ex" class="text-[11px] font-mono px-1 min-w-[50px] text-center">0/0</span>
