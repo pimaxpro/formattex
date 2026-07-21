@@ -1,5 +1,5 @@
 /* =========================================================
-   PIMAX TOOL — CLEAN EDITOR & AUTOCOMPLETE ENGINE
+   PIMAX TOOL — CLEAN EDITOR ENGINE (CHỈ ĐẾM DÒNG & AUTOCOMPLETE)
    ========================================================= */
 
 const LATEX_SUGGESTIONS = [
@@ -14,15 +14,13 @@ const LATEX_SUGGESTIONS = [
   { cmd: '\\vec{}', label: '\\vec{a}', desc: 'Vectơ' },
   { cmd: '\\begin{aligned}\n    \n\\end{aligned}', label: '\\begin{aligned}', desc: 'Hệ phương trình' },
   { cmd: '\\begin{cases}\n    \n\\end{cases}', label: '\\begin{cases}', desc: 'Ngoặc nhọn hệ' },
-  { cmd: '\\begin{tikzpicture}\n    \n\\end{tikzpicture}', label: '\\begin{tikzpicture}', desc: 'Hình TikZ' },
-  { cmd: '\\int_{}^{}', label: '\\int', desc: 'Tích phân' },
-  { cmd: '\\lim_{x \\to }', label: '\\lim', desc: 'Giới hạn' }
+  { cmd: '\\begin{tikzpicture}\n    \n\\end{tikzpicture}', label: '\\begin{tikzpicture}', desc: 'Hình TikZ' }
 ];
 
 let activeIndex = 0;
 let filteredSuggestions = [];
 
-/* Đếm số dòng mượt mà */
+/* Chỉ đếm dòng, đồng bộ cuộn và kiểm tra gợi ý code */
 function handleInput(id) {
   const textarea = document.getElementById(id);
   const linesDiv = document.getElementById(`lines-${id}`);
@@ -42,7 +40,6 @@ function handleInput(id) {
   checkAutocompleteTrigger(id);
 }
 
-/* Đồng bộ cuộn giữa số dòng và Textarea */
 function syncScroll(id) {
   const textarea = document.getElementById(id);
   const linesDiv = document.getElementById(`lines-${id}`);
@@ -52,7 +49,6 @@ function syncScroll(id) {
   }
 }
 
-/* Điều khiển Autocomplete bằng phím Mũi tên & Enter/Tab */
 function handleKeyDown(e, id) {
   const dropdown = document.getElementById(`autocomplete-${id}`);
   
@@ -80,7 +76,6 @@ function handleKeyDown(e, id) {
     }
   }
 
-  // Phím Tab thụt lề 4 khoảng trắng
   if (e.key === 'Tab') {
     e.preventDefault();
     const textarea = document.getElementById(id);
@@ -93,7 +88,6 @@ function handleKeyDown(e, id) {
   }
 }
 
-/* Kích hoạt gợi ý lệnh khi gõ \ */
 function checkAutocompleteTrigger(id) {
   const textarea = document.getElementById(id);
   const dropdown = document.getElementById(`autocomplete-${id}`);
