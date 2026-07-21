@@ -13,24 +13,24 @@ function switchSubMode(mode) {
     const btn = document.getElementById(`sub-btn-${m}`);
     if (btn) {
       if (m === mode) {
-        btn.className = "px-3 py-1.5 text-xs font-semibold rounded-lg transition flex items-center space-x-1.5 theme-btn-pimax whitespace-nowrap text-white";
+        btn.className = "px-4 py-2 text-xs font-bold rounded transition-all flex items-center space-x-2 bg-white text-slate-900 border border-slate-300 shadow-sm cursor-pointer";
       } else {
-        btn.className = "px-3 py-1.5 text-xs font-semibold rounded-lg transition flex items-center space-x-1.5 bg-gray-100 text-gray-700 hover:bg-gray-200 whitespace-nowrap";
+        btn.className = "px-4 py-2 text-xs font-semibold rounded transition-all flex items-center space-x-2 bg-transparent text-slate-500 hover:text-slate-800 hover:bg-slate-200/50 border border-transparent cursor-pointer";
       }
     }
   });
 
-  const descEl = document.getElementById('sub-mode-desc');
+  const descEl = document.getElementById('current-mode-label');
   const btnLabelEl = document.getElementById('btn-ex-label');
   
   if (mode === 1) {
-    if (descEl) descEl.innerHTML = 'Chế độ: <b>Trắc nghiệm 4 phương án (\\choice)</b>';
+    if (descEl) descEl.textContent = 'Chế độ: Trắc nghiệm 4 phương án (\\choice)';
     if (btnLabelEl) btnLabelEl.innerText = 'Chuẩn Hóa Ngay (CN 1)';
   } else if (mode === 2) {
-    if (descEl) descEl.innerHTML = 'Chế độ: <b>Trắc nghiệm Đúng / Sai (a, b, c, d)</b>';
+    if (descEl) descEl.textContent = 'Chế độ: Trắc nghiệm Đúng / Sai (a, b, c, d)';
     if (btnLabelEl) btnLabelEl.innerText = 'Chuẩn Hóa Ngay (CN 2)';
   } else if (mode === 3) {
-    if (descEl) descEl.innerHTML = 'Chế độ: <b>Trả lời ngắn (\\shortans)</b>';
+    if (descEl) descEl.textContent = 'Chế độ: Trả lời ngắn (\\shortans)';
     if (btnLabelEl) btnLabelEl.innerText = 'Chuẩn Hóa Ngay (CN 3)';
   }
 }
@@ -50,7 +50,7 @@ function processMode1() {
   if (!inputEl || !inputEl.value.trim()) return;
   const input = inputEl.value;
 
-  const questionBlocks = input.split(/(?=(?:^|\n)\s*Câu\s+\d+)/i).filter(b => b.trim());
+  const questionBlocks = input.split(/(?=(?:^|\n)\s*(?:Câu|Bài|Ex)\s+\d+)/i).filter(b => b.trim());
   let results = [];
 
   questionBlocks.forEach(block => {
@@ -58,7 +58,7 @@ function processMode1() {
     let questionPart = content;
     let solutionPart = "";
 
-    const solutionHeaderRegex = /(?:Lời\s*giải|Hướng\s*dẫn\s*giải)[\.\s:]*/i;
+    const solutionHeaderRegex = /(?:Lời\s*giải|Hướng\s*dẫn\s*giải|HDG|Giải)[\.\s:]*/i;
     const solMatch = content.match(solutionHeaderRegex);
 
     if (solMatch) {
@@ -80,7 +80,7 @@ function processMode1() {
       questionPart = questionPart.replace(/(?:Chọn\s*(?:ý|đáp\s*án)?|Đáp\s*án)\s*[A-D][\.\s]*/gi, '').trim();
     }
 
-    const choiceRegex = /(?:^|\n)\s*([A-D])[\.\)]\s*([\s\S]*?)(?=(?:\n\s*[A-D][\.\)]|$))/gi;
+    const choiceRegex = /(?:^|\n|\s)\s*([A-D])[\.\)]\s*([\s\S]*?)(?=(?:\n|\s)\s*[A-D][\.\)]|$)/gi;
     let choices = {};
     let matches;
     let firstChoiceIndex = -1;
@@ -125,7 +125,7 @@ function processMode2() {
   if (!inputEl || !inputEl.value.trim()) return;
   const input = inputEl.value;
 
-  const questionBlocks = input.split(/(?=(?:^|\n)\s*Câu\s+\d+)/i).filter(b => b.trim());
+  const questionBlocks = input.split(/(?=(?:^|\n)\s*(?:Câu|Bài|Ex)\s+\d+)/i).filter(b => b.trim());
   let results = [];
 
   questionBlocks.forEach(block => {
@@ -133,7 +133,7 @@ function processMode2() {
     let questionPart = content;
     let solutionPart = "";
 
-    const solutionHeaderRegex = /(?:Lời\s*giải|Hướng\s*dẫn\s*giải)[\.\s:]*/i;
+    const solutionHeaderRegex = /(?:Lời\s*giải|Hướng\s*dẫn\s*giải|HDG|Giải)[\.\s:]*/i;
     const solMatch = content.match(solutionHeaderRegex);
 
     if (solMatch) {
@@ -141,7 +141,7 @@ function processMode2() {
       solutionPart = content.substring(solMatch.index + solMatch[0].length).trim();
     }
 
-    // Tách mẫu Đúng/Sai nếu có dạng Đ S D S
+    // Tách mẫu Đúng/Sai dạng Đ S D S hoặc D, S, D, S
     let tfPattern = null;
     const answerTFRegex = /(?:Đáp\s*án|Chọn)[\.\s:]*([DĐS[\s\-\,\.]+){4}/gi;
 
@@ -156,8 +156,8 @@ function processMode2() {
     questionPart = questionPart.replace(/(?:Đáp\s*án|Chọn)[\.\s:]*([DĐS[\s\-\,\.]+){4}\.?\s*/gi, '').trim();
     solutionPart = solutionPart.replace(/(?:Đáp\s*án|Chọn)[\.\s:]*([DĐS[\s\-\,\.]+){4}\.?\s*/gi, '').trim();
 
-    // Regex linh hoạt cho a), b), c), d) hoặc a., b., c., d.
-    const choiceTFRegex = /(?:^|\n)\s*([a-d])[\)\.]\s*([\s\S]*?)(?=(?:\n\s*[a-d][\)\.]|$))/gi;
+    // Regex bắt linh hoạt a), b), c), d) hoặc a., b., c., d.
+    const choiceTFRegex = /(?:^|\n|\s)\s*([a-d])[\)\.]\s*([\s\S]*?)(?=(?:\n|\s)\s*[a-d][\)\.]|$)/gi;
     let choices = {};
     let matches;
     let firstChoiceIndex = -1;
@@ -172,7 +172,7 @@ function processMode2() {
     let mainQuestion = firstChoiceIndex !== -1 ? questionPart.substring(0, firstChoiceIndex).trim() : questionPart;
     mainQuestion = fixMathSpacing(mainQuestion);
 
-    // XUẤT MÃ \choiceTF CHUẨN XÁC
+    // XUẤT MÃ \choiceTF CỰC CHUẨN
     let exCode = `\\begin{ex}\n    ${mainQuestion}\n    \\choiceTF\n`;
     const keys = ['a', 'b', 'c', 'd'];
     keys.forEach((key, index) => {
@@ -204,7 +204,7 @@ function processMode3() {
   if (!inputEl || !inputEl.value.trim()) return;
   const input = inputEl.value;
 
-  const questionBlocks = input.split(/(?=(?:^|\n)\s*Câu\s+\d+)/i).filter(b => b.trim());
+  const questionBlocks = input.split(/(?=(?:^|\n)\s*(?:Câu|Bài|Ex)\s+\d+)/i).filter(b => b.trim());
   let results = [];
 
   questionBlocks.forEach(block => {
@@ -212,7 +212,7 @@ function processMode3() {
     let questionPart = content;
     let solutionPart = "";
 
-    const solutionHeaderRegex = /(?:Lời\s*giải|Hướng\s*dẫn\s*giải)[\.\s:]*/i;
+    const solutionHeaderRegex = /(?:Lời\s*giải|Hướng\s*dẫn\s*giải|HDG|Giải)[\.\s:]*/i;
     const solMatch = content.match(solutionHeaderRegex);
 
     if (solMatch) {
@@ -221,7 +221,7 @@ function processMode3() {
     }
 
     let shortAnswerValue = "";
-    const shortAnsHeaderRegex = /(?:Đáp\s*án|Đáp\s*số)[\.\s:]*([^\n]+)/i;
+    const shortAnsHeaderRegex = /(?:Đáp\s*án|Đáp\s*số|Kết\s*quả)[\.\s:]*([^\n]+)/i;
     const ansMatch = questionPart.match(shortAnsHeaderRegex) || solutionPart.match(shortAnsHeaderRegex);
 
     if (ansMatch) {
@@ -232,7 +232,7 @@ function processMode3() {
 
     let mainQuestion = fixMathSpacing(questionPart);
 
-    let exCode = `\\begin{ex}\n    ${mainQuestion}\n\n    \\shortans{${shortAnswerValue}}\n\n`;
+    let exCode = `\\begin{ex}\n    ${mainQuestion}\n    \\shortans{${shortAnswerValue}}\n`;
     if (solutionPart) {
       let cleanSol = fixMathSpacing(solutionPart);
       const indentedSolution = cleanSol.split('\n').map(line => line ? `        ${line}` : '').join('\n');
@@ -254,7 +254,7 @@ function processMode3() {
 
 function cleanHeaderPrefix(rawText) {
   let str = rawText.trim();
-  str = str.replace(/^Câu\s+\d+\s*[\.\:-]*/i, '').trim();
+  str = str.replace(/^(?:Câu|Bài|Ex)\s+\d+\s*[\.\:-]*/i, '').trim();
   str = str.replace(/^\[[^\]]*\]\s*/i, '').trim();
   str = str.replace(/^\([^\)]*\)\s*/i, '').trim();
   str = str.replace(/^[:\.-]+\s*/, '').trim();
@@ -318,7 +318,6 @@ function setEditorValue(id, val) {
   const el = document.getElementById(id);
   if (el) {
     el.value = val;
-    // Cập nhật lại bộ đếm số dòng ngay lập tức
     if (typeof updateLineNumbers === 'function') {
       updateLineNumbers(id);
     } else if (typeof handleInput === 'function') {
