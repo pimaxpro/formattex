@@ -1,33 +1,25 @@
 /* =========================================================
-   PIMAX TOOL — EX ENVIRONMENT PROCESSOR
+   PIMAX TOOL — EX ENVIRONMENT PROCESSOR (FIX FULL CN1, CN2, CN3)
    ========================================================= */
 
-// Đảm bảo biến subModeEx luôn khởi tạo trên window
 if (typeof window.subModeEx === 'undefined') {
   window.subModeEx = 1;
 }
 
-/**
- * Chuyển đổi giữa các chế độ phụ CN1, CN2, CN3
- */
 function switchSubMode(mode) {
   window.subModeEx = mode;
   
-  // Cập nhật giao diện active cho các nút
   [1, 2, 3].forEach(m => {
     const btn = document.getElementById(`sub-btn-${m}`);
     if (btn) {
       if (m === mode) {
-        btn.classList.add("theme-btn-pimax");
-        btn.classList.remove("opacity-75");
+        btn.className = "px-3 py-1.5 text-xs font-semibold rounded-lg transition flex items-center space-x-1.5 theme-btn-pimax whitespace-nowrap text-white";
       } else {
-        btn.classList.remove("theme-btn-pimax");
-        btn.classList.add("opacity-75");
+        btn.className = "px-3 py-1.5 text-xs font-semibold rounded-lg transition flex items-center space-x-1.5 bg-gray-100 text-gray-700 hover:bg-gray-200 whitespace-nowrap";
       }
     }
   });
 
-  // Cập nhật nhãn thông báo và nhãn trên nút Chuẩn Hóa
   const descEl = document.getElementById('sub-mode-desc');
   const btnLabelEl = document.getElementById('btn-ex-label');
   
@@ -35,7 +27,7 @@ function switchSubMode(mode) {
     if (descEl) descEl.innerHTML = 'Chế độ: <b>Trắc nghiệm 4 phương án (\\choice)</b>';
     if (btnLabelEl) btnLabelEl.innerText = 'Chuẩn Hóa Ngay (CN 1)';
   } else if (mode === 2) {
-    if (descEl) descEl.innerHTML = 'Chế độ: <b>Trắc nghiệm Đúng/Sai (\\choiceTF)</b>';
+    if (descEl) descEl.innerHTML = 'Chế độ: <b>Trắc nghiệm Đúng / Sai (a, b, c, d)</b>';
     if (btnLabelEl) btnLabelEl.innerText = 'Chuẩn Hóa Ngay (CN 2)';
   } else if (mode === 3) {
     if (descEl) descEl.innerHTML = 'Chế độ: <b>Trả lời ngắn (\\shortans)</b>';
@@ -43,9 +35,6 @@ function switchSubMode(mode) {
   }
 }
 
-/**
- * Điều hướng thực thi khi bấm nút Chuẩn hóa
- */
 function processExEnvironment() {
   const currentMode = window.subModeEx || 1;
   if (currentMode === 1) processMode1();
@@ -54,7 +43,7 @@ function processExEnvironment() {
 }
 
 /* =========================================================
-   MODE 1: CHUẨN HÓA TRẮC NGHIỆM 4 PHƯƠNG ÁN (\choice)
+   CN 1: TRẮC NGHIỆM 4 PHƯƠNG ÁN (\choice)
    ========================================================= */
 function processMode1() {
   const inputEl = document.getElementById('input-ex');
@@ -91,7 +80,7 @@ function processMode1() {
       questionPart = questionPart.replace(/(?:Chọn\s*(?:ý|đáp\s*án)?|Đáp\s*án)\s*[A-D][\.\s]*/gi, '').trim();
     }
 
-    const choiceRegex = /(?:^|\n)\s*([A-D])\.\s*([\s\S]*?)(?=(?:\n\s*[A-D]\.|$))/g;
+    const choiceRegex = /(?:^|\n)\s*([A-D])[\.\)]\s*([\s\S]*?)(?=(?:\n\s*[A-D][\.\)]|$))/gi;
     let choices = {};
     let matches;
     let firstChoiceIndex = -1;
@@ -129,7 +118,7 @@ function processMode1() {
 }
 
 /* =========================================================
-   MODE 2: CHUẨN HÓA TRẮC NGHIỆM ĐÚNG/SAI (\choiceTF)
+   CN 2: TRẮC NGHIỆM ĐÚNG / SAI (\choiceTF)
    ========================================================= */
 function processMode2() {
   const inputEl = document.getElementById('input-ex');
@@ -152,6 +141,7 @@ function processMode2() {
       solutionPart = content.substring(solMatch.index + solMatch[0].length).trim();
     }
 
+    // Tách mẫu Đúng/Sai nếu có dạng Đ S D S
     let tfPattern = null;
     const answerTFRegex = /(?:Đáp\s*án|Chọn)[\.\s:]*([DĐS[\s\-\,\.]+){4}/gi;
 
@@ -166,6 +156,7 @@ function processMode2() {
     questionPart = questionPart.replace(/(?:Đáp\s*án|Chọn)[\.\s:]*([DĐS[\s\-\,\.]+){4}\.?\s*/gi, '').trim();
     solutionPart = solutionPart.replace(/(?:Đáp\s*án|Chọn)[\.\s:]*([DĐS[\s\-\,\.]+){4}\.?\s*/gi, '').trim();
 
+    // Regex linh hoạt cho a), b), c), d) hoặc a., b., c., d.
     const choiceTFRegex = /(?:^|\n)\s*([a-d])[\)\.]\s*([\s\S]*?)(?=(?:\n\s*[a-d][\)\.]|$))/gi;
     let choices = {};
     let matches;
@@ -181,6 +172,7 @@ function processMode2() {
     let mainQuestion = firstChoiceIndex !== -1 ? questionPart.substring(0, firstChoiceIndex).trim() : questionPart;
     mainQuestion = fixMathSpacing(mainQuestion);
 
+    // XUẤT MÃ \choiceTF CHUẨN XÁC
     let exCode = `\\begin{ex}\n    ${mainQuestion}\n    \\choiceTF\n`;
     const keys = ['a', 'b', 'c', 'd'];
     keys.forEach((key, index) => {
@@ -205,7 +197,7 @@ function processMode2() {
 }
 
 /* =========================================================
-   MODE 3: CHUẨN HÓA TRẢ LỜI NGẮN (\shortans)
+   CN 3: TRẢ LỜI NGẮN (\shortans)
    ========================================================= */
 function processMode3() {
   const inputEl = document.getElementById('input-ex');
@@ -257,7 +249,7 @@ function processMode3() {
 }
 
 /* =========================================================
-   HÀM BỔ TRỢ GỐC CHUẨN XÁC
+   HÀM BỔ TRỢ & TỰ ĐỘNG CẬP NHẬT SỐ DÒNG (LINE NUMBERS)
    ========================================================= */
 
 function cleanHeaderPrefix(rawText) {
@@ -326,7 +318,10 @@ function setEditorValue(id, val) {
   const el = document.getElementById(id);
   if (el) {
     el.value = val;
-    if (typeof handleInput === 'function') {
+    // Cập nhật lại bộ đếm số dòng ngay lập tức
+    if (typeof updateLineNumbers === 'function') {
+      updateLineNumbers(id);
+    } else if (typeof handleInput === 'function') {
       handleInput(id);
     }
   }
