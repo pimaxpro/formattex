@@ -25,10 +25,8 @@ function saveState(id, force = false) {
 
   if (hist.isApplying) return;
 
-  // Nếu trạng thái hiện tại khác trạng thái cuối trong stack thì đẩy vào
   if (hist.index === -1 || hist.stack[hist.index] !== val) {
     if (force || hist.index === -1 || val !== hist.stack[hist.index]) {
-      // Cắt bỏ phần dư nếu đang đứng ở giữa lịch sử
       hist.stack = hist.stack.slice(0, hist.index + 1);
       hist.stack.push(val);
       hist.index = hist.stack.length - 1;
@@ -71,17 +69,28 @@ function updateUndoRedoButtons(id) {
   const hist = editorHistories[id];
   if (!hist) return;
 
-  // Tùy chỉnh trạng thái sáng/mờ của nút Undo / Redo trên giao diện tương ứng
-  const undoBtn = document.getElementById(`btn-undo-${id}`);
-  const redoBtn = document.getElementById(`btn-redo-${id}`);
-
-  if (undoBtn) {
-    undoBtn.disabled = hist.index <= 0;
-    undoBtn.style.opacity = undoBtn.disabled ? "0.4" : "1";
+  // Liên kết chính xác với ID trên HTML của Input và Output
+  if (id === 'input-ex') {
+    updateBtnState(document.getElementById('btn-undo-input-ex'), hist.index <= 0);
+    updateBtnState(document.getElementById('btn-redo-input-ex'), hist.index >= hist.stack.length - 1);
+  } else if (id === 'output-ex') {
+    updateBtnState(document.getElementById('btn-undo-output-ex'), hist.index <= 0);
+    updateBtnState(document.getElementById('btn-redo-output-ex'), hist.index >= hist.stack.length - 1);
+  } else {
+    updateBtnState(document.getElementById(`btn-undo-${id}`), hist.index <= 0);
+    updateBtnState(document.getElementById(`btn-redo-${id}`), hist.index >= hist.stack.length - 1);
   }
-  if (redoBtn) {
-    redoBtn.disabled = hist.index >= hist.stack.length - 1;
-    redoBtn.style.opacity = redoBtn.disabled ? "0.4" : "1";
+}
+
+function updateBtnState(btn, isDisabled) {
+  if (!btn) return;
+  btn.disabled = isDisabled;
+  if (isDisabled) {
+    btn.classList.add('opacity-40', 'cursor-not-allowed');
+    btn.classList.remove('hover:bg-gray-200', 'hover-pimax');
+  } else {
+    btn.classList.remove('opacity-40', 'cursor-not-allowed');
+    btn.classList.add('hover:bg-gray-200', 'hover-pimax');
   }
 }
 
