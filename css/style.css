@@ -1,6 +1,5 @@
 /* =========================================================
-   PIMAX TOOL SYSTEM STYLESHEET - FIXED OVERLAY & HOVER
-   Main Color: #db3c6e (RGB: 219, 60, 110)
+   PIMAX TOOL SYSTEM STYLESHEET - NO GHOSTING / CLEAN EDITOR
    ========================================================= */
 
 :root {
@@ -9,7 +8,6 @@
   --pimax-light: #fce8ef;
   --pimax-dark-bg: #4a0d20;
 
-  /* Theme Light Defaults */
   --bg-main: #f8fafc;
   --bg-card: #ffffff;
   --bg-sub: #f1f5f9;
@@ -43,7 +41,7 @@ body {
   border-color: var(--border-color) !important;
 }
 
-/* Primary PimaX Buttons */
+/* Nút bấm PimaX */
 .theme-btn-dark,
 .theme-btn-pimax {
   background-color: var(--pimax-main) !important;
@@ -77,7 +75,7 @@ body.dark .theme-badge-pimax {
   border-color: #8c1d3f;
 }
 
-/* Hover effects for toolbar buttons */
+/* Nút tiện ích Hover */
 .theme-sub-bg.hover-pimax {
   transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1) !important;
 }
@@ -97,7 +95,7 @@ body.dark .theme-sub-bg.hover-pimax:hover {
 }
 
 /* =========================================================
-   EDITOR OVERLAY ENGINE (ÉP KHÍT 100% CHỐNG ÁM MỜ KHU CUỘN)
+   CLEAN EDITOR ARCHITECTURE (KHÔNG BÓNG MỜ 100%)
    ========================================================= */
 
 .editor-container {
@@ -113,6 +111,7 @@ body.dark .theme-sub-bg.hover-pimax:hover {
   border: 1px solid var(--border-color) !important;
 }
 
+/* Cột số dòng bên trái */
 .line-numbers {
   background-color: var(--bg-sub) !important;
   color: #94a3b8 !important;
@@ -134,15 +133,10 @@ body.dark .theme-sub-bg.hover-pimax:hover {
   flex: 1 1 0% !important;
   height: 100% !important;
   width: 100% !important;
-  overflow: hidden !important;
 }
 
-/* Định dạng chung cho 2 lớp trùng khít tuyệt đối */
-.code-input, 
-.code-highlight {
-  position: absolute !important;
-  top: 0 !important;
-  left: 0 !important;
+/* Ô nhập liệu duy nhất - Chữ hiển thị nét căng */
+.code-input {
   width: 100% !important;
   height: 100% !important;
   padding: 0.5rem 0.75rem !important;
@@ -157,33 +151,16 @@ body.dark .theme-sub-bg.hover-pimax:hover {
   outline: none !important;
   box-sizing: border-box !important;
   tab-size: 2 !important;
-}
-
-/* Lớp Highlight nằm dưới - không nhận cuộn độc lập */
-.code-highlight {
-  pointer-events: none !important;
-  z-index: 1 !important;
-  color: transparent !important;
-  overflow: hidden !important; /* Triệt tiêu thanh cuộn riêng gây lệch */
-  background: transparent !important;
-}
-
-/* Lớp Textarea nằm trên - nhận phím gõ & cuộn chính */
-.code-input {
-  z-index: 2 !important;
   background: transparent !important;
   color: var(--text-main) !important;
   resize: none !important;
   caret-color: var(--pimax-main) !important;
 }
 
-/* Tô màu cú pháp LaTeX */
-.hl-keyword { color: #db3c6e !important; font-weight: bold !important; }
-.hl-env { color: #2563eb !important; font-weight: bold !important; }
-body.dark .hl-env { color: #60a5fa !important; font-weight: bold !important; }
-.hl-math { color: #059669 !important; }
-body.dark .hl-math { color: #34d399 !important; }
-.hl-comment { color: #94a3b8 !important; font-style: italic !important; }
+/* Ẩn div highlight thừa nếu có trong HTML */
+.code-highlight {
+  display: none !important;
+}
 
 /* Custom Scrollbar */
 .custom-scroll::-webkit-scrollbar { width: 8px; height: 8px; }
@@ -192,13 +169,13 @@ body.dark .hl-math { color: #34d399 !important; }
 body.dark .custom-scroll::-webkit-scrollbar-thumb { background: #475569; }
 .custom-scroll::-webkit-scrollbar-thumb:hover { background: var(--pimax-main); }
 
-/* Autocomplete Menu Style */
+/* Menu Autocomplete Đề xuất Code LaTeX */
 .autocomplete-dropdown {
   position: absolute !important;
   z-index: 100 !important;
-  min-width: 180px !important;
-  max-width: 280px !important;
-  max-height: 200px !important;
+  min-width: 200px !important;
+  max-width: 300px !important;
+  max-height: 220px !important;
   overflow-y: auto !important;
   background-color: var(--bg-card) !important;
   border: 1px solid var(--pimax-main) !important;
