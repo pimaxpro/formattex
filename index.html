@@ -13,7 +13,7 @@
   <!-- JSZip library -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
   <!-- Custom Style -->
-  <link rel="stylesheet" href="css/style.css?v=7.0">
+  <link rel="stylesheet" href="css/style.css?v=8.0">
 </head>
 <body class="min-h-screen font-sans flex flex-col transition-colors duration-200">
 
@@ -56,22 +56,22 @@
 
     <!-- MENU 1: CHUẨN HÓA LATEX -->
     <section id="menu-section-1" class="space-y-4">
-      <div class="theme-bg p-3 border shadow-sm flex flex-col sm:flex-row justify-between items-center gap-3 rounded-md">
-        <div class="flex theme-sub-bg p-1 border rounded w-full sm:w-auto overflow-x-auto">
-          <button id="sub-btn-1" onclick="switchSubMode(1)" class="px-3 py-1.5 text-xs font-semibold rounded transition flex items-center justify-center space-x-1.5 theme-btn-pimax whitespace-nowrap">
-            <i data-lucide="check-square" class="w-3.5 h-3.5"></i>
-            <span>CN 1: \choice</span>
+      <!-- THANH CHỌN CHỨC NĂNG ĐƯỢC THIẾT KẾ LẠI TINH TẾ & CHUYÊN NGHIỆP -->
+      <div class="theme-bg p-3 border shadow-sm flex items-center justify-between rounded-md gap-4">
+        <div class="flex theme-sub-bg p-1 border rounded-lg w-full sm:w-auto overflow-x-auto gap-1">
+          <button id="sub-btn-1" onclick="switchSubMode(1)" class="px-4 py-2 text-xs font-semibold rounded-md transition-all flex items-center justify-center space-x-2 theme-btn-pimax shadow-sm whitespace-nowrap">
+            <i data-lucide="check-square" class="w-4 h-4"></i>
+            <span>Trắc nghiệm (\choice)</span>
           </button>
-          <button id="sub-btn-2" onclick="switchSubMode(2)" class="px-3 py-1.5 text-xs font-semibold rounded transition flex items-center justify-center space-x-1.5 opacity-75 hover:opacity-100 whitespace-nowrap">
-            <i data-lucide="list-checks" class="w-3.5 h-3.5"></i>
-            <span>CN 2: \choiceTF</span>
+          <button id="sub-btn-2" onclick="switchSubMode(2)" class="px-4 py-2 text-xs font-semibold rounded-md transition-all flex items-center justify-center space-x-2 opacity-75 hover:opacity-100 whitespace-nowrap">
+            <i data-lucide="list-checks" class="w-4 h-4"></i>
+            <span>Đúng / Sai (\choiceTF)</span>
           </button>
-          <button id="sub-btn-3" onclick="switchSubMode(3)" class="px-3 py-1.5 text-xs font-semibold rounded transition flex items-center justify-center space-x-1.5 opacity-75 hover:opacity-100 whitespace-nowrap">
-            <i data-lucide="pen-tool" class="w-3.5 h-3.5"></i>
-            <span>CN 3: \shortans</span>
+          <button id="sub-btn-3" onclick="switchSubMode(3)" class="px-4 py-2 text-xs font-semibold rounded-md transition-all flex items-center justify-center space-x-2 opacity-75 hover:opacity-100 whitespace-nowrap">
+            <i data-lucide="pen-tool" class="w-4 h-4"></i>
+            <span>Trả lời ngắn (\shortans)</span>
           </button>
         </div>
-        <span id="sub-mode-desc" class="text-xs opacity-75 font-medium">Chế độ: <b>Trắc nghiệm 4 phương án (A, B, C, D)</b></span>
       </div>
 
       <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -143,7 +143,7 @@
             </div>
           </div>
 
-          <!-- Tìm kiếm & thay thế (Đã gán đủ sự kiện oninput/onchange) -->
+          <!-- Tìm kiếm & thay thế -->
           <div class="theme-sub-bg p-2 border rounded mb-2 flex flex-col gap-2 text-xs shrink-0">
             <div class="flex items-center gap-2 flex-wrap">
               <div class="flex items-center space-x-1 flex-1 min-w-[150px]">
