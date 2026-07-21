@@ -13,7 +13,7 @@
   <!-- JSZip library -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
   <!-- Custom Style -->
-  <link rel="stylesheet" href="css/style.css?v=6.0">
+  <link rel="stylesheet" href="css/style.css?v=7.0">
 </head>
 <body class="min-h-screen font-sans flex flex-col transition-colors duration-200">
 
@@ -90,7 +90,7 @@
               <button onclick="clearText('input-ex')" class="hover:underline h-7 px-1 flex items-center opacity-75">Xóa</button>
             </div>
           </div>
-          <!-- EDITOR CONTAINER (KHÔNG CÒN THẺ CODE-HIGHLIGHT GÂY BÓNG MỜ) -->
+          <!-- EDITOR CONTAINER -->
           <div class="editor-container">
             <div id="lines-input-ex" class="line-numbers">1</div>
             <div class="editor-area">
@@ -143,7 +143,7 @@
             </div>
           </div>
 
-          <!-- Tìm kiếm & thay thế -->
+          <!-- Tìm kiếm & thay thế (Đã gán đủ sự kiện oninput/onchange) -->
           <div class="theme-sub-bg p-2 border rounded mb-2 flex flex-col gap-2 text-xs shrink-0">
             <div class="flex items-center gap-2 flex-wrap">
               <div class="flex items-center space-x-1 flex-1 min-w-[150px]">
@@ -155,7 +155,10 @@
                 <span id="count-output-ex" class="text-[11px] font-mono px-1 min-w-[50px] text-center">0/0</span>
                 <button onclick="navigateSearch('output-ex', 1)" class="hover:opacity-100 p-1 rounded opacity-75"><i data-lucide="chevron-right" class="w-3.5 h-3.5"></i></button>
               </div>
-              <label class="flex items-center space-x-1 cursor-pointer select-none opacity-75"><input type="checkbox" id="match-case-output-ex" onchange="findText('output-ex')" class="rounded"><span>Match case</span></label>
+              <label class="flex items-center space-x-1 cursor-pointer select-none opacity-75">
+                <input type="checkbox" id="match-case-output-ex" onchange="findText('output-ex')" class="rounded">
+                <span>Match case</span>
+              </label>
             </div>
             <div class="flex items-center gap-2">
               <div class="flex items-center space-x-1 flex-1">
