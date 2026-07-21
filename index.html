@@ -13,7 +13,7 @@
   <!-- JSZip library -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
   <!-- Custom Style -->
-  <link rel="stylesheet" href="css/style.css?v=11.0">
+  <link rel="stylesheet" href="css/style.css?v=12.0">
 </head>
 <body class="min-h-screen font-sans flex flex-col transition-colors duration-200 bg-slate-100 dark:bg-slate-900 text-slate-800 dark:text-slate-100">
 
@@ -21,29 +21,29 @@
   <header class="bg-white dark:bg-slate-900 border-b border-slate-300 dark:border-slate-800 sticky top-0 z-50 shadow-sm">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 py-3 flex flex-col md:flex-row justify-between items-center gap-4">
       <div class="flex items-center space-x-3">
-        <div class="bg-rose-600 text-white p-2 rounded-xl shadow-md">
+        <div class="bg-rose-700 text-white p-2 rounded-xl shadow-md">
           <i data-lucide="sparkles" class="w-5 h-5"></i>
         </div>
         <div>
           <h1 class="text-lg font-bold tracking-tight flex items-center gap-2 text-slate-900 dark:text-white">
             PimaX Tool
-            <span class="text-[10px] bg-rose-100 dark:bg-rose-950 text-rose-700 dark:text-rose-400 px-2 py-0.5 font-bold border border-rose-300 dark:border-rose-800 rounded-full">Beta</span>
+            <span class="text-[10px] bg-rose-100 dark:bg-rose-950 text-rose-800 dark:text-rose-300 px-2 py-0.5 font-bold border border-rose-300 dark:border-rose-800 rounded-full">Beta</span>
           </h1>
           <p class="text-xs text-slate-500 dark:text-slate-400">Bộ công cụ chuẩn hóa LaTeX & Xử lý tài liệu toán</p>
         </div>
       </div>
 
-      <!-- NAV MENU CHÍNH (ĐÃ ĐỒNG BỘ NÚT ĐỎ PIMAX CHUẨN) -->
-      <nav class="flex bg-slate-200 dark:bg-slate-800 p-1.5 rounded-xl border border-slate-300 dark:border-slate-700 shadow-inner space-x-2">
-        <button id="nav-btn-1" onclick="switchMainMenu(1)" class="px-4 py-1.5 text-xs font-bold rounded-lg transition-all flex items-center space-x-2 bg-rose-600 text-white shadow-md cursor-pointer">
+      <!-- NAV MENU CHÍNH (ĐỒNG BỘ HOÀN TOÀN TÔNG MÀU PIMAX) -->
+      <nav class="flex bg-slate-200 dark:bg-slate-800 p-1.5 rounded-2xl border border-slate-300 dark:border-slate-700 shadow-inner space-x-2">
+        <button id="nav-btn-1" onclick="switchMainMenu(1)" class="px-4 py-2 text-xs font-bold rounded-xl transition-all flex items-center space-x-2 bg-rose-700 text-white shadow-md cursor-pointer border border-rose-800">
           <i data-lucide="file-code-2" class="w-4 h-4"></i>
           <span>Chuẩn Hóa LaTeX</span>
         </button>
-        <button id="nav-btn-2" onclick="switchMainMenu(2)" class="px-4 py-1.5 text-xs font-semibold rounded-lg transition-all flex items-center space-x-2 bg-white dark:bg-slate-700 text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-600 border border-slate-300 dark:border-slate-600 shadow-sm cursor-pointer">
+        <button id="nav-btn-2" onclick="switchMainMenu(2)" class="px-4 py-2 text-xs font-semibold rounded-xl transition-all flex items-center space-x-2 bg-white dark:bg-slate-700 text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-600 border border-slate-300 dark:border-slate-600 shadow-sm cursor-pointer">
           <i data-lucide="scissors" class="w-4 h-4 text-slate-500 dark:text-slate-400"></i>
           <span>Lọc TikZ</span>
         </button>
-        <button id="nav-btn-3" onclick="switchMainMenu(3)" class="px-4 py-1.5 text-xs font-semibold rounded-lg transition-all flex items-center space-x-2 bg-white dark:bg-slate-700 text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-600 border border-slate-300 dark:border-slate-600 shadow-sm cursor-pointer">
+        <button id="nav-btn-3" onclick="switchMainMenu(3)" class="px-4 py-2 text-xs font-semibold rounded-xl transition-all flex items-center space-x-2 bg-white dark:bg-slate-700 text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-600 border border-slate-300 dark:border-slate-600 shadow-sm cursor-pointer">
           <i data-lucide="file-image" class="w-4 h-4 text-slate-500 dark:text-slate-400"></i>
           <span>Chuyển PDF Thành Ảnh</span>
         </button>
@@ -57,21 +57,21 @@
     <!-- MENU 1: CHUẨN HÓA LATEX -->
     <section id="menu-section-1" class="space-y-4">
       
-      <!-- THANH CHỌN LOẠI CÂU HỎI -->
+      <!-- THANH CHỌN LOẠI CÂU HỎI (ĐỒNG BỘ 100% CẤU TRÚC VÀ MÀU PIMAX BẢN CHUẨN) -->
       <div class="flex items-center justify-between border-b border-slate-300 dark:border-slate-800 pb-3 mb-2">
-        <div class="flex items-center space-x-2 p-1.5 bg-slate-200 dark:bg-slate-800 rounded-xl border border-slate-300 dark:border-slate-700 shadow-inner">
+        <div class="flex items-center space-x-2 p-1.5 bg-slate-200 dark:bg-slate-800 rounded-2xl border border-slate-300 dark:border-slate-700 shadow-inner">
           
           <button id="sub-btn-1" onclick="switchSubMode(1)" 
-                  class="px-4 py-2 text-xs font-bold rounded-lg transition-all flex items-center space-x-2 bg-rose-600 text-white shadow-md cursor-pointer">
+                  class="px-4 py-2 text-xs font-bold rounded-xl transition-all flex items-center space-x-2 bg-rose-700 text-white shadow-md cursor-pointer border border-rose-800">
             <i data-lucide="check-square" class="w-4 h-4"></i>
             <span>Trắc nghiệm 4 phương án</span>
-            <span class="text-[10px] font-mono bg-rose-700/80 text-rose-100 px-2 py-0.5 rounded border border-rose-500/40">
+            <span class="text-[10px] font-mono bg-rose-900/60 text-rose-100 px-2 py-0.5 rounded border border-rose-500/40">
               \choice
             </span>
           </button>
 
           <button id="sub-btn-2" onclick="switchSubMode(2)" 
-                  class="px-4 py-2 text-xs font-semibold rounded-lg transition-all flex items-center space-x-2 bg-white dark:bg-slate-700 text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-600 border border-slate-300 dark:border-slate-600 shadow-sm cursor-pointer">
+                  class="px-4 py-2 text-xs font-semibold rounded-xl transition-all flex items-center space-x-2 bg-white dark:bg-slate-700 text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-600 border border-slate-300 dark:border-slate-600 shadow-sm cursor-pointer">
             <i data-lucide="list-checks" class="w-4 h-4 text-slate-500 dark:text-slate-400"></i>
             <span>Câu hỏi Đúng / Sai</span>
             <span class="text-[10px] font-mono bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 px-2 py-0.5 rounded border border-slate-200 dark:border-slate-700">
@@ -80,7 +80,7 @@
           </button>
 
           <button id="sub-btn-3" onclick="switchSubMode(3)" 
-                  class="px-4 py-2 text-xs font-semibold rounded-lg transition-all flex items-center space-x-2 bg-white dark:bg-slate-700 text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-600 border border-slate-300 dark:border-slate-600 shadow-sm cursor-pointer">
+                  class="px-4 py-2 text-xs font-semibold rounded-xl transition-all flex items-center space-x-2 bg-white dark:bg-slate-700 text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-600 border border-slate-300 dark:border-slate-600 shadow-sm cursor-pointer">
             <i data-lucide="pen-tool" class="w-4 h-4 text-slate-500 dark:text-slate-400"></i>
             <span>Trả lời ngắn</span>
             <span class="text-[10px] font-mono bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 px-2 py-0.5 rounded border border-slate-200 dark:border-slate-700">
@@ -100,7 +100,7 @@
         <!-- Input Box 1 -->
         <div class="bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-800 p-4 shadow-sm flex flex-col h-[640px] rounded-xl">
           <div class="flex justify-between items-center text-xs font-bold h-8 mb-3 pb-2 border-b border-slate-200 dark:border-slate-800 shrink-0">
-            <span class="flex items-center gap-1.5 text-slate-800 dark:text-slate-200"><i data-lucide="file-input" class="w-4 h-4 text-rose-600"></i> Dữ liệu thô đầu vào:</span>
+            <span class="flex items-center gap-1.5 text-slate-800 dark:text-slate-200"><i data-lucide="file-input" class="w-4 h-4 text-rose-700"></i> Dữ liệu thô đầu vào:</span>
             <div class="flex items-center space-x-1.5">
               <button id="btn-undo-input-ex" onclick="undo('input-ex')" disabled class="btn-history bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 px-2 h-7 flex items-center gap-1 border border-slate-300 dark:border-slate-700 rounded-md transition text-[11px]" title="Hoàn tác (Ctrl+Z)"><i data-lucide="undo-2" class="w-3.5 h-3.5"></i></button>
               <button id="btn-redo-input-ex" onclick="redo('input-ex')" disabled class="btn-history bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 px-2 h-7 flex items-center gap-1 border border-slate-300 dark:border-slate-700 rounded-md transition text-[11px]" title="Làm lại (Ctrl+Y)"><i data-lucide="redo-2" class="w-3.5 h-3.5"></i></button>
@@ -109,7 +109,7 @@
                 <i data-lucide="upload" class="w-3.5 h-3.5"></i> Tải file
                 <input type="file" accept=".tex,.txt" class="hidden" onchange="loadFile(event, 'input-ex')">
               </label>
-              <button onclick="clearText('input-ex')" class="hover:underline h-7 px-1 flex items-center text-rose-600 font-medium">Xóa</button>
+              <button onclick="clearText('input-ex')" class="hover:underline h-7 px-1 flex items-center text-rose-700 font-medium">Xóa</button>
             </div>
           </div>
           <!-- EDITOR CONTAINER -->
@@ -125,7 +125,7 @@
         <!-- Output Box 1 -->
         <div class="bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-800 p-4 shadow-sm flex flex-col h-[640px] rounded-xl">
           <div class="flex justify-between items-center text-xs font-bold h-8 mb-2 pb-2 border-b border-slate-200 dark:border-slate-800 shrink-0">
-            <span class="flex items-center gap-1.5 text-slate-800 dark:text-slate-200"><i data-lucide="file-output" class="w-4 h-4 text-rose-600"></i> Kết quả chuẩn hóa:</span>
+            <span class="flex items-center gap-1.5 text-slate-800 dark:text-slate-200"><i data-lucide="file-output" class="w-4 h-4 text-rose-700"></i> Kết quả chuẩn hóa:</span>
             
             <!-- TOOLBAR TRÊN OUTPUT -->
             <div class="flex items-center space-x-1">
@@ -136,19 +136,19 @@
                 <i data-lucide="redo-2" class="w-3.5 h-3.5"></i>
               </button>
               <span class="opacity-20">|</span>
-              <button onclick="openAnswerModal()" class="bg-rose-600 hover:bg-rose-700 text-white px-2.5 h-7 flex items-center gap-1 rounded-md transition font-semibold text-[11px] shadow-sm" title="Bảng chèn đáp án trắc nghiệm nhanh">
+              <button onclick="openAnswerModal()" class="bg-rose-700 hover:bg-rose-800 text-white px-2.5 h-7 flex items-center gap-1 rounded-md transition font-semibold text-[11px] shadow-sm" title="Bảng chèn đáp án trắc nghiệm nhanh">
                 <i data-lucide="grid" class="w-3.5 h-3.5"></i>
                 <span>Thêm đáp án</span>
               </button>
               <span class="opacity-20">|</span>
               <button onclick="applyAutoMath('output-ex')" class="bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 p-1.5 h-7 w-7 rounded-md flex items-center justify-center border border-slate-300 dark:border-slate-700 transition" title="Tự động bọc $">
-                <i data-lucide="variable" class="w-4 h-4 text-rose-600"></i>
+                <i data-lucide="variable" class="w-4 h-4 text-rose-700"></i>
               </button>
               <button onclick="convertArrayToAligned('output-ex')" class="bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 p-1.5 h-7 w-7 rounded-md flex items-center justify-center border border-slate-300 dark:border-slate-700 transition" title="Chuyển array thành aligned">
-                <i data-lucide="columns-2" class="w-4 h-4 text-rose-600"></i>
+                <i data-lucide="columns-2" class="w-4 h-4 text-rose-700"></i>
               </button>
               <button onclick="applyCleanSpacingTool('output-ex')" class="bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 p-1.5 h-7 w-7 rounded-md flex items-center justify-center border border-slate-300 dark:border-slate-700 transition" title="Dọn dẹp khoảng trắng dấu câu">
-                <svg class="w-4 h-4 text-rose-600" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m2 22 10-10"/><path d="M9.5 12.5 14 17"/><path d="m15 11 3 3"/><path d="m17 7 2 2"/><path d="M19 2l3 3-7 7-3-3z"/></svg>
+                <svg class="w-4 h-4 text-rose-700" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m2 22 10-10"/><path d="M9.5 12.5 14 17"/><path d="m15 11 3 3"/><path d="m17 7 2 2"/><path d="M19 2l3 3-7 7-3-3z"/></svg>
               </button>
               <button onclick="wrapSelectionWithEnv('output-ex', 'itemize')" class="bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 p-1.5 h-7 w-7 rounded-md flex items-center justify-center border border-slate-300 dark:border-slate-700 transition" title="Chuyển itemize">
                 <i data-lucide="list" class="w-4 h-4"></i>
@@ -192,7 +192,7 @@
               </div>
               <div class="flex items-center space-x-1">
                 <button onclick="replaceText('output-ex', false)" class="bg-white dark:bg-slate-700 hover:bg-slate-200 border border-slate-300 dark:border-slate-600 rounded px-2.5 py-1 font-semibold transition">Thay</button>
-                <button onclick="replaceText('output-ex', true)" class="bg-rose-600 hover:bg-rose-700 text-white rounded px-2.5 py-1 font-semibold transition shadow-sm">Thay tất cả</button>
+                <button onclick="replaceText('output-ex', true)" class="bg-rose-700 hover:bg-rose-800 text-white rounded px-2.5 py-1 font-semibold transition shadow-sm">Thay tất cả</button>
               </div>
             </div>
           </div>
@@ -208,7 +208,7 @@
       </div>
 
       <div class="flex justify-end pt-2">
-        <button onclick="processExEnvironment()" class="bg-rose-600 hover:bg-rose-700 text-white font-bold px-7 py-2.5 rounded-xl transition flex items-center space-x-2 shadow-md cursor-pointer">
+        <button onclick="processExEnvironment()" class="bg-rose-700 hover:bg-rose-800 text-white font-bold px-7 py-2.5 rounded-xl transition flex items-center space-x-2 shadow-md cursor-pointer border border-rose-800">
           <i data-lucide="wand-2" class="w-4 h-4"></i>
           <span id="btn-ex-label">Chuẩn Hóa Ngay</span>
         </button>
@@ -217,18 +217,18 @@
 
     <!-- MENU 2: LỌC TIKZ -->
     <section id="menu-section-2" class="hidden space-y-4">
-      <div class="bg-white dark:bg-slate-900 p-4 border border-slate-300 dark:border-slate-800 rounded-xl shadow-sm"><p class="text-sm font-medium">Tự động lọc và tách toàn bộ các khối <code class="font-bold text-rose-600">\begin{tikzpicture}...\end{tikzpicture}</code> ra khỏi file LaTeX gốc.</p></div>
+      <div class="bg-white dark:bg-slate-900 p-4 border border-slate-300 dark:border-slate-800 rounded-xl shadow-sm"><p class="text-sm font-medium">Tự động lọc và tách toàn bộ các khối <code class="font-bold text-rose-700">\begin{tikzpicture}...\end{tikzpicture}</code> ra khỏi file LaTeX gốc.</p></div>
       <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
         <!-- Input TikZ -->
         <div class="bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-800 p-4 shadow-sm flex flex-col h-[580px] rounded-xl">
           <div class="flex justify-between items-center text-xs font-bold h-8 mb-3 pb-2 border-b border-slate-200 dark:border-slate-800 shrink-0">
-            <span class="flex items-center gap-1.5"><i data-lucide="file-text" class="w-4 h-4 text-rose-600"></i> Code LaTeX gốc:</span>
+            <span class="flex items-center gap-1.5"><i data-lucide="file-text" class="w-4 h-4 text-rose-700"></i> Code LaTeX gốc:</span>
             <div class="flex items-center space-x-1.5">
               <button id="btn-undo-input-tikz" onclick="undo('input-tikz')" disabled class="btn-history bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 px-2 h-7 border border-slate-300 dark:border-slate-700 rounded-md transition text-[11px]"><i data-lucide="undo-2" class="w-3.5 h-3.5"></i></button>
               <button id="btn-redo-input-tikz" onclick="redo('input-tikz')" disabled class="btn-history bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 px-2 h-7 border border-slate-300 dark:border-slate-700 rounded-md transition text-[11px]"><i data-lucide="redo-2" class="w-3.5 h-3.5"></i></button>
               <span class="opacity-20">|</span>
               <label class="cursor-pointer bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 px-2.5 h-7 flex items-center transition border border-slate-300 dark:border-slate-700 rounded-md gap-1 text-xs font-semibold"><i data-lucide="upload" class="w-3.5 h-3.5"></i> Tải file<input type="file" accept=".tex,.txt" class="hidden" onchange="loadFile(event, 'input-tikz')"></label>
-              <button onclick="clearText('input-tikz')" class="hover:underline h-7 px-1 flex items-center text-rose-600 font-medium">Xóa</button>
+              <button onclick="clearText('input-tikz')" class="hover:underline h-7 px-1 flex items-center text-rose-700 font-medium">Xóa</button>
             </div>
           </div>
           <div class="editor-container">
@@ -243,14 +243,14 @@
         <!-- Output Main -->
         <div class="bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-800 p-4 shadow-sm flex flex-col h-[580px] rounded-xl">
           <div class="flex justify-between items-center text-xs font-bold h-8 mb-2 pb-2 border-b border-slate-200 dark:border-slate-800 shrink-0">
-            <span class="flex items-center gap-1.5"><i data-lucide="file-check" class="w-4 h-4 text-rose-600"></i> File gốc (Đã gỡ TikZ):</span>
+            <span class="flex items-center gap-1.5"><i data-lucide="file-check" class="w-4 h-4 text-rose-700"></i> File gốc (Đã gỡ TikZ):</span>
             <div class="flex items-center space-x-1">
               <button id="btn-undo-output-main" onclick="undo('output-main')" disabled class="btn-history bg-slate-100 dark:bg-slate-800 p-1.5 h-7 w-7 border border-slate-300 dark:border-slate-700 rounded-md transition"><i data-lucide="undo-2" class="w-3.5 h-3.5"></i></button>
               <button id="btn-redo-output-main" onclick="redo('output-main')" disabled class="btn-history bg-slate-100 dark:bg-slate-800 p-1.5 h-7 w-7 border border-slate-300 dark:border-slate-700 rounded-md transition"><i data-lucide="redo-2" class="w-3.5 h-3.5"></i></button>
               <span class="opacity-20">|</span>
-              <button onclick="applyAutoMath('output-main')" class="bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 p-1.5 h-7 w-7 border border-slate-300 dark:border-slate-700 rounded-md transition"><i data-lucide="variable" class="w-4 h-4 text-rose-600"></i></button>
-              <button onclick="convertArrayToAligned('output-main')" class="bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 p-1.5 h-7 w-7 border border-slate-300 dark:border-slate-700 rounded-md transition"><i data-lucide="columns-2" class="w-4 h-4 text-rose-600"></i></button>
-              <button onclick="applyCleanSpacingTool('output-main')" class="bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 p-1.5 h-7 w-7 border border-slate-300 dark:border-slate-700 rounded-md transition"><svg class="w-4 h-4 text-rose-600" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m2 22 10-10"/><path d="M9.5 12.5 14 17"/><path d="m15 11 3 3"/><path d="m17 7 2 2"/><path d="M19 2l3 3-7 7-3-3z"/></svg></button>
+              <button onclick="applyAutoMath('output-main')" class="bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 p-1.5 h-7 w-7 border border-slate-300 dark:border-slate-700 rounded-md transition"><i data-lucide="variable" class="w-4 h-4 text-rose-700"></i></button>
+              <button onclick="convertArrayToAligned('output-main')" class="bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 p-1.5 h-7 w-7 border border-slate-300 dark:border-slate-700 rounded-md transition"><i data-lucide="columns-2" class="w-4 h-4 text-rose-700"></i></button>
+              <button onclick="applyCleanSpacingTool('output-main')" class="bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 p-1.5 h-7 w-7 border border-slate-300 dark:border-slate-700 rounded-md transition"><svg class="w-4 h-4 text-rose-700" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m2 22 10-10"/><path d="M9.5 12.5 14 17"/><path d="m15 11 3 3"/><path d="m17 7 2 2"/><path d="M19 2l3 3-7 7-3-3z"/></svg></button>
               <button onclick="wrapSelectionWithEnv('output-main', 'itemize')" class="bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 p-1.5 h-7 w-7 border border-slate-300 dark:border-slate-700 rounded-md transition"><i data-lucide="list" class="w-4 h-4"></i></button>
               <button onclick="wrapSelectionWithEnv('output-main', 'enumerate')" class="bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 p-1.5 h-7 w-7 border border-slate-300 dark:border-slate-700 rounded-md transition"><i data-lucide="list-ordered" class="w-4 h-4"></i></button>
               <span class="opacity-20">|</span>
@@ -278,7 +278,7 @@
             <option value=".txt">.txt</option>
           </select>
         </div>
-        <button onclick="extractAllTikZToSingleFile()" class="bg-rose-600 hover:bg-rose-700 text-white font-bold px-6 py-2.5 rounded-xl transition flex items-center space-x-2 shadow-md cursor-pointer">
+        <button onclick="extractAllTikZToSingleFile()" class="bg-rose-700 hover:bg-rose-800 text-white font-bold px-6 py-2.5 rounded-xl transition flex items-center space-x-2 shadow-md cursor-pointer border border-rose-800">
           <i data-lucide="scissors" class="w-4 h-4"></i>
           <span>Tách & Gom Vào 1 File</span>
         </button>
@@ -287,9 +287,9 @@
       <div id="single-tikz-container" class="hidden bg-white dark:bg-slate-900 p-5 border border-slate-300 dark:border-slate-800 rounded-xl shadow-sm space-y-3">
         <div class="flex justify-between items-center border-b border-slate-200 dark:border-slate-800 pb-3 flex-wrap gap-2">
           <div class="flex items-center space-x-2">
-            <i data-lucide="file-code-2" class="w-5 h-5 text-rose-600"></i>
+            <i data-lucide="file-code-2" class="w-5 h-5 text-rose-700"></i>
             <h3 class="font-bold text-sm">File chứa toàn bộ hình TikZ</h3>
-            <span id="tikz-count-badge" class="text-xs bg-rose-100 dark:bg-rose-950 text-rose-700 dark:text-rose-400 font-bold px-2.5 py-0.5 border border-rose-300 dark:border-rose-800 rounded-full">0 hình</span>
+            <span id="tikz-count-badge" class="text-xs bg-rose-100 dark:bg-rose-950 text-rose-800 dark:text-rose-300 font-bold px-2.5 py-0.5 border border-rose-300 dark:border-rose-800 rounded-full">0 hình</span>
           </div>
           <div class="flex items-center space-x-1.5">
             <button id="btn-undo-output-tikz-single" onclick="undo('output-tikz-single')" disabled class="btn-history bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 p-1.5 h-7 w-7 border border-slate-300 dark:border-slate-700 rounded-md transition"><i data-lucide="undo-2" class="w-3.5 h-3.5"></i></button>
@@ -313,7 +313,7 @@
     <section id="menu-section-3" class="hidden space-y-4">
       <div class="max-w-3xl mx-auto bg-white dark:bg-slate-900 p-6 sm:p-8 border border-slate-300 dark:border-slate-800 rounded-xl shadow-sm space-y-6">
         <div>
-          <h2 class="text-lg font-bold flex items-center gap-2"><i data-lucide="file-image" class="w-5 h-5 text-rose-600"></i> Chuyển PDF sang Ảnh (PNG / JPG)</h2>
+          <h2 class="text-lg font-bold flex items-center gap-2"><i data-lucide="file-image" class="w-5 h-5 text-rose-700"></i> Chuyển PDF sang Ảnh (PNG / JPG)</h2>
           <p class="text-xs text-slate-500 dark:text-slate-400 mt-1">Xuất các trang trong file PDF thành file ảnh chất lượng cao và đóng gói file ZIP.</p>
         </div>
         <div class="space-y-4">
@@ -348,11 +348,11 @@
               <input type="number" id="height-input" value="1080" min="100" max="10000" class="w-full bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-lg p-2 text-xs outline-none font-mono" placeholder="VD: 1080">
             </div>
           </div>
-          <button id="convert-btn" class="w-full bg-rose-600 hover:bg-rose-700 text-white py-3 rounded-xl font-bold transition shadow-md disabled:opacity-50 cursor-pointer">Chuyển Đổi Sang Ảnh</button>
+          <button id="convert-btn" class="w-full bg-rose-700 hover:bg-rose-800 text-white py-3 rounded-xl font-bold transition shadow-md disabled:opacity-50 cursor-pointer border border-rose-800">Chuyển Đổi Sang Ảnh</button>
         </div>
         <div id="status" class="text-center text-xs font-bold"></div>
         <div id="download-container" class="text-center hidden">
-          <button id="download-btn" class="bg-rose-600 hover:bg-rose-700 text-white px-6 py-2.5 text-xs font-bold rounded-xl transition shadow-md flex items-center justify-center space-x-2 mx-auto cursor-pointer">
+          <button id="download-btn" class="bg-rose-700 hover:bg-rose-800 text-white px-6 py-2.5 text-xs font-bold rounded-xl transition shadow-md flex items-center justify-center space-x-2 mx-auto cursor-pointer border border-rose-800">
             <i data-lucide="download" class="w-4 h-4"></i>
             <span>Tải File ZIP Ảnh</span>
           </button>
@@ -367,7 +367,7 @@
     <div class="bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-2xl shadow-2xl max-w-2xl w-full max-h-[85vh] flex flex-col overflow-hidden">
       <div class="p-4 border-b border-slate-200 dark:border-slate-700 flex justify-between items-center bg-slate-100 dark:bg-slate-800">
         <div class="flex items-center space-x-2">
-          <i data-lucide="grid" class="w-5 h-5 text-rose-600"></i>
+          <i data-lucide="grid" class="w-5 h-5 text-rose-700"></i>
           <h3 class="font-bold text-sm" id="answer-modal-title">Bảng Tích Đáp Án Trắc Nghiệm</h3>
         </div>
         <button onclick="closeAnswerModal()" class="hover:bg-slate-200 dark:hover:bg-slate-700 p-1 rounded-lg text-slate-500 hover:text-slate-800 transition">
@@ -376,7 +376,7 @@
       </div>
 
       <div class="px-4 py-2 text-xs font-medium text-slate-600 dark:text-slate-400 border-b border-slate-100 dark:border-slate-800 bg-slate-50 dark:bg-slate-900">
-        Tích chọn đáp án đúng cho từng câu bên dưới. Hệ thống sẽ tự động cập nhật lệnh <code class="font-mono bg-slate-200 dark:bg-slate-800 px-1 py-0.5 rounded text-rose-600 font-bold">\True</code> vào ô Output ngay lập tức.
+        Tích chọn đáp án đúng cho từng câu bên dưới. Hệ thống sẽ tự động cập nhật lệnh <code class="font-mono bg-slate-200 dark:bg-slate-800 px-1 py-0.5 rounded text-rose-700 font-bold">\True</code> vào ô Output ngay lập tức.
       </div>
 
       <div class="flex-1 overflow-y-auto p-4 custom-scroll">
@@ -384,10 +384,10 @@
       </div>
 
       <div class="p-3 border-t border-slate-200 dark:border-slate-700 flex justify-between items-center bg-slate-100 dark:bg-slate-800">
-        <button onclick="clearAllAnswersInModal()" class="text-xs text-rose-600 hover:underline font-bold flex items-center gap-1 cursor-pointer">
+        <button onclick="clearAllAnswersInModal()" class="text-xs text-rose-700 hover:underline font-bold flex items-center gap-1 cursor-pointer">
           <i data-lucide="rotate-ccw" class="w-3.5 h-3.5"></i> Xóa tất cả tích
         </button>
-        <button onclick="saveAndCloseAnswerModal()" class="bg-rose-600 hover:bg-rose-700 text-white px-5 py-2 text-xs font-bold rounded-lg shadow transition flex items-center gap-1.5 cursor-pointer">
+        <button onclick="saveAndCloseAnswerModal()" class="bg-rose-700 hover:bg-rose-800 text-white px-5 py-2 text-xs font-bold rounded-lg shadow transition flex items-center gap-1.5 cursor-pointer border border-rose-800">
           <i data-lucide="check" class="w-4 h-4"></i> Hoàn thành
         </button>
       </div>
@@ -399,12 +399,12 @@
   </footer>
 
   <!-- SCRIPT ENGINE CORE -->
-  <script src="js/editor.js?v=11.0"></script>
-  <script src="js/clean-tool.js?v=11.0"></script>
-  <script src="js/ex-processor.js?v=11.0"></script>
-  <script src="js/tikz-extractor.js?v=11.0"></script>
-  <script src="js/pdf-converter.js?v=11.0"></script>
-  <script src="js/answer-modal.js?v=11.0"></script>
-  <script src="js/app.js?v=11.0"></script>
+  <script src="js/editor.js?v=12.0"></script>
+  <script src="js/clean-tool.js?v=12.0"></script>
+  <script src="js/ex-processor.js?v=12.0"></script>
+  <script src="js/tikz-extractor.js?v=12.0"></script>
+  <script src="js/pdf-converter.js?v=12.0"></script>
+  <script src="js/answer-modal.js?v=12.0"></script>
+  <script src="js/app.js?v=12.0"></script>
 </body>
 </html>
