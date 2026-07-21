@@ -12,173 +12,14 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.16.105/pdf.min.js"></script>
   <!-- JSZip library -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
-  <style>
-    /* Custom Scrollbar */
-    .custom-scroll::-webkit-scrollbar {
-      width: 6px;
-      height: 6px;
-    }
-    .custom-scroll::-webkit-scrollbar-thumb {
-      background: #cbd5e1;
-    }
-    .custom-scroll::-webkit-scrollbar-thumb:hover {
-      background: #94a3b8;
-    }
-
-    /* LaTeX Syntax Highlighting Colors - Light Theme */
-    .hl-keyword { color: #e11d48; font-weight: bold; }
-    .hl-true { color: #0284c7; font-weight: bold; }
-    .hl-env { color: #b45309; font-weight: bold; }
-    .hl-math { color: #15803d; font-weight: 500; }
-    .hl-comment { color: #64748b; font-style: italic; }
-
-    /* LaTeX Syntax Highlighting Colors - Dark Theme */
-    body.dark .hl-keyword { color: #fb7185; font-weight: bold; }
-    body.dark .hl-true { color: #38bdf8; font-weight: bold; }
-    body.dark .hl-env { color: #fbbf24; font-weight: bold; }
-    body.dark .hl-math { color: #4ade80; font-weight: 500; }
-    body.dark .hl-comment { color: #94a3b8; font-style: italic; }
-
-    /* Search Match Highlighting */
-    .hl-search-match {
-      background-color: #fef08a;
-      color: #0f172a;
-      border-radius: 2px;
-    }
-    body.dark .hl-search-match {
-      background-color: #854d0e;
-      color: #fef08a;
-    }
-    .hl-search-match-active {
-      background-color: #fbbf24;
-      color: #0f172a;
-      font-weight: bold;
-      border-radius: 2px;
-    }
-    body.dark .hl-search-match-active {
-      background-color: #ca8a04;
-      color: #fef08a;
-    }
-
-    /* --- CẤU TRÚC BỘ SOẠN THẢO VÀ ĐỒNG BỘ DÒNG CĂN CHUẨN --- */
-    .editor-container {
-      position: relative;
-      flex: 1;
-      display: flex;
-      overflow: hidden;
-    }
-
-    /* ĐỒNG BỘ TUYỆT ĐỐI KHÔNG LỆCH DÒNG */
-    .line-numbers, .code-input, .code-highlight {
-      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
-      font-size: 0.875rem !important; /* 14px */
-      line-height: 1.5rem !important;  /* 24px */
-      padding-top: 0.75rem !important;  /* 12px */
-      padding-bottom: 0.75rem !important;
-      box-sizing: border-box !important;
-    }
-
-    .line-numbers {
-      user-select: none;
-      text-align: right;
-      padding-left: 0.5rem !important;
-      padding-right: 0.5rem !important;
-      border-right: 1px solid;
-      overflow: hidden;
-      white-space: pre;
-    }
-
-    .editor-area {
-      position: relative;
-      flex: 1;
-      height: 100%;
-      overflow: hidden;
-    }
-
-    .code-input, .code-highlight {
-      position: absolute;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      padding-left: 0.75rem !important;
-      padding-right: 0.75rem !important;
-      margin: 0;
-      border: none;
-      white-space: pre-wrap; 
-      word-break: break-word;
-      tab-size: 4;
-    }
-
-    .code-input {
-      color: transparent;
-      background: transparent;
-      z-index: 2;
-      resize: none;
-      overflow-y: auto;
-      overflow-x: hidden;
-    }
-
-    .code-highlight {
-      z-index: 1;
-      pointer-events: none;
-      overflow: hidden;
-    }
-
-    /* Light Mode Defaults */
-    body { background-color: #f1f5f9; color: #1e293b; }
-    .theme-bg { background-color: #ffffff; border-color: #cbd5e1; color: #1e293b; }
-    .theme-sub-bg { background-color: #f8fafc; border-color: #e2e8f0; color: #334155; }
-    .theme-btn-dark { background-color: #1e293b; color: #ffffff; border-color: #0f172a; }
-    .theme-btn-dark:hover { background-color: #0f172a; }
-    .line-numbers { background-color: #f8fafc; color: #94a3b8; border-color: #e2e8f0; }
-    .code-highlight { color: #1e293b; }
-    .code-input { caret-color: #0f172a; }
-
-    /* Dark Mode Conversions */
-    body.dark { background-color: #0f172a; color: #f1f5f9; }
-    body.dark .theme-bg { background-color: #1e293b; border-color: #334155; color: #f1f5f9; }
-    body.dark .theme-sub-bg { background-color: #0f172a; border-color: #334155; color: #cbd5e1; }
-    body.dark .theme-btn-dark { background-color: #f8fafc !important; color: #0f172a !important; border-color: #cbd5e1 !important; }
-    body.dark .theme-btn-dark:hover { background-color: #e2e8f0 !important; }
-
-    body.dark .line-numbers { background-color: #0f172a; color: #64748b; border-color: #334155; }
-    body.dark .code-highlight { color: #f8fafc; }
-    body.dark .code-input { caret-color: #f8fafc; }
-    body.dark input, body.dark select { background-color: #0f172a !important; color: #f8fafc !important; border-color: #334155 !important; }
-    body.dark input::placeholder { color: #64748b; }
-
-    .btn-history:disabled {
-      opacity: 0.4;
-      cursor: not-allowed;
-    }
-
-    /* Autocomplete Dropdown Popup */
-    .autocomplete-dropdown {
-      position: absolute;
-      border: 1px solid;
-      z-index: 100;
-      max-height: 200px;
-      overflow-y: auto;
-      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
-      font-size: 0.8rem;
-      display: none;
-      border-radius: 4px;
-      box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
-    }
-    .autocomplete-item {
-      padding: 6px 12px;
-      cursor: pointer;
-    }
-  </style>
+  <!-- Custom Style -->
+  <link rel="stylesheet" href="css/style.css">
 </head>
 <body class="min-h-screen font-sans flex flex-col transition-colors duration-200">
 
   <!-- ==================== HEADER & TOP NAVIGATION ==================== -->
   <header class="theme-bg border-b sticky top-0 z-50 shadow-sm">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 py-3.5 flex flex-col md:flex-row justify-between items-center gap-4">
-      
-      <!-- Logo & Brand -->
       <div class="flex items-center space-x-3">
         <div class="theme-btn-dark p-2 transition-colors">
           <i data-lucide="sparkles" class="w-6 h-6"></i>
@@ -192,97 +33,54 @@
         </div>
       </div>
 
-      <!-- MAIN NAVIGATION MENU -->
       <nav class="flex theme-sub-bg p-1 border">
-        <button 
-          id="nav-btn-1" 
-          onclick="switchMainMenu(1)" 
-          class="px-4 py-2 text-xs font-semibold transition-all flex items-center space-x-2 theme-btn-dark"
-        >
+        <button id="nav-btn-1" onclick="switchMainMenu(1)" class="px-4 py-2 text-xs font-semibold transition-all flex items-center space-x-2 theme-btn-dark">
           <i data-lucide="file-code-2" class="w-4 h-4"></i>
           <span>Chuẩn Hóa LaTeX</span>
         </button>
-
-        <button 
-          id="nav-btn-2" 
-          onclick="switchMainMenu(2)" 
-          class="px-4 py-2 text-xs font-semibold transition-all flex items-center space-x-2 opacity-75 hover:opacity-100"
-        >
+        <button id="nav-btn-2" onclick="switchMainMenu(2)" class="px-4 py-2 text-xs font-semibold transition-all flex items-center space-x-2 opacity-75 hover:opacity-100">
           <i data-lucide="scissors" class="w-4 h-4"></i>
           <span>Lọc TikZ</span>
         </button>
-
-        <button 
-          id="nav-btn-3" 
-          onclick="switchMainMenu(3)" 
-          class="px-4 py-2 text-xs font-semibold transition-all flex items-center space-x-2 opacity-75 hover:opacity-100"
-        >
+        <button id="nav-btn-3" onclick="switchMainMenu(3)" class="px-4 py-2 text-xs font-semibold transition-all flex items-center space-x-2 opacity-75 hover:opacity-100">
           <i data-lucide="file-image" class="w-4 h-4"></i>
           <span>Chuyển PDF Thành Ảnh</span>
         </button>
       </nav>
-
     </div>
   </header>
 
   <!-- ==================== MAIN CONTENT AREA ==================== -->
   <main class="flex-1 max-w-7xl w-full mx-auto p-4 sm:p-6">
 
-    <!-- ================================================================= -->
-    <!-- MENU 1: CHUẨN HÓA LATEX (\begin{ex})                              -->
-    <!-- ================================================================= -->
+    <!-- MENU 1: CHUẨN HÓA LATEX -->
     <section id="menu-section-1" class="space-y-4">
-      
-      <!-- Sub-menu Switcher -->
       <div class="theme-bg p-3 border shadow-sm flex flex-col sm:flex-row justify-between items-center gap-3">
         <div class="flex theme-sub-bg p-1 border w-full sm:w-auto overflow-x-auto">
-          <button 
-            id="sub-btn-1" 
-            onclick="switchSubMode(1)" 
-            class="px-3 py-1.5 text-xs font-semibold transition flex items-center justify-center space-x-1.5 theme-btn-dark whitespace-nowrap"
-          >
+          <button id="sub-btn-1" onclick="switchSubMode(1)" class="px-3 py-1.5 text-xs font-semibold transition flex items-center justify-center space-x-1.5 theme-btn-dark whitespace-nowrap">
             <i data-lucide="check-square" class="w-3.5 h-3.5"></i>
             <span>CN 1: \choice</span>
           </button>
-          <button 
-            id="sub-btn-2" 
-            onclick="switchSubMode(2)" 
-            class="px-3 py-1.5 text-xs font-semibold transition flex items-center justify-center space-x-1.5 opacity-75 hover:opacity-100 whitespace-nowrap"
-          >
+          <button id="sub-btn-2" onclick="switchSubMode(2)" class="px-3 py-1.5 text-xs font-semibold transition flex items-center justify-center space-x-1.5 opacity-75 hover:opacity-100 whitespace-nowrap">
             <i data-lucide="list-checks" class="w-3.5 h-3.5"></i>
             <span>CN 2: \choiceTF</span>
           </button>
-          <button 
-            id="sub-btn-3" 
-            onclick="switchSubMode(3)" 
-            class="px-3 py-1.5 text-xs font-semibold transition flex items-center justify-center space-x-1.5 opacity-75 hover:opacity-100 whitespace-nowrap"
-          >
+          <button id="sub-btn-3" onclick="switchSubMode(3)" class="px-3 py-1.5 text-xs font-semibold transition flex items-center justify-center space-x-1.5 opacity-75 hover:opacity-100 whitespace-nowrap">
             <i data-lucide="pen-tool" class="w-3.5 h-3.5"></i>
             <span>CN 3: \shortans</span>
           </button>
         </div>
-        <span id="sub-mode-desc" class="text-xs opacity-75 font-medium">
-          Chế độ: <b>Trắc nghiệm 4 phương án (A, B, C, D)</b>
-        </span>
+        <span id="sub-mode-desc" class="text-xs opacity-75 font-medium">Chế độ: <b>Trắc nghiệm 4 phương án (A, B, C, D)</b></span>
       </div>
 
-      <!-- Editor Grid -->
       <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-        
         <!-- Input Box 1 -->
         <div class="theme-bg border p-4 shadow-sm flex flex-col justify-between h-[640px]">
           <div class="flex justify-between items-center text-xs font-bold h-8 mb-3 pb-2 border-b border-slate-200 dark:border-slate-700">
-            <span class="flex items-center gap-1.5">
-              <i data-lucide="file-input" class="w-4 h-4"></i>
-              Dữ liệu thô đầu vào:
-            </span>
+            <span class="flex items-center gap-1.5"><i data-lucide="file-input" class="w-4 h-4"></i> Dữ liệu thô đầu vào:</span>
             <div class="flex items-center space-x-1.5">
-              <button id="btn-undo-input-ex" onclick="undo('input-ex')" disabled class="btn-history theme-sub-bg px-2 h-7 flex items-center gap-1 border transition text-[11px]" title="Hoàn tác (Ctrl+Z)">
-                <i data-lucide="undo-2" class="w-3.5 h-3.5"></i>
-              </button>
-              <button id="btn-redo-input-ex" onclick="redo('input-ex')" disabled class="btn-history theme-sub-bg px-2 h-7 flex items-center gap-1 border transition text-[11px]" title="Làm lại (Ctrl+Y)">
-                <i data-lucide="redo-2" class="w-3.5 h-3.5"></i>
-              </button>
+              <button id="btn-undo-input-ex" onclick="undo('input-ex')" disabled class="btn-history theme-sub-bg px-2 h-7 flex items-center gap-1 border transition text-[11px]" title="Hoàn tác (Ctrl+Z)"><i data-lucide="undo-2" class="w-3.5 h-3.5"></i></button>
+              <button id="btn-redo-input-ex" onclick="redo('input-ex')" disabled class="btn-history theme-sub-bg px-2 h-7 flex items-center gap-1 border transition text-[11px]" title="Làm lại (Ctrl+Y)"><i data-lucide="redo-2" class="w-3.5 h-3.5"></i></button>
               <span class="opacity-30">|</span>
               <label class="cursor-pointer theme-sub-bg px-2.5 h-7 flex items-center transition border gap-1 text-xs">
                 <i data-lucide="upload" class="w-3 h-3"></i> Tải file
@@ -291,19 +89,11 @@
               <button onclick="clearText('input-ex')" class="hover:underline h-7 px-1 flex items-center opacity-75">Xóa</button>
             </div>
           </div>
-
           <div class="editor-container border border-slate-200 dark:border-slate-700">
             <div id="lines-input-ex" class="line-numbers min-w-[42px]">1</div>
             <div class="editor-area">
               <div id="hl-input-ex" class="code-highlight"></div>
-              <textarea 
-                id="input-ex" 
-                oninput="handleInput('input-ex')" 
-                onkeydown="handleKeyDown(event, 'input-ex')"
-                onscroll="syncScroll('input-ex')"
-                class="code-input custom-scroll"
-                placeholder="Dán nội dung câu hỏi thô vào đây..."
-              ></textarea>
+              <textarea id="input-ex" oninput="handleInput('input-ex')" onkeydown="handleKeyDown(event, 'input-ex')" onscroll="syncScroll('input-ex')" class="code-input custom-scroll" placeholder="Dán nội dung câu hỏi thô vào đây..."></textarea>
               <div id="autocomplete-input-ex" class="autocomplete-dropdown theme-bg"></div>
             </div>
           </div>
@@ -312,72 +102,40 @@
         <!-- Output Box 1 -->
         <div class="theme-bg border p-4 shadow-sm flex flex-col justify-between h-[640px]">
           <div class="flex justify-between items-center text-xs font-bold h-8 mb-2 pb-2 border-b border-slate-200 dark:border-slate-700">
-            <span class="flex items-center gap-1.5">
-              <i data-lucide="file-output" class="w-4 h-4"></i>
-              Kết quả chuẩn hóa:
-            </span>
+            <span class="flex items-center gap-1.5"><i data-lucide="file-output" class="w-4 h-4"></i> Kết quả chuẩn hóa:</span>
             <div class="flex items-center space-x-1">
-              <button id="btn-undo-output-ex" onclick="undo('output-ex')" disabled class="btn-history theme-sub-bg p-1.5 h-7 w-7 flex items-center justify-center border transition" title="Hoàn tác (Ctrl+Z)">
-                <i data-lucide="undo-2" class="w-3.5 h-3.5"></i>
-              </button>
-              <button id="btn-redo-output-ex" onclick="redo('output-ex')" disabled class="btn-history theme-sub-bg p-1.5 h-7 w-7 flex items-center justify-center border transition" title="Làm lại (Ctrl+Y)">
-                <i data-lucide="redo-2" class="w-3.5 h-3.5"></i>
-              </button>
+              <button id="btn-undo-output-ex" onclick="undo('output-ex')" disabled class="btn-history theme-sub-bg p-1.5 h-7 w-7 flex items-center justify-center border transition" title="Hoàn tác"><i data-lucide="undo-2" class="w-3.5 h-3.5"></i></button>
+              <button id="btn-redo-output-ex" onclick="redo('output-ex')" disabled class="btn-history theme-sub-bg p-1.5 h-7 w-7 flex items-center justify-center border transition" title="Làm lại"><i data-lucide="redo-2" class="w-3.5 h-3.5"></i></button>
               <span class="opacity-30">|</span>
-              <button onclick="applyAutoMath('output-ex')" class="bg-amber-100 dark:bg-amber-900/50 text-amber-900 dark:text-amber-200 p-1.5 h-7 w-7 flex items-center justify-center border border-amber-300 dark:border-amber-700 transition" title="Tự động bọc $ cho đoạn bôi đen">
-                <i data-lucide="variable" class="w-4 h-4 text-amber-700 dark:text-amber-400"></i>
-              </button>
-              <button onclick="convertArrayToAligned('output-ex')" class="bg-blue-100 dark:bg-blue-900/50 text-blue-900 dark:text-blue-200 p-1.5 h-7 w-7 flex items-center justify-center border border-blue-300 dark:border-blue-700 transition" title="Chuyển toàn bộ array thành aligned và căn lề dấu =">
-                <i data-lucide="columns-2" class="w-4 h-4 text-blue-700 dark:text-blue-400"></i>
-              </button>
-              <button onclick="applyCleanSpacingTool('output-ex')" class="bg-emerald-100 dark:bg-emerald-900/50 text-emerald-900 dark:text-emerald-200 p-1.5 h-7 w-7 flex items-center justify-center border border-emerald-300 dark:border-emerald-700 transition" title="Dọn dẹp dòng trống thừa & khoảng trắng trước dấu câu">
-                <svg class="w-4 h-4 text-emerald-700 dark:text-emerald-400" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m2 22 10-10"/><path d="M9.5 12.5 14 17"/><path d="m15 11 3 3"/><path d="m17 7 2 2"/><path d="M19 2l3 3-7 7-3-3z"/></svg>
-              </button>
-              <button onclick="wrapSelectionWithEnv('output-ex', 'itemize')" class="theme-sub-bg p-1.5 h-7 w-7 flex items-center justify-center border transition" title="Chuyển thành môi trường \\begin{itemize}">
-                <i data-lucide="list" class="w-4 h-4"></i>
-              </button>
-              <button onclick="wrapSelectionWithEnv('output-ex', 'enumerate')" class="theme-sub-bg p-1.5 h-7 w-7 flex items-center justify-center border transition" title="Chuyển thành môi trường \\begin{enumerate}">
-                <i data-lucide="list-ordered" class="w-4 h-4"></i>
-              </button>
+              <button onclick="applyAutoMath('output-ex')" class="bg-amber-100 dark:bg-amber-900/50 text-amber-900 dark:text-amber-200 p-1.5 h-7 w-7 flex items-center justify-center border border-amber-300 dark:border-amber-700 transition" title="Tự động bọc $"><i data-lucide="variable" class="w-4 h-4 text-amber-700 dark:text-amber-400"></i></button>
+              <button onclick="convertArrayToAligned('output-ex')" class="bg-blue-100 dark:bg-blue-900/50 text-blue-900 dark:text-blue-200 p-1.5 h-7 w-7 flex items-center justify-center border border-blue-300 dark:border-blue-700 transition" title="Chuyển array thành aligned"><i data-lucide="columns-2" class="w-4 h-4 text-blue-700 dark:text-blue-400"></i></button>
+              <button onclick="applyCleanSpacingTool('output-ex')" class="bg-emerald-100 dark:bg-emerald-900/50 text-emerald-900 dark:text-emerald-200 p-1.5 h-7 w-7 flex items-center justify-center border border-emerald-300 dark:border-emerald-700 transition" title="Dọn dẹp khoảng trắng"><svg class="w-4 h-4 text-emerald-700 dark:text-emerald-400" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m2 22 10-10"/><path d="M9.5 12.5 14 17"/><path d="m15 11 3 3"/><path d="m17 7 2 2"/><path d="M19 2l3 3-7 7-3-3z"/></svg></button>
+              <button onclick="wrapSelectionWithEnv('output-ex', 'itemize')" class="theme-sub-bg p-1.5 h-7 w-7 flex items-center justify-center border transition" title="Chuyển itemize"><i data-lucide="list" class="w-4 h-4"></i></button>
+              <button onclick="wrapSelectionWithEnv('output-ex', 'enumerate')" class="theme-sub-bg p-1.5 h-7 w-7 flex items-center justify-center border transition" title="Chuyển enumerate"><i data-lucide="list-ordered" class="w-4 h-4"></i></button>
               <span class="opacity-30">|</span>
-              <button onclick="copyToClipboard('output-ex')" class="theme-sub-bg p-1.5 h-7 w-7 flex items-center justify-center border transition" title="Copy nội dung">
-                <i data-lucide="copy" class="w-3.5 h-3.5"></i>
-              </button>
-              <button onclick="downloadSingleText('output-ex', 'chuan_hoa_ex.tex')" class="theme-sub-bg p-1.5 h-7 w-7 flex items-center justify-center border transition" title="Tải file .tex">
-                <i data-lucide="download" class="w-3.5 h-3.5"></i>
-              </button>
+              <button onclick="copyToClipboard('output-ex')" class="theme-sub-bg p-1.5 h-7 w-7 flex items-center justify-center border transition" title="Copy"><i data-lucide="copy" class="w-3.5 h-3.5"></i></button>
+              <button onclick="downloadSingleText('output-ex', 'chuan_hoa_ex.tex')" class="theme-sub-bg p-1.5 h-7 w-7 flex items-center justify-center border transition" title="Tải file .tex"><i data-lucide="download" class="w-3.5 h-3.5"></i></button>
             </div>
           </div>
 
-          <!-- ADVANCED SEARCH & REPLACE BAR FOR OUTPUT-EX -->
+          <!-- Tìm kiếm & thay thế -->
           <div class="theme-sub-bg p-2 border mb-2 flex flex-col gap-2 text-xs">
             <div class="flex items-center gap-2 flex-wrap">
               <div class="flex items-center space-x-1 flex-1 min-w-[150px]">
                 <i data-lucide="search" class="w-3.5 h-3.5 opacity-50"></i>
                 <input type="text" id="find-output-ex" placeholder="Tìm kiếm..." oninput="findText('output-ex')" class="w-full theme-bg border px-2 py-1 outline-none">
               </div>
-
-              <button onclick="applyCleanSpacingTool('output-ex')" class="bg-emerald-100 dark:bg-emerald-900/50 text-emerald-900 dark:text-emerald-200 px-2.5 py-1 flex items-center gap-1 border border-emerald-300 dark:border-emerald-700 transition font-medium" title="Dọn dẹp dòng trống thừa & khoảng trắng trước dấu câu">
+              <button onclick="applyCleanSpacingTool('output-ex')" class="bg-emerald-100 dark:bg-emerald-900/50 text-emerald-900 dark:text-emerald-200 px-2.5 py-1 flex items-center gap-1 border border-emerald-300 dark:border-emerald-700 transition font-medium">
                 <svg class="w-3.5 h-3.5 text-emerald-700 dark:text-emerald-400" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m2 22 10-10"/><path d="M9.5 12.5 14 17"/><path d="m15 11 3 3"/><path d="m17 7 2 2"/><path d="M19 2l3 3-7 7-3-3z"/></svg>
                 <span>Dọn dẹp</span>
               </button>
-
               <div class="flex items-center space-x-1 border theme-bg px-1 py-0.5">
-                <button onclick="navigateSearch('output-ex', -1)" title="Tìm trước" class="hover:opacity-100 p-1 rounded opacity-75">
-                  <i data-lucide="chevron-left" class="w-3.5 h-3.5"></i>
-                </button>
+                <button onclick="navigateSearch('output-ex', -1)" class="hover:opacity-100 p-1 rounded opacity-75"><i data-lucide="chevron-left" class="w-3.5 h-3.5"></i></button>
                 <span id="count-output-ex" class="text-[11px] font-mono px-1 min-w-[50px] text-center">0/0</span>
-                <button onclick="navigateSearch('output-ex', 1)" title="Tìm tiếp" class="hover:opacity-100 p-1 rounded opacity-75">
-                  <i data-lucide="chevron-right" class="w-3.5 h-3.5"></i>
-                </button>
+                <button onclick="navigateSearch('output-ex', 1)" class="hover:opacity-100 p-1 rounded opacity-75"><i data-lucide="chevron-right" class="w-3.5 h-3.5"></i></button>
               </div>
-
-              <label class="flex items-center space-x-1 cursor-pointer select-none opacity-75">
-                <input type="checkbox" id="match-case-output-ex" onchange="findText('output-ex')" class="rounded">
-                <span>Match case</span>
-              </label>
+              <label class="flex items-center space-x-1 cursor-pointer select-none opacity-75"><input type="checkbox" id="match-case-output-ex" onchange="findText('output-ex')" class="rounded"><span>Match case</span></label>
             </div>
-
             <div class="flex items-center gap-2">
               <div class="flex items-center space-x-1 flex-1">
                 <i data-lucide="replace" class="w-3.5 h-3.5 opacity-50"></i>
@@ -394,79 +152,42 @@
             <div id="lines-output-ex" class="line-numbers min-w-[42px]">1</div>
             <div class="editor-area">
               <div id="hl-output-ex" class="code-highlight"></div>
-              <textarea 
-                id="output-ex" 
-                oninput="handleInput('output-ex')" 
-                onkeydown="handleKeyDown(event, 'output-ex')"
-                onscroll="syncScroll('output-ex')"
-                class="code-input custom-scroll"
-                placeholder="Kết quả chuẩn hóa sẽ xuất hiện tại đây..."
-              ></textarea>
+              <textarea id="output-ex" oninput="handleInput('output-ex')" onkeydown="handleKeyDown(event, 'output-ex')" onscroll="syncScroll('output-ex')" class="code-input custom-scroll" placeholder="Kết quả chuẩn hóa sẽ xuất hiện tại đây..."></textarea>
               <div id="autocomplete-output-ex" class="autocomplete-dropdown theme-bg"></div>
             </div>
           </div>
         </div>
-
       </div>
 
       <div class="flex justify-end pt-2">
-        <button 
-          onclick="processExEnvironment()" 
-          class="theme-btn-dark font-semibold px-6 py-2.5 transition flex items-center space-x-2 shadow"
-        >
+        <button onclick="processExEnvironment()" class="theme-btn-dark font-semibold px-6 py-2.5 transition flex items-center space-x-2 shadow">
           <i data-lucide="wand-2" class="w-4 h-4"></i>
           <span id="btn-ex-label">Chuẩn Hóa Ngay (CN 1)</span>
         </button>
       </div>
     </section>
 
-    <!-- ================================================================= -->
-    <!-- MENU 2: LỌC TIKZ                                                 -->
-    <!-- ================================================================= -->
+    <!-- MENU 2: LỌC TIKZ -->
     <section id="menu-section-2" class="hidden space-y-4">
-      <div class="theme-bg p-4 border shadow-sm">
-        <p class="text-sm opacity-75">
-          Tự động lọc và tách toàn bộ các khối <code class="font-bold">\begin{tikzpicture}...\end{tikzpicture}</code> ra khỏi file LaTeX gốc và gom tất cả vào 1 file duy nhất.
-        </p>
-      </div>
-
+      <div class="theme-bg p-4 border shadow-sm"><p class="text-sm opacity-75">Tự động lọc và tách toàn bộ các khối <code class="font-bold">\begin{tikzpicture}...\end{tikzpicture}</code> ra khỏi file LaTeX gốc.</p></div>
       <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-        
         <!-- Input TikZ -->
         <div class="theme-bg border p-4 shadow-sm flex flex-col justify-between h-[580px]">
           <div class="flex justify-between items-center text-xs font-bold h-8 mb-3 pb-2 border-b border-slate-200 dark:border-slate-700">
-            <span class="flex items-center gap-1.5">
-              <i data-lucide="file-text" class="w-4 h-4"></i>
-              Code LaTeX gốc:
-            </span>
+            <span class="flex items-center gap-1.5"><i data-lucide="file-text" class="w-4 h-4"></i> Code LaTeX gốc:</span>
             <div class="flex items-center space-x-1.5">
-              <button id="btn-undo-input-tikz" onclick="undo('input-tikz')" disabled class="btn-history theme-sub-bg px-2 h-7 flex items-center gap-1 border transition text-[11px]" title="Hoàn tác (Ctrl+Z)">
-                <i data-lucide="undo-2" class="w-3.5 h-3.5"></i>
-              </button>
-              <button id="btn-redo-input-tikz" onclick="redo('input-tikz')" disabled class="btn-history theme-sub-bg px-2 h-7 flex items-center gap-1 border transition text-[11px]" title="Làm lại (Ctrl+Y)">
-                <i data-lucide="redo-2" class="w-3.5 h-3.5"></i>
-              </button>
+              <button id="btn-undo-input-tikz" onclick="undo('input-tikz')" disabled class="btn-history theme-sub-bg px-2 h-7 flex items-center gap-1 border transition text-[11px]"><i data-lucide="undo-2" class="w-3.5 h-3.5"></i></button>
+              <button id="btn-redo-input-tikz" onclick="redo('input-tikz')" disabled class="btn-history theme-sub-bg px-2 h-7 flex items-center gap-1 border transition text-[11px]"><i data-lucide="redo-2" class="w-3.5 h-3.5"></i></button>
               <span class="opacity-30">|</span>
-              <label class="cursor-pointer theme-sub-bg px-2.5 h-7 flex items-center transition border gap-1 text-xs">
-                <i data-lucide="upload" class="w-3 h-3"></i> Tải file
-                <input type="file" accept=".tex,.txt" class="hidden" onchange="loadFile(event, 'input-tikz')">
-              </label>
+              <label class="cursor-pointer theme-sub-bg px-2.5 h-7 flex items-center transition border gap-1 text-xs"><i data-lucide="upload" class="w-3 h-3"></i> Tải file<input type="file" accept=".tex,.txt" class="hidden" onchange="loadFile(event, 'input-tikz')"></label>
               <button onclick="clearText('input-tikz')" class="hover:underline h-7 px-1 flex items-center opacity-75">Xóa</button>
             </div>
           </div>
-
           <div class="editor-container border border-slate-200 dark:border-slate-700">
             <div id="lines-input-tikz" class="line-numbers min-w-[42px]">1</div>
             <div class="editor-area">
               <div id="hl-input-tikz" class="code-highlight"></div>
-              <textarea 
-                id="input-tikz" 
-                oninput="handleInput('input-tikz')" 
-                onkeydown="handleKeyDown(event, 'input-tikz')"
-                onscroll="syncScroll('input-tikz')"
-                class="code-input custom-scroll"
-                placeholder="Dán nội dung LaTeX chứa TikZ vào đây..."
-              ></textarea>
+              <textarea id="input-tikz" oninput="handleInput('input-tikz')" onkeydown="handleKeyDown(event, 'input-tikz')" onscroll="syncScroll('input-tikz')" class="code-input custom-scroll" placeholder="Dán nội dung LaTeX chứa TikZ vào đây..."></textarea>
               <div id="autocomplete-input-tikz" class="autocomplete-dropdown theme-bg"></div>
             </div>
           </div>
@@ -475,108 +196,36 @@
         <!-- Output Main -->
         <div class="theme-bg border p-4 shadow-sm flex flex-col justify-between h-[580px]">
           <div class="flex justify-between items-center text-xs font-bold h-8 mb-2 pb-2 border-b border-slate-200 dark:border-slate-700">
-            <span class="flex items-center gap-1.5">
-              <i data-lucide="file-check" class="w-4 h-4"></i>
-              File gốc (Đã gỡ TikZ):
-            </span>
+            <span class="flex items-center gap-1.5"><i data-lucide="file-check" class="w-4 h-4"></i> File gốc (Đã gỡ TikZ):</span>
             <div class="flex items-center space-x-1">
-              <button id="btn-undo-output-main" onclick="undo('output-main')" disabled class="btn-history theme-sub-bg p-1.5 h-7 w-7 flex items-center justify-center border transition" title="Hoàn tác (Ctrl+Z)">
-                <i data-lucide="undo-2" class="w-3.5 h-3.5"></i>
-              </button>
-              <button id="btn-redo-output-main" onclick="redo('output-main')" disabled class="btn-history theme-sub-bg p-1.5 h-7 w-7 flex items-center justify-center border transition" title="Làm lại (Ctrl+Y)">
-                <i data-lucide="redo-2" class="w-3.5 h-3.5"></i>
-              </button>
+              <button id="btn-undo-output-main" onclick="undo('output-main')" disabled class="btn-history theme-sub-bg p-1.5 h-7 w-7 border transition"><i data-lucide="undo-2" class="w-3.5 h-3.5"></i></button>
+              <button id="btn-redo-output-main" onclick="redo('output-main')" disabled class="btn-history theme-sub-bg p-1.5 h-7 w-7 border transition"><i data-lucide="redo-2" class="w-3.5 h-3.5"></i></button>
               <span class="opacity-30">|</span>
-              <button onclick="applyAutoMath('output-main')" class="bg-amber-100 dark:bg-amber-900/50 text-amber-900 dark:text-amber-200 p-1.5 h-7 w-7 flex items-center justify-center border border-amber-300 dark:border-amber-700 transition" title="Tự động bọc $ cho đoạn bôi đen">
-                <i data-lucide="variable" class="w-4 h-4 text-amber-700 dark:text-amber-400"></i>
-              </button>
-              <button onclick="convertArrayToAligned('output-main')" class="bg-blue-100 dark:bg-blue-900/50 text-blue-900 dark:text-blue-200 p-1.5 h-7 w-7 flex items-center justify-center border border-blue-300 dark:border-blue-700 transition" title="Chuyển toàn bộ array thành aligned và căn lề dấu =">
-                <i data-lucide="columns-2" class="w-4 h-4 text-blue-700 dark:text-blue-400"></i>
-              </button>
-              <button onclick="applyCleanSpacingTool('output-main')" class="bg-emerald-100 dark:bg-emerald-900/50 text-emerald-900 dark:text-emerald-200 p-1.5 h-7 w-7 flex items-center justify-center border border-emerald-300 dark:border-emerald-700 transition" title="Dọn dẹp dòng trống thừa & khoảng trắng trước dấu câu">
-                <svg class="w-4 h-4 text-emerald-700 dark:text-emerald-400" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m2 22 10-10"/><path d="M9.5 12.5 14 17"/><path d="m15 11 3 3"/><path d="m17 7 2 2"/><path d="M19 2l3 3-7 7-3-3z"/></svg>
-              </button>
-              <button onclick="wrapSelectionWithEnv('output-main', 'itemize')" class="theme-sub-bg p-1.5 h-7 w-7 flex items-center justify-center border transition" title="Chuyển thành môi trường \\begin{itemize}">
-                <i data-lucide="list" class="w-4 h-4"></i>
-              </button>
-              <button onclick="wrapSelectionWithEnv('output-main', 'enumerate')" class="theme-sub-bg p-1.5 h-7 w-7 flex items-center justify-center border transition" title="Chuyển thành môi trường \\begin{enumerate}">
-                <i data-lucide="list-ordered" class="w-4 h-4"></i>
-              </button>
+              <button onclick="applyAutoMath('output-main')" class="bg-amber-100 dark:bg-amber-900/50 text-amber-900 dark:text-amber-200 p-1.5 h-7 w-7 border border-amber-300 dark:border-amber-700 transition"><i data-lucide="variable" class="w-4 h-4 text-amber-700 dark:text-amber-400"></i></button>
+              <button onclick="convertArrayToAligned('output-main')" class="bg-blue-100 dark:bg-blue-900/50 text-blue-900 dark:text-blue-200 p-1.5 h-7 w-7 border border-blue-300 dark:border-blue-700 transition"><i data-lucide="columns-2" class="w-4 h-4 text-blue-700 dark:text-blue-400"></i></button>
+              <button onclick="applyCleanSpacingTool('output-main')" class="bg-emerald-100 dark:bg-emerald-900/50 text-emerald-900 dark:text-emerald-200 p-1.5 h-7 w-7 border border-emerald-300 dark:border-emerald-700 transition"><svg class="w-4 h-4 text-emerald-700 dark:text-emerald-400" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m2 22 10-10"/><path d="M9.5 12.5 14 17"/><path d="m15 11 3 3"/><path d="m17 7 2 2"/><path d="M19 2l3 3-7 7-3-3z"/></svg></button>
+              <button onclick="wrapSelectionWithEnv('output-main', 'itemize')" class="theme-sub-bg p-1.5 h-7 w-7 border transition"><i data-lucide="list" class="w-4 h-4"></i></button>
+              <button onclick="wrapSelectionWithEnv('output-main', 'enumerate')" class="theme-sub-bg p-1.5 h-7 w-7 border transition"><i data-lucide="list-ordered" class="w-4 h-4"></i></button>
               <span class="opacity-30">|</span>
-              <button onclick="copyToClipboard('output-main')" class="theme-sub-bg p-1.5 h-7 w-7 flex items-center justify-center border transition" title="Copy nội dung">
-                <i data-lucide="copy" class="w-3.5 h-3.5"></i>
-              </button>
-              <button onclick="downloadSingleText('output-main', 'file_goc_no_tikz.tex')" class="theme-sub-bg p-1.5 h-7 w-7 flex items-center justify-center border transition" title="Tải file gốc">
-                <i data-lucide="download" class="w-3.5 h-3.5"></i>
-              </button>
+              <button onclick="copyToClipboard('output-main')" class="theme-sub-bg p-1.5 h-7 w-7 border transition"><i data-lucide="copy" class="w-3.5 h-3.5"></i></button>
+              <button onclick="downloadSingleText('output-main', 'file_goc_no_tikz.tex')" class="theme-sub-bg p-1.5 h-7 w-7 border transition"><i data-lucide="download" class="w-3.5 h-3.5"></i></button>
             </div>
           </div>
-
-          <!-- ADVANCED SEARCH & REPLACE BAR FOR OUTPUT-MAIN -->
-          <div class="theme-sub-bg p-2 border mb-2 flex flex-col gap-2 text-xs">
-            <div class="flex items-center gap-2 flex-wrap">
-              <div class="flex items-center space-x-1 flex-1 min-w-[150px]">
-                <i data-lucide="search" class="w-3.5 h-3.5 opacity-50"></i>
-                <input type="text" id="find-output-main" placeholder="Tìm kiếm..." oninput="findText('output-main')" class="w-full theme-bg border px-2 py-1 outline-none">
-              </div>
-
-              <button onclick="applyCleanSpacingTool('output-main')" class="bg-emerald-100 dark:bg-emerald-900/50 text-emerald-900 dark:text-emerald-200 px-2.5 py-1 flex items-center gap-1 border border-emerald-300 dark:border-emerald-700 transition font-medium" title="Dọn dẹp dòng trống thừa & khoảng trắng trước dấu câu">
-                <svg class="w-3.5 h-3.5 text-emerald-700 dark:text-emerald-400" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m2 22 10-10"/><path d="M9.5 12.5 14 17"/><path d="m15 11 3 3"/><path d="m17 7 2 2"/><path d="M19 2l3 3-7 7-3-3z"/></svg>
-                <span>Dọn dẹp</span>
-              </button>
-
-              <div class="flex items-center space-x-1 border theme-bg px-1 py-0.5">
-                <button onclick="navigateSearch('output-main', -1)" title="Tìm trước" class="hover:opacity-100 p-1 rounded opacity-75">
-                  <i data-lucide="chevron-left" class="w-3.5 h-3.5"></i>
-                </button>
-                <span id="count-output-main" class="text-[11px] font-mono px-1 min-w-[50px] text-center">0/0</span>
-                <button onclick="navigateSearch('output-main', 1)" title="Tìm tiếp" class="hover:opacity-100 p-1 rounded opacity-75">
-                  <i data-lucide="chevron-right" class="w-3.5 h-3.5"></i>
-                </button>
-              </div>
-
-              <label class="flex items-center space-x-1 cursor-pointer select-none opacity-75">
-                <input type="checkbox" id="match-case-output-main" onchange="findText('output-main')" class="rounded">
-                <span>Match case</span>
-              </label>
-            </div>
-
-            <div class="flex items-center gap-2">
-              <div class="flex items-center space-x-1 flex-1">
-                <i data-lucide="replace" class="w-3.5 h-3.5 opacity-50"></i>
-                <input type="text" id="replace-output-main" placeholder="Thay thế bằng..." class="w-full theme-bg border px-2 py-1 outline-none">
-              </div>
-              <div class="flex items-center space-x-1">
-                <button onclick="replaceText('output-main', false)" class="theme-sub-bg border px-2.5 py-1 font-medium transition opacity-75 hover:opacity-100">Thay</button>
-                <button onclick="replaceText('output-main', true)" class="theme-btn-dark px-2.5 py-1 font-medium transition">Thay tất cả</button>
-              </div>
-            </div>
-          </div>
-
           <div class="editor-container border border-slate-200 dark:border-slate-700">
             <div id="lines-output-main" class="line-numbers min-w-[42px]">1</div>
             <div class="editor-area">
               <div id="hl-output-main" class="code-highlight"></div>
-              <textarea 
-                id="output-main" 
-                oninput="handleInput('output-main')" 
-                onkeydown="handleKeyDown(event, 'output-main')"
-                onscroll="syncScroll('output-main')"
-                class="code-input custom-scroll"
-                placeholder="File gốc sau khi gỡ các khối TikZ sẽ hiển thị ở đây..."
-              ></textarea>
+              <textarea id="output-main" oninput="handleInput('output-main')" onkeydown="handleKeyDown(event, 'output-main')" onscroll="syncScroll('output-main')" class="code-input custom-scroll" placeholder="File gốc sau khi gỡ các khối TikZ..."></textarea>
               <div id="autocomplete-output-main" class="autocomplete-dropdown theme-bg"></div>
             </div>
           </div>
         </div>
-
       </div>
 
       <div class="theme-bg p-4 border shadow-sm flex flex-wrap justify-between items-center gap-4">
         <div class="flex items-center space-x-3">
           <label class="text-xs font-semibold opacity-75">Tên file TikZ tổng:</label>
           <input type="text" id="file-name-tikz" value="tat_ca_hinh_tikz" class="theme-bg border px-3 py-1.5 text-xs font-mono outline-none w-48">
-          
           <label class="text-xs font-semibold opacity-75 ml-2">Đuôi file:</label>
           <select id="file-ext-tikz" class="theme-bg border text-xs px-2 py-1.5 outline-none">
             <option value=".tex" selected>.tex</option>
@@ -589,7 +238,6 @@
         </button>
       </div>
 
-      <!-- Result Container TikZ -->
       <div id="single-tikz-container" class="hidden theme-bg p-5 border shadow-sm space-y-3">
         <div class="flex justify-between items-center border-b border-slate-200 dark:border-slate-700 pb-3 flex-wrap gap-2">
           <div class="flex items-center space-x-2">
@@ -598,95 +246,36 @@
             <span id="tikz-count-badge" class="text-xs theme-sub-bg font-semibold px-2.5 py-0.5 border">0 hình</span>
           </div>
           <div class="flex items-center space-x-1.5">
-            <button id="btn-undo-output-tikz-single" onclick="undo('output-tikz-single')" disabled class="btn-history theme-sub-bg p-1.5 h-7 w-7 flex items-center justify-center border transition" title="Hoàn tác (Ctrl+Z)">
-              <i data-lucide="undo-2" class="w-3.5 h-3.5"></i>
-            </button>
-            <button id="btn-redo-output-tikz-single" onclick="redo('output-tikz-single')" disabled class="btn-history theme-sub-bg p-1.5 h-7 w-7 flex items-center justify-center border transition" title="Làm lại (Ctrl+Y)">
-              <i data-lucide="redo-2" class="w-3.5 h-3.5"></i>
-            </button>
+            <button id="btn-undo-output-tikz-single" onclick="undo('output-tikz-single')" disabled class="btn-history theme-sub-bg p-1.5 h-7 w-7 border transition"><i data-lucide="undo-2" class="w-3.5 h-3.5"></i></button>
+            <button id="btn-redo-output-tikz-single" onclick="redo('output-tikz-single')" disabled class="btn-history theme-sub-bg p-1.5 h-7 w-7 border transition"><i data-lucide="redo-2" class="w-3.5 h-3.5"></i></button>
             <span class="opacity-30">|</span>
-            <button onclick="copyToClipboard('output-tikz-single')" class="theme-sub-bg p-1.5 h-7 w-7 flex items-center justify-center border transition" title="Copy TikZ">
-              <i data-lucide="copy" class="w-3.5 h-3.5"></i>
-            </button>
-            <button onclick="downloadSingleText('output-tikz-single', getTikZFilename())" class="theme-sub-bg p-1.5 h-7 w-7 flex items-center justify-center border transition" title="Tải File TikZ Tổng">
-              <i data-lucide="download" class="w-3.5 h-3.5"></i>
-            </button>
+            <button onclick="copyToClipboard('output-tikz-single')" class="theme-sub-bg p-1.5 h-7 w-7 border transition"><i data-lucide="copy" class="w-3.5 h-3.5"></i></button>
+            <button onclick="downloadSingleText('output-tikz-single', getTikZFilename())" class="theme-sub-bg p-1.5 h-7 w-7 border transition"><i data-lucide="download" class="w-3.5 h-3.5"></i></button>
           </div>
         </div>
-
-        <!-- ADVANCED SEARCH & REPLACE BAR FOR OUTPUT-TIKZ-SINGLE -->
-        <div class="theme-sub-bg p-2 border flex flex-col gap-2 text-xs">
-          <div class="flex items-center gap-2 flex-wrap">
-            <div class="flex items-center space-x-1 flex-1 min-w-[150px]">
-              <i data-lucide="search" class="w-3.5 h-3.5 opacity-50"></i>
-              <input type="text" id="find-output-tikz-single" placeholder="Tìm kiếm..." oninput="findText('output-tikz-single')" class="w-full theme-bg border px-2 py-1 outline-none">
-            </div>
-
-            <div class="flex items-center space-x-1 border theme-bg px-1 py-0.5">
-              <button onclick="navigateSearch('output-tikz-single', -1)" title="Tìm trước" class="hover:opacity-100 p-1 rounded opacity-75">
-                <i data-lucide="chevron-left" class="w-3.5 h-3.5"></i>
-              </button>
-              <span id="count-output-tikz-single" class="text-[11px] font-mono px-1 min-w-[50px] text-center">0/0</span>
-              <button onclick="navigateSearch('output-tikz-single', 1)" title="Tìm tiếp" class="hover:opacity-100 p-1 rounded opacity-75">
-                <i data-lucide="chevron-right" class="w-3.5 h-3.5"></i>
-              </button>
-            </div>
-
-            <label class="flex items-center space-x-1 cursor-pointer select-none opacity-75">
-              <input type="checkbox" id="match-case-output-tikz-single" onchange="findText('output-tikz-single')" class="rounded">
-              <span>Match case</span>
-            </label>
-          </div>
-
-          <div class="flex items-center gap-2">
-            <div class="flex items-center space-x-1 flex-1">
-              <i data-lucide="replace" class="w-3.5 h-3.5 opacity-50"></i>
-              <input type="text" id="replace-output-tikz-single" placeholder="Thay thế bằng..." class="w-full theme-bg border px-2 py-1 outline-none">
-            </div>
-            <div class="flex items-center space-x-1">
-              <button onclick="replaceText('output-tikz-single', false)" class="theme-sub-bg border px-2.5 py-1 font-medium transition opacity-75 hover:opacity-100">Thay</button>
-              <button onclick="replaceText('output-tikz-single', true)" class="theme-btn-dark px-2.5 py-1 font-medium transition">Thay tất cả</button>
-            </div>
-          </div>
-        </div>
-
         <div class="editor-container h-80 border border-slate-200 dark:border-slate-700">
           <div id="lines-output-tikz-single" class="line-numbers min-w-[42px]">1</div>
           <div class="editor-area">
             <div id="hl-output-tikz-single" class="code-highlight"></div>
-            <textarea 
-              id="output-tikz-single" 
-              oninput="handleInput('output-tikz-single')" 
-              onkeydown="handleKeyDown(event, 'output-tikz-single')"
-              onscroll="syncScroll('output-tikz-single')"
-              class="code-input custom-scroll"
-              placeholder="Code các hình TikZ sẽ gom vào đây..."
-            ></textarea>
+            <textarea id="output-tikz-single" oninput="handleInput('output-tikz-single')" onkeydown="handleKeyDown(event, 'output-tikz-single')" onscroll="syncScroll('output-tikz-single')" class="code-input custom-scroll" placeholder="Code các hình TikZ sẽ gom vào đây..."></textarea>
             <div id="autocomplete-output-tikz-single" class="autocomplete-dropdown theme-bg"></div>
           </div>
         </div>
       </div>
     </section>
 
-    <!-- ================================================================= -->
-    <!-- MENU 3: CHUYỂN PDF THÀNH ẢNH                                      -->
-    <!-- ================================================================= -->
+    <!-- MENU 3: CHUYỂN PDF THÀNH ẢNH -->
     <section id="menu-section-3" class="hidden space-y-4">
       <div class="max-w-3xl mx-auto theme-bg p-6 sm:p-8 border shadow-sm space-y-6">
         <div>
-          <h2 class="text-lg font-bold flex items-center gap-2">
-            <i data-lucide="file-image" class="w-5 h-5"></i>
-            Chuyển PDF sang Ảnh (PNG / JPG)
-          </h2>
+          <h2 class="text-lg font-bold flex items-center gap-2"><i data-lucide="file-image" class="w-5 h-5"></i> Chuyển PDF sang Ảnh (PNG / JPG)</h2>
           <p class="text-xs opacity-75 mt-1">Xuất các trang trong file PDF thành file ảnh chất lượng cao và đóng gói file ZIP.</p>
         </div>
-
         <div class="space-y-4">
           <div>
             <label class="block text-xs font-bold mb-1">Chọn file PDF:</label>
             <input type="file" id="pdf-input" accept="application/pdf" class="w-full text-xs theme-sub-bg border p-2.5 outline-none">
           </div>
-
           <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
               <label class="block text-xs font-bold mb-1">Định dạng ảnh xuất:</label>
@@ -704,39 +293,18 @@
               </select>
             </div>
           </div>
-
           <div id="dimension-box" class="grid grid-cols-2 gap-4 theme-sub-bg p-4 border">
             <div id="width-box">
               <label class="block text-xs font-bold mb-1">Chiều Rộng (px):</label>
-              <input 
-                type="number" 
-                id="width-input" 
-                value="1920" 
-                min="100" 
-                max="10000"
-                class="w-full theme-bg border p-2 text-xs outline-none font-mono"
-                placeholder="VD: 1920"
-              >
+              <input type="number" id="width-input" value="1920" min="100" max="10000" class="w-full theme-bg border p-2 text-xs outline-none font-mono" placeholder="VD: 1920">
             </div>
             <div id="height-box" class="opacity-50 pointer-events-none">
               <label class="block text-xs font-bold mb-1">Chiều Cao (px):</label>
-              <input 
-                type="number" 
-                id="height-input" 
-                value="1080" 
-                min="100" 
-                max="10000"
-                class="w-full theme-bg border p-2 text-xs outline-none font-mono"
-                placeholder="VD: 1080"
-              >
+              <input type="number" id="height-input" value="1080" min="100" max="10000" class="w-full theme-bg border p-2 text-xs outline-none font-mono" placeholder="VD: 1080">
             </div>
           </div>
-
-          <button id="convert-btn" class="w-full theme-btn-dark py-3 font-semibold transition shadow disabled:opacity-50">
-            Chuyển Đổi Sang Ảnh
-          </button>
+          <button id="convert-btn" class="w-full theme-btn-dark py-3 font-semibold transition shadow disabled:opacity-50">Chuyển Đổi Sang Ảnh</button>
         </div>
-
         <div id="status" class="text-center text-xs font-semibold"></div>
         <div id="download-container" class="text-center hidden">
           <button id="download-btn" class="theme-btn-dark px-6 py-2.5 text-xs font-semibold transition shadow flex items-center justify-center space-x-2 mx-auto">
@@ -749,12 +317,8 @@
 
   </main>
 
-  <!-- ==================== NÚT TOGGLE LIGHT / DARK MODE (GÓC DƯỚI BÊN PHẢI) ==================== -->
-  <button 
-    onclick="toggleDarkMode()" 
-    class="fixed bottom-6 right-6 z-50 bg-slate-800 dark:bg-amber-400 text-white dark:text-slate-900 p-3.5 rounded-full shadow-lg hover:scale-105 transition flex items-center justify-center"
-    title="Chuyển đổi giao diện Sáng / Tối"
-  >
+  <!-- Toggle Dark/Light Mode Button -->
+  <button onclick="toggleDarkMode()" class="fixed bottom-6 right-6 z-50 bg-slate-800 dark:bg-amber-400 text-white dark:text-slate-900 p-3.5 rounded-full shadow-lg hover:scale-105 transition flex items-center justify-center" title="Chuyển đổi giao diện Sáng / Tối">
     <i id="theme-icon" data-lucide="moon" class="w-5 h-5"></i>
   </button>
 
@@ -762,1180 +326,12 @@
     PimaX Tool Beta — Hệ sinh thái hỗ trợ soạn thảo LaTeX & Xử lý tài liệu
   </footer>
 
-  <script>
-    lucide.createIcons();
-
-    // ==================== DARK / LIGHT MODE LOGIC ====================
-    function toggleDarkMode() {
-      const body = document.body;
-      const icon = document.getElementById('theme-icon');
-      
-      body.classList.toggle('dark');
-      const isDark = body.classList.contains('dark');
-      
-      if (isDark) {
-        icon.setAttribute('data-lucide', 'sun');
-        localStorage.setItem('pimax_theme', 'dark');
-      } else {
-        icon.setAttribute('data-lucide', 'moon');
-        localStorage.setItem('pimax_theme', 'light');
-      }
-      lucide.createIcons();
-    }
-
-    window.addEventListener('DOMContentLoaded', () => {
-      const savedTheme = localStorage.getItem('pimax_theme');
-      if (savedTheme === 'dark') {
-        document.body.classList.add('dark');
-        const icon = document.getElementById('theme-icon');
-        if (icon) icon.setAttribute('data-lucide', 'sun');
-        lucide.createIcons();
-      }
-
-      ['input-ex', 'output-ex', 'input-tikz', 'output-main', 'output-tikz-single'].forEach(id => {
-        initHistory(id);
-        const el = document.getElementById(id);
-        if (el) {
-          saveState(id, true);
-        }
-      });
-    });
-
-    // ==================== UNDO / REDO SYSTEM ====================
-    const historyStacks = {}; 
-
-    function initHistory(id) {
-      if (!historyStacks[id]) {
-        historyStacks[id] = {
-          undoStack: [],
-          redoStack: [],
-          timeout: null
-        };
-      }
-    }
-
-    function saveState(id, force = false) {
-      initHistory(id);
-      const textarea = document.getElementById(id);
-      if (!textarea) return;
-
-      const state = {
-        value: textarea.value,
-        selectionStart: textarea.selectionStart,
-        selectionEnd: textarea.selectionEnd
-      };
-
-      const h = historyStacks[id];
-      const lastState = h.undoStack[h.undoStack.length - 1];
-
-      if (lastState && lastState.value === state.value) return;
-
-      if (force) {
-        h.undoStack.push(state);
-        h.redoStack = [];
-        updateHistoryButtons(id);
-      } else {
-        clearTimeout(h.timeout);
-        h.timeout = setTimeout(() => {
-          h.undoStack.push(state);
-          h.redoStack = [];
-          updateHistoryButtons(id);
-        }, 300);
-      }
-    }
-
-    function undo(id) {
-      initHistory(id);
-      const h = historyStacks[id];
-      const textarea = document.getElementById(id);
-      if (!textarea || h.undoStack.length <= 1) return;
-
-      const currentState = h.undoStack.pop();
-      h.redoStack.push(currentState);
-
-      const previousState = h.undoStack[h.undoStack.length - 1];
-      textarea.value = previousState.value;
-      textarea.setSelectionRange(previousState.selectionStart, previousState.selectionEnd);
-
-      handleInput(id, false);
-      updateHistoryButtons(id);
-    }
-
-    function redo(id) {
-      initHistory(id);
-      const h = historyStacks[id];
-      const textarea = document.getElementById(id);
-      if (!textarea || h.redoStack.length === 0) return;
-
-      const nextState = h.redoStack.pop();
-      h.undoStack.push(nextState);
-
-      textarea.value = nextState.value;
-      textarea.setSelectionRange(nextState.selectionStart, nextState.selectionEnd);
-
-      handleInput(id, false);
-      updateHistoryButtons(id);
-    }
-
-    function updateHistoryButtons(id) {
-      initHistory(id);
-      const h = historyStacks[id];
-      const btnUndo = document.getElementById(`btn-undo-${id}`);
-      const btnRedo = document.getElementById(`btn-redo-${id}`);
-
-      if (btnUndo) btnUndo.disabled = h.undoStack.length <= 1;
-      if (btnRedo) btnRedo.disabled = h.redoStack.length === 0;
-    }
-
-    document.addEventListener('keydown', function(e) {
-      const activeEl = document.activeElement;
-      if (activeEl && activeEl.tagName === 'TEXTAREA') {
-        const id = activeEl.id;
-        
-        if (e.ctrlKey || e.metaKey) {
-          if (e.key.toLowerCase() === 'z') {
-            e.preventDefault();
-            if (e.shiftKey) {
-              redo(id);
-            } else {
-              undo(id);
-            }
-          } else if (e.key.toLowerCase() === 'y') {
-            e.preventDefault();
-            redo(id);
-          }
-        }
-      }
-    });
-
-    // 1. SWITCH NAVIGATION
-    let activeMainMenu = 1;
-    function switchMainMenu(menuIndex) {
-      activeMainMenu = menuIndex;
-      for (let i = 1; i <= 3; i++) {
-        const btn = document.getElementById(`nav-btn-${i}`);
-        const sec = document.getElementById(`menu-section-${i}`);
-        if (i === menuIndex) {
-          btn.className = "px-4 py-2 text-xs font-semibold transition-all flex items-center space-x-2 theme-btn-dark";
-          sec.classList.remove('hidden');
-        } else {
-          btn.className = "px-4 py-2 text-xs font-semibold transition-all flex items-center space-x-2 opacity-75 hover:opacity-100";
-          sec.classList.add('hidden');
-        }
-      }
-    }
-
-    let subModeEx = 1;
-    function switchSubMode(mode) {
-      subModeEx = mode;
-      const btn1 = document.getElementById('sub-btn-1');
-      const btn2 = document.getElementById('sub-btn-2');
-      const btn3 = document.getElementById('sub-btn-3');
-      const desc = document.getElementById('sub-mode-desc');
-      const label = document.getElementById('btn-ex-label');
-
-      [btn1, btn2, btn3].forEach(b => {
-        b.className = "px-3 py-1.5 text-xs font-semibold transition flex items-center justify-center space-x-1.5 opacity-75 hover:opacity-100 whitespace-nowrap";
-      });
-
-      if (mode === 1) {
-        btn1.className = "px-3 py-1.5 text-xs font-semibold transition flex items-center justify-center space-x-1.5 theme-btn-dark whitespace-nowrap";
-        desc.innerHTML = "Chế độ: <b>Trắc nghiệm 4 phương án (A, B, C, D)</b>";
-        label.innerText = "Chuẩn Hóa Ngay (CN 1)";
-      } else if (mode === 2) {
-        btn2.className = "px-3 py-1.5 text-xs font-semibold transition flex items-center justify-center space-x-1.5 theme-btn-dark whitespace-nowrap";
-        desc.innerHTML = "Chế độ: <b>Trắc nghiệm Đúng/Sai (a, b, c, d)</b>";
-        label.innerText = "Chuẩn Hóa Ngay (CN 2)";
-      } else {
-        btn3.className = "px-3 py-1.5 text-xs font-semibold transition flex items-center justify-center space-x-1.5 theme-btn-dark whitespace-nowrap";
-        desc.innerHTML = "Chế độ: <b>Trắc nghiệm trả lời ngắn (\\shortans)</b>";
-        label.innerText = "Chuẩn Hóa Ngay (CN 3)";
-      }
-    }
-
-    const searchStates = {};
-
-    // ==================== KHO GỢI Ý LATEX ====================
-    const latexKeywords = [
-      "\\begin{ex}", "\\end{ex}", "\\begin{itemize}", "\\end{itemize}",
-      "\\begin{enumerate}", "\\end{enumerate}", "\\begin{description}", "\\end{description}",
-      "\\begin{tikzpicture}", "\\end{tikzpicture}", "\\begin{tabular}", "\\end{tabular}",
-      "\\begin{align}", "\\end{align}", "\\begin{align*}", "\\end{align*}",
-      "\\begin{equation}", "\\end{equation}", "\\begin{equation*}", "\\end{equation*}",
-      "\\begin{center}", "\\end{center}", "\\begin{flushleft}", "\\end{flushleft}",
-      "\\begin{flushright}", "\\end{flushright}", "\\begin{quote}", "\\end{quote}",
-      "\\begin{abstract}", "\\end{abstract}", "\\begin{figure}", "\\end{figure}",
-      "\\begin{table}", "\\end{table}", "\\begin{matrix}", "\\end{matrix}",
-      "\\begin{pmatrix}", "\\end{pmatrix}", "\\begin{bmatrix}", "\\end{bmatrix}",
-      "\\begin{vmatrix}", "\\end{vmatrix}", "\\begin{Bmatrix}", "\\end{Bmatrix}",
-      "\\begin{cases}", "\\end{cases}", "\\begin{array}", "\\end{array}",
-      "\\begin{aligned}", "\\end{aligned}",
-
-      "\\choice", "\\choiceTF", "\\True", "\\loigiai", "\\item", "\\shortans{}",
-      "\\section{}", "\\subsection{}", "\\subsubsection{}", "\\paragraph{}",
-      "\\chapter{}", "\\part{}", "\\appendix",
-
-      "\\frac{}{}", "\\sqrt{}", "\\sqrt[]{}", "\\left", "\\right",
-      "\\vec{}", "\\overrightarrow{}", "\\overline{}", "\\bar{}",
-      "\\sum_{}^{}", "\\int_{}^{}", "\\iint", "\\iiint", "\\oint",
-      "\\lim_{ \\to }", "\\infty", "\\partial", "\\nabla", "\\times", "\\div",
-      "\\pm", "\\mp", "\\cdot", "\\ast", "\\star", "\\circ", "\\bullet",
-      "\\leq", "\\geq", "\\neq", "\\approx", "\\equiv", "\\sim", "\\simeq",
-      "\\subset", "\\supset", "\\subseteq", "\\supseteq", "\\in", "\\notin",
-      "\\cup", "\\cap", "\\setminus", "\\emptyset", "\\forall", "\\exists",
-      "\\neg", "\\vee", "\\wedge", "\\implies", "\\impliedby", "\\iff",
-      "\\alpha", "\\beta", "\\gamma", "\\delta", "\\epsilon", "\\varepsilon",
-      "\\zeta", "\\eta", "\\theta", "\\vartheta", "\\iota", "\\kappa",
-      "\\lambda", "\\mu", "\\nu", "\\xi", "\\pi", "\\varpi", "\\rho", "\\varrho",
-      "\\sigma", "\\varsigma", "\\tau", "\\upsilon", "\\phi", "\\varphi",
-      "\\chi", "\\psi", "\\omega", "\\Gamma", "\\Delta", "\\Theta", "\\Lambda",
-      "\\Xi", "\\Pi", "\\Sigma", "\\Upsilon", "\\Phi", "\\Psi", "\\Omega",
-
-      "\\sin", "\\cos", "\\tan", "\\cot", "\\sec", "\\csc",
-      "\\arcsin", "\\arccos", "\\arctan", "\\sinh", "\\cosh", "\\tanh",
-      "\\log", "\\ln", "\\exp", "\\det", "\\dim", "\\hom", "\\ker",
-      "\\max", "\\min", "\\sup", "\\inf", "\\gcd", "\\deg",
-
-      "\\textbf{}", "\\textit{}", "\\underline{}", "\\text{}", "\\textrm{}",
-      "\\textsf{}", "\\texttt{}", "\\textmd{}", "\\textup{}", "\\mathbf{}",
-      "\\mathit{}", "\\mathsf{}", "\\mathtt{}", "\\mathbb{}", "\\mathcal{}",
-      "\\fontfamily{}", "\\mathrm{}", "\\quad", "\\qquad", "\\,", "\\!", "\\;", "\\:",
-      "\\newpage", "\\clearpage", "\\linebreak", "\\nolinebreak", "\\pagebreak",
-      "\\noindent", "\\indent", "\\par", "\\footnote{}", "\\url{}", "\\href{}{}",
-
-      "\\hline", "\\cline{}", "\\multicolumn{}{}{}", "\\rowcolor{}", "\\columncolor{}",
-      "\\hline", "\\cline{1-2}", "\\cline{2-3}", "\\vline", "\\multicolumn{1}{c}{}",
-      "\\centering", "\\raggedright", "\\raggedleft", "\\arraystretch",
-
-      "\\draw", "\\fill", "\\filldraw", "\\node", "\\path", "\\coordinate",
-      "\\clip", "\\grid", "\\axis", "\\addplot", "\\usetikzlibrary{}",
-      "\\tikzset{}", "\\begin{axis}", "\\end{axis}", "\\draw[thick]", "\\draw[dashed]",
-      "\\draw[->]", "\\draw[<->]", "\\draw[domain=]", "\\addplot[blue]",
-
-      "\\usepackage{}", "\\documentclass[]{}", "\\author{}", "\\date{}", "\\title{}",
-      "\\maketitle", "\\tableofcontents", "\\listoffigures", "\\listoftables",
-      "\\bibliographystyle{}", "\\bibliography{}", "\\cite{}", "\\ref{}", "\\label{}"
-    ];
-
-    function handleKeyDown(e, id) {
-      const textarea = document.getElementById(id);
-      const dropdown = document.getElementById(`autocomplete-${id}`);
-
-      if (e.key === 'Tab') {
-        e.preventDefault();
-        const start = textarea.selectionStart;
-        const end = textarea.selectionEnd;
-
-        if (dropdown && dropdown.style.display === 'block') {
-          const activeItem = dropdown.querySelector('.autocomplete-item.active') || dropdown.querySelector('.autocomplete-item');
-          if (activeItem) {
-            activeItem.click();
-            return;
-          }
-        }
-
-        if (start === end) {
-          textarea.setRangeText('    ', start, end, 'end');
-        } else {
-          const value = textarea.value;
-          const lineStart = value.lastIndexOf('\n', start - 1) + 1;
-          const selectedText = value.substring(lineStart, end);
-          const lines = selectedText.split('\n');
-          
-          if (e.shiftKey) {
-            const indented = lines.map(l => l.startsWith('    ') ? l.substring(4) : (l.startsWith('\t') ? l.substring(1) : l)).join('\n');
-            textarea.setRangeText(indented, lineStart, end, 'select');
-          } else {
-            const indented = lines.map(l => '    ' + l).join('\n');
-            textarea.setRangeText(indented, lineStart, end, 'select');
-          }
-        }
-        handleInput(id);
-        return;
-      }
-
-      if (dropdown && dropdown.style.display === 'block') {
-        const items = dropdown.querySelectorAll('.autocomplete-item');
-        let activeIdx = Array.from(items).findIndex(el => el.classList.contains('active'));
-
-        if (e.key === 'ArrowDown') {
-          e.preventDefault();
-          if (activeIdx < items.length - 1) {
-            if (activeIdx >= 0) items[activeIdx].classList.remove('active');
-            items[activeIdx + 1].classList.add('active');
-            items[activeIdx + 1].scrollIntoView({ block: 'nearest' });
-          }
-        } else if (e.key === 'ArrowUp') {
-          e.preventDefault();
-          if (activeIdx > 0) {
-            items[activeIdx].classList.remove('active');
-            items[activeIdx - 1].classList.add('active');
-            items[activeIdx - 1].scrollIntoView({ block: 'nearest' });
-          }
-        } else if (e.key === 'Enter') {
-          if (activeIdx >= 0 && dropdown.style.display === 'block') {
-            e.preventDefault();
-            items[activeIdx].click();
-            return;
-          }
-        } else if (e.key === 'Escape') {
-          dropdown.style.display = 'none';
-        }
-      }
-    }
-
-    function updateAutocomplete(id) {
-      const textarea = document.getElementById(id);
-      const dropdown = document.getElementById(`autocomplete-${id}`);
-      if (!dropdown) return;
-
-      const cursorPos = textarea.selectionStart;
-      const textBefore = textarea.value.substring(0, cursorPos);
-      const match = textBefore.match(/\\[a-zA-Z]*$/);
-
-      if (!match || match[0].length <= 1) {
-        dropdown.style.display = 'none';
-        return;
-      }
-
-      const query = match[0].toLowerCase();
-      const filtered = latexKeywords.filter(kw => kw.toLowerCase().startsWith(query));
-
-      if (filtered.length === 0 || (filtered.length === 1 && filtered[0].toLowerCase() === query)) {
-        dropdown.style.display = 'none';
-        return;
-      }
-
-      dropdown.innerHTML = '';
-      filtered.forEach((kw, idx) => {
-        const item = document.createElement('div');
-        item.className = `autocomplete-item ${idx === 0 ? 'active bg-slate-200 dark:bg-slate-700 font-semibold' : ''}`;
-        item.textContent = kw;
-        item.onclick = () => {
-          const start = textarea.selectionStart;
-          const replaceStart = start - query.length;
-          
-          let insertText = kw;
-          let cursorOffset = kw.length;
-
-          if (kw.startsWith('\\begin{') && kw.endsWith('}')) {
-            const envName = kw.substring(7, kw.length - 1);
-            insertText = `\\begin{${envName}}\n    \n\\end{${envName}}`;
-            cursorOffset = `\\begin{${envName}}\n    `.length;
-          }
-
-          textarea.setRangeText(insertText, replaceStart, start, 'end');
-          textarea.setSelectionRange(replaceStart + cursorOffset, replaceStart + cursorOffset);
-
-          dropdown.style.display = 'none';
-          handleInput(id);
-          textarea.focus();
-        };
-        dropdown.appendChild(item);
-      });
-
-      dropdown.style.display = 'block';
-      dropdown.style.left = '48px'; 
-      dropdown.style.top = '48px';
-    }
-
-    function highlightText(text, id) {
-      if (!text) return '';
-      
-      let searchKeyword = "";
-      let matchCase = false;
-      let activeIndex = -1;
-
-      if (id && document.getElementById(`find-${id}`)) {
-        searchKeyword = document.getElementById(`find-${id}`).value;
-        matchCase = document.getElementById(`match-case-${id}`).checked;
-        if (searchStates[id]) {
-          activeIndex = searchStates[id].activeMatchIndex;
-        }
-      }
-
-      let html = text
-        .replace(/&/g, "&amp;")
-        .replace(/</g, "&lt;")
-        .replace(/>/g, "&gt;");
-
-      html = html.replace(/(\%[^\n]*)/g, '<span class="hl-comment">$1</span>');
-      html = html.replace(/(\$(?:[^\$\\]|\\.)*\$)/g, '<span class="hl-math">$1</span>');
-      html = html.replace(/\\(begin|end|choice|choiceTF|loigiai|item|shortans)\b/g, '<span class="hl-keyword">\\$1</span>');
-      html = html.replace(/\\True\b/g, '<span class="hl-true">\\True</span>');
-      html = html.replace(/(\{ex\}|\{tikzpicture\}|\{itemize\}|\{enumerate\})/g, '<span class="hl-env">$1</span>');
-
-      if (searchKeyword.trim()) {
-        const flags = matchCase ? 'g' : 'gi';
-        const escapedKeyword = escapeRegExp(searchKeyword);
-        const searchRegex = new RegExp(escapedKeyword, flags);
-
-        const parts = html.split(/(<[^>]+>)/g);
-        let matchCounter = 0;
-
-        for (let i = 0; i < parts.length; i++) {
-          if (!parts[i].startsWith('<')) {
-            parts[i] = parts[i].replace(searchRegex, (match) => {
-              const currentMatchIdx = matchCounter++;
-              const isCurrent = (currentMatchIdx === activeIndex);
-              const highlightClass = isCurrent ? 'hl-search-match-active' : 'hl-search-match';
-              return `<mark class="${highlightClass}">${match}</mark>`;
-            });
-          }
-        }
-        html = parts.join('');
-      }
-
-      if (html.endsWith('\n')) html += ' ';
-      return html;
-    }
-
-    function handleInput(id, recordHistory = true) {
-      const textarea = document.getElementById(id);
-      const hlDiv = document.getElementById(`hl-${id}`);
-      const linesDiv = document.getElementById(`lines-${id}`);
-
-      hlDiv.innerHTML = highlightText(textarea.value, id);
-      const lineCount = textarea.value.split('\n').length;
-      linesDiv.innerHTML = Array.from({length: lineCount}, (_, i) => i + 1).join('\n');
-      syncScroll(id);
-
-      updateAutocomplete(id);
-
-      if (recordHistory) {
-        saveState(id);
-      }
-    }
-
-    function syncScroll(id) {
-      const textarea = document.getElementById(id);
-      const hlDiv = document.getElementById(`hl-${id}`);
-      const linesDiv = document.getElementById(`lines-${id}`);
-
-      hlDiv.scrollTop = textarea.scrollTop;
-      linesDiv.scrollTop = textarea.scrollTop;
-    }
-
-    function setEditorValue(id, value) {
-      const textarea = document.getElementById(id);
-      textarea.value = value;
-      handleInput(id, false);
-      saveState(id, true);
-    }
-
-    function cleanTextSpacingAndLines(text) {
-      if (!text) return '';
-
-      let cleaned = text.replace(/\s+([\?\,\.\!])/g, '$1');
-
-      let lines = cleaned.split('\n');
-      let filteredLines = [];
-      for (let i = 0; i < lines.length; i++) {
-        let line = lines[i];
-        if (line.trim() !== '') {
-          filteredLines.push(line.trimEnd());
-        }
-      }
-
-      let resultText = filteredLines.join('\n');
-
-      resultText = resultText.replace(/([^\n])\n+(\\begin\{[^}]+\})/g, '$1\n\n$2');
-      resultText = resultText.replace(/(\\end\{[^}]+\})\n+([^\n])/g, '$1\n\n$2');
-
-      resultText = resultText.replace(/\n\s*\n\s*\n+/g, '\n\n');
-
-      return resultText.trim();
-    }
-
-    function applyCleanSpacingTool(id) {
-      const textarea = document.getElementById(id);
-      if (!textarea || !textarea.value.trim()) return;
-
-      textarea.value = cleanTextSpacingAndLines(textarea.value);
-      handleInput(id, false);
-      saveState(id, true);
-    }
-
-    function convertArrayToAligned(id) {
-      const textarea = document.getElementById(id);
-      if (!textarea) return;
-
-      let text = textarea.value;
-      const arrayRegex = /\\begin\{array\}\s*\{[^}]*\}([\s\S]*?)\\end\{array\}/g;
-
-      text = text.replace(arrayRegex, (match, innerContent) => {
-        let lines = innerContent.split('\\\\');
-        
-        let processedLines = lines.map(line => {
-          let trimmed = line.trim();
-          if (!trimmed) return '';
-          trimmed = trimmed.replace(/&/g, '').trim();
-          if (trimmed.includes('=')) {
-            trimmed = trimmed.replace('=', '&=');
-          }
-          return `    ${trimmed}`;
-        });
-
-        const formattedBody = processedLines.filter(l => l !== '').join(' \\\\\n');
-        return `\\begin{aligned}\n${formattedBody}\n\\end{aligned}`;
-      });
-
-      text = cleanTextSpacingAndLines(text);
-
-      textarea.value = text;
-      handleInput(id, false);
-      saveState(id, true);
-    }
-
-    function autoAddMathDollars(text) {
-      if (!text) return '';
-
-      const excludeList = ['VCB', 'VND', 'VNĐ', 'THPT', 'SGD', 'BGD', 'SGK', 'HCM', 'HN', 'VN', 'USD', 'STT', 'NXB', 'KHTN', 'GDĐT'];
-      const parts = text.split(/(\$(?:\\.|[^$])+\$)/g);
-
-      for (let i = 0; i < parts.length; i++) {
-        if (!parts[i].startsWith('$')) {
-          let str = parts[i];
-
-          str = str.replace(/(?<![\$\w\\])(\([A-Z0-9a-z;,\s\-\+]+\)|[A-Z]{2,}\s*=\s*[\-+]?\d+(?:[\.,]\d+)?)(?![\$\w])/g, (m, p1) => `$${p1}$`);
-          str = str.replace(/(?<![\$\w\\])(\d+(?:\s*[\.,]\s*\d+)?\s*(?:\\%)?)(?![\$\w\\])/g, (m, p1) => `$${p1}$`);
-          str = str.replace(/(?<![\p{L}\p{N}\\])([A-Z]{1,4})(?![\p{L}\p{N}])/gu, (match, p1) => {
-            if (excludeList.includes(p1)) return match;
-            return `$${p1}$`;
-          });
-
-          parts[i] = str;
-        }
-      }
-
-      let result = parts.join('');
-      return fixMathSpacing(result);
-    }
-
-    function applyAutoMath(id) {
-      const textarea = document.getElementById(id);
-      const start = textarea.selectionStart;
-      const end = textarea.selectionEnd;
-      const fullText = textarea.value;
-
-      if (start === end) {
-        alert("Vui lòng bôi đen đoạn văn bản cần tự động thêm dấu $!");
-        return;
-      }
-
-      const selectedText = fullText.substring(start, end);
-      const processedText = autoAddMathDollars(selectedText);
-
-      textarea.setRangeText(processedText, start, end, 'select');
-      handleInput(id, false);
-      saveState(id, true);
-    }
-
-    function wrapSelectionWithEnv(id, envType) {
-      const textarea = document.getElementById(id);
-      const start = textarea.selectionStart;
-      const end = textarea.selectionEnd;
-      const fullText = textarea.value;
-
-      if (start === end) {
-        const emptyEnv = `\\begin{${envType}}\n\\item \n\\end{${envType}}`;
-        textarea.setRangeText(emptyEnv, start, end, 'select');
-      } else {
-        const selectedText = fullText.substring(start, end);
-        const lines = selectedText.split('\n');
-
-        const convertedLines = lines.map(line => {
-          let cleanedLine = line.trim();
-          if (!cleanedLine) return '';
-          cleanedLine = cleanedLine.replace(/^(?:\\item\s*|[\-\*\+]\s*|\d+[\.\)]\s*)/, '').trim();
-          return `\\item ${cleanedLine}`;
-        });
-
-        const formattedContent = convertedLines.filter(l => l !== '').join('\n');
-        const wrappedText = `\\begin{${envType}}\n${formattedContent}\n\\end{${envType}}`;
-
-        textarea.setRangeText(wrappedText, start, end, 'select');
-      }
-
-      handleInput(id, false);
-      saveState(id, true);
-    }
-
-    function findText(id) {
-      const findVal = document.getElementById(`find-${id}`).value;
-      const countSpan = document.getElementById(`count-${id}`);
-      const matchCase = document.getElementById(`match-case-${id}`).checked;
-      const textarea = document.getElementById(id);
-
-      if (!searchStates[id]) {
-        searchStates[id] = { matches: [], activeMatchIndex: -1 };
-      }
-
-      if (!findVal) {
-        searchStates[id] = { matches: [], activeMatchIndex: -1 };
-        countSpan.textContent = "0/0";
-        handleInput(id, false);
-        return;
-      }
-
-      const flags = matchCase ? 'g' : 'gi';
-      const regex = new RegExp(escapeRegExp(findVal), flags);
-      const matches = [];
-      let match;
-
-      while ((match = regex.exec(textarea.value)) !== null) {
-        matches.push({
-          index: match.index,
-          length: match[0].length
-        });
-      }
-
-      searchStates[id].matches = matches;
-
-      if (matches.length > 0) {
-        if (searchStates[id].activeMatchIndex < 0 || searchStates[id].activeMatchIndex >= matches.length) {
-          searchStates[id].activeMatchIndex = 0;
-        }
-        countSpan.textContent = `${searchStates[id].activeMatchIndex + 1}/${matches.length}`;
-        scrollToMatch(id);
-      } else {
-        searchStates[id].activeMatchIndex = -1;
-        countSpan.textContent = "0/0";
-      }
-
-      handleInput(id, false);
-    }
-
-    function navigateSearch(id, direction) {
-      const state = searchStates[id];
-      if (!state || !state.matches || state.matches.length === 0) return;
-
-      state.activeMatchIndex += direction;
-      if (state.activeMatchIndex >= state.matches.length) {
-        state.activeMatchIndex = 0;
-      } else if (state.activeMatchIndex < 0) {
-        state.activeMatchIndex = state.matches.length - 1;
-      }
-
-      document.getElementById(`count-${id}`).textContent = `${state.activeMatchIndex + 1}/${state.matches.length}`;
-      scrollToMatch(id);
-      handleInput(id, false);
-    }
-
-    function scrollToMatch(id) {
-      const state = searchStates[id];
-      if (!state || state.activeMatchIndex < 0) return;
-
-      const textarea = document.getElementById(id);
-      const match = state.matches[state.activeMatchIndex];
-
-      const textBefore = textarea.value.substring(0, match.index);
-      const lineNumber = textBefore.split('\n').length;
-      const lineHeight = 24;
-
-      textarea.scrollTop = (lineNumber - 3) * lineHeight;
-      syncScroll(id);
-    }
-
-    function replaceText(id, replaceAll = false) {
-      const findVal = document.getElementById(`find-${id}`).value;
-      const replaceVal = document.getElementById(`replace-${id}`).value;
-      const matchCase = document.getElementById(`match-case-${id}`).checked;
-      const textarea = document.getElementById(id);
-
-      if (!findVal) return;
-
-      const flags = matchCase ? 'g' : 'gi';
-
-      if (replaceAll) {
-        const regex = new RegExp(escapeRegExp(findVal), flags);
-        textarea.value = textarea.value.replace(regex, replaceVal);
-      } else {
-        const state = searchStates[id];
-        if (state && state.matches && state.activeMatchIndex >= 0) {
-          const match = state.matches[state.activeMatchIndex];
-          const before = textarea.value.substring(0, match.index);
-          const after = textarea.value.substring(match.index + match.length);
-          textarea.value = before + replaceVal + after;
-        } else {
-          const regex = new RegExp(escapeRegExp(findVal), matchCase ? '' : 'i');
-          textarea.value = textarea.value.replace(regex, replaceVal);
-        }
-      }
-
-      findText(id);
-      saveState(id, true);
-    }
-
-    function escapeRegExp(string) {
-      return string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-    }
-
-    function loadFile(event, targetId) {
-      const file = event.target.files[0];
-      if (!file) return;
-      const reader = new FileReader();
-      reader.onload = function(e) {
-        setEditorValue(targetId, e.target.result);
-      };
-      reader.readAsText(file);
-    }
-
-    function clearText(id) {
-      setEditorValue(id, '');
-      if (id === 'input-ex') setEditorValue('output-ex', '');
-    }
-
-    function copyToClipboard(id) {
-      const textarea = document.getElementById(id);
-      if (!textarea.value) return;
-      navigator.clipboard.writeText(textarea.value);
-      alert('Đã copy vào bộ nhớ tạm!');
-    }
-
-    function downloadSingleText(elementId, filename) {
-      const text = document.getElementById(elementId).value;
-      if (!text) return;
-      const blob = new Blob([text], { type: 'text/plain;charset=utf-8' });
-      saveBlob(blob, filename);
-    }
-
-    function saveBlob(blob, filename) {
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = filename;
-      document.body.appendChild(a);
-      a.click();
-      document.body.removeChild(a);
-      URL.revokeObjectURL(url);
-    }
-
-    function formatOptionText(str) {
-      if (!str) return '';
-      let text = str.trim();
-      
-      const containsWords = /[a-zA-ZÀ-ỹ]/.test(text.replace(/\\[a-zA-Z]+/g, ''));
-      if (!containsWords && !text.startsWith('$') && !text.endsWith('$')) {
-        return `$${text}$`;
-      }
-      return fixMathSpacing(text);
-    }
-
-    function fixMathSpacing(str) {
-      if (!str) return '';
-      let text = str;
-
-      text = text.replace(/\$+/g, '$');
-      text = text.replace(/\$((?:\\.|[^$])+)\$/g, (m, inner) => `$${inner.trim()}$`);
-
-      text = text.replace(/([\p{L}\p{N}:,;\.\?!])\$/gu, '$1 $');
-      text = text.replace(/\$([\p{L}\p{N}])/gu, '$ $1');
-
-      text = text.replace(/[ \t]+/g, ' ');
-      text = text.replace(/\s+([\.,;\)])/g, '$1');
-      text = text.replace(/([\(\[])\s+/g, '$1');
-
-      text = text.replace(/\$((?:\\.|[^$])+)\$/g, (m, inner) => `$${inner.trim()}$`);
-
-      text = cleanTextSpacingAndLines(text);
-
-      return text.trim();
-    }
-
-    function cleanHeaderPrefix(rawText) {
-      let str = rawText.trim();
-      str = str.replace(/^Câu\s+\d+\s*[\.\:-]*/i, '').trim();
-      str = str.replace(/^\[[^\]]*\]\s*/i, '').trim();
-      str = str.replace(/^\([^\)]*\)\s*/i, '').trim();
-      str = str.replace(/^[:\.-]+\s*/, '').trim();
-      return str;
-    }
-
-    function processExEnvironment() {
-      if (subModeEx === 1) processMode1();
-      else if (subModeEx === 2) processMode2();
-      else processMode3();
-    }
-
-    function processMode1() {
-      const input = document.getElementById('input-ex').value;
-      if (!input.trim()) return;
-
-      const questionBlocks = input.split(/(?=(?:^|\n)\s*Câu\s+\d+)/i).filter(b => b.trim());
-      let results = [];
-
-      questionBlocks.forEach(block => {
-        let content = cleanHeaderPrefix(block);
-        let questionPart = content;
-        let solutionPart = "";
-
-        const solutionHeaderRegex = /(?:Lời\s*giải|Hướng\s*dẫn\s*giải)[\.\s:]*/i;
-        const solMatch = content.match(solutionHeaderRegex);
-
-        if (solMatch) {
-          questionPart = content.substring(0, solMatch.index).trim();
-          solutionPart = content.substring(solMatch.index + solMatch[0].length).trim();
-        }
-
-        let trueAnswerKey = null;
-        const choicePickRegex = /(?:Chọn\s*(?:ý|đáp\s*án)?|Đáp\s*án)\s*([A-D])[\.\s]*/gi;
-
-        let pickMatch;
-        if ((pickMatch = choicePickRegex.exec(solutionPart)) !== null) {
-          trueAnswerKey = pickMatch[1].toUpperCase();
-          solutionPart = solutionPart.replace(/(?:Chọn\s*(?:ý|đáp\s*án)?|Đáp\s*án)\s*[A-D][\.\s]*/gi, '').trim();
-        } 
-        choicePickRegex.lastIndex = 0;
-        if (!trueAnswerKey && (pickMatch = choicePickRegex.exec(questionPart)) !== null) {
-          trueAnswerKey = pickMatch[1].toUpperCase();
-          questionPart = questionPart.replace(/(?:Chọn\s*(?:ý|đáp\s*án)?|Đáp\s*án)\s*[A-D][\.\s]*/gi, '').trim();
-        }
-
-        const choiceRegex = /(?:^|\n)\s*([A-D])\.\s*([\s\S]*?)(?=(?:\n\s*[A-D]\.|$))/g;
-        let choices = {};
-        let matches;
-        let firstChoiceIndex = -1;
-
-        while ((matches = choiceRegex.exec(questionPart)) !== null) {
-          if (firstChoiceIndex === -1) firstChoiceIndex = matches.index;
-          const key = matches[1].toUpperCase();
-          let choiceVal = matches[2].trim();
-          choiceVal = choiceVal.replace(/\.\s*$/, '');
-          choiceVal = formatOptionText(choiceVal);
-          choices[key] = choiceVal;
-        }
-
-        let mainQuestion = firstChoiceIndex !== -1 ? questionPart.substring(0, firstChoiceIndex).trim() : questionPart;
-        mainQuestion = fixMathSpacing(mainQuestion);
-
-        let exCode = `\\begin{ex}\n`;
-        exCode += `    ${mainQuestion}\n`;
-        exCode += `    \\choice\n`;
-
-        ['A', 'B', 'C', 'D'].forEach(key => {
-          let optionText = choices[key] || '';
-          let isTrue = (key === trueAnswerKey) ? '\\True ' : '';
-          exCode += `    {${isTrue}${optionText}}\n`;
-        });
-
-        if (solutionPart) {
-          let cleanSol = fixMathSpacing(solutionPart);
-          const indentedSolution = cleanSol.split('\n').map(line => line ? `        ${line}` : '').join('\n');
-          exCode += `    \\loigiai{\n${indentedSolution}\n    }\n`;
-        } else {
-          exCode += `    \\loigiai{\n\n    }\n`;
-        }
-
-        exCode += `\\end{ex}`;
-        results.push(exCode);
-      });
-
-      setEditorValue('output-ex', cleanTextSpacingAndLines(results.join('\n\n')));
-    }
-
-    function processMode2() {
-      const input = document.getElementById('input-ex').value;
-      if (!input.trim()) return;
-
-      const questionBlocks = input.split(/(?=(?:^|\n)\s*Câu\s+\d+)/i).filter(b => b.trim());
-      let results = [];
-
-      questionBlocks.forEach(block => {
-        let content = cleanHeaderPrefix(block);
-        let questionPart = content;
-        let solutionPart = "";
-
-        const solutionHeaderRegex = /(?:Lời\s*giải|Hướng\s*dẫn\s*giải)[\.\s:]*/i;
-        const solMatch = content.match(solutionHeaderRegex);
-
-        if (solMatch) {
-          questionPart = content.substring(0, solMatch.index).trim();
-          solutionPart = content.substring(solMatch.index + solMatch[0].length).trim();
-        }
-
-        let tfPattern = null;
-        const answerTFRegex = /(?:Đáp\s*án|Chọn)[\.\s:]*([DĐS[\s\-\,\.]+){4}/gi;
-
-        let tfMatch = answerTFRegex.exec(solutionPart) || answerTFRegex.exec(questionPart);
-        if (tfMatch) {
-          let cleanStr = tfMatch[0].replace(/(?:Đáp\s*án|Chọn)[\.\s:]*/i, '').replace(/[\s\-\,\.]/g, '').toUpperCase();
-          if (cleanStr.length === 4) {
-            tfPattern = cleanStr.split('').map(ch => (ch === 'D' || ch === 'Đ'));
-          }
-        }
-
-        questionPart = questionPart.replace(/(?:Đáp\s*án|Chọn)[\.\s:]*([DĐS[\s\-\,\.]+){4}\.?\s*/gi, '').trim();
-        solutionPart = solutionPart.replace(/(?:Đáp\s*án|Chọn)[\.\s:]*([DĐS[\s\-\,\.]+){4}\.?\s*/gi, '').trim();
-
-        const choiceTFRegex = /(?:^|\n)\s*([a-d])[\)\.]\s*([\s\S]*?)(?=(?:\n\s*[a-d][\)\.]|$))/gi;
-        let choices = {};
-        let matches;
-        let firstChoiceIndex = -1;
-
-        while ((matches = choiceTFRegex.exec(questionPart)) !== null) {
-          if (firstChoiceIndex === -1) firstChoiceIndex = matches.index;
-          const key = matches[1].toLowerCase();
-          let choiceVal = matches[2].trim();
-          choiceVal = choiceVal.replace(/\.\s*$/, '');
-          choiceVal = formatOptionText(choiceVal);
-          choices[key] = choiceVal;
-        }
-
-        let mainQuestion = firstChoiceIndex !== -1 ? questionPart.substring(0, firstChoiceIndex).trim() : questionPart;
-        mainQuestion = fixMathSpacing(mainQuestion);
-
-        let exCode = `\\begin{ex}\n`;
-        exCode += `    ${mainQuestion}\n`;
-        exCode += `    \\choiceTF\n`;
-
-        const keys = ['a', 'b', 'c', 'd'];
-        keys.forEach((key, index) => {
-          let optionText = choices[key] || '';
-          let isTrue = (tfPattern && tfPattern[index]) ? '\\True ' : '';
-          exCode += `    {${isTrue}${optionText}}\n`;
-        });
-
-        if (solutionPart) {
-          let cleanSol = fixMathSpacing(solutionPart);
-          const indentedSolution = cleanSol.split('\n').map(line => line ? `        ${line}` : '').join('\n');
-          exCode += `    \\loigiai{\n${indentedSolution}\n    }\n`;
-        } else {
-          exCode += `    \\loigiai{\n\n    }\n`;
-        }
-
-        exCode += `\\end{ex}`;
-        results.push(exCode);
-      });
-
-      setEditorValue('output-ex', cleanTextSpacingAndLines(results.join('\n\n')));
-    }
-
-    function processMode3() {
-      const input = document.getElementById('input-ex').value;
-      if (!input.trim()) return;
-
-      const questionBlocks = input.split(/(?=(?:^|\n)\s*Câu\s+\d+)/i).filter(b => b.trim());
-      let results = [];
-
-      questionBlocks.forEach(block => {
-        let content = cleanHeaderPrefix(block);
-        let questionPart = content;
-        let solutionPart = "";
-
-        const solutionHeaderRegex = /(?:Lời\s*giải|Hướng\s*dẫn\s*giải)[\.\s:]*/i;
-        const solMatch = content.match(solutionHeaderRegex);
-
-        if (solMatch) {
-          questionPart = content.substring(0, solMatch.index).trim();
-          solutionPart = content.substring(solMatch.index + solMatch[0].length).trim();
-        }
-
-        let shortAnswerValue = "";
-        const shortAnsHeaderRegex = /(?:Đáp\s*án|Đáp\s*số)[\.\s:]*([^\n]+)/i;
-        const ansMatch = questionPart.match(shortAnsHeaderRegex) || solutionPart.match(shortAnsHeaderRegex);
-
-        if (ansMatch) {
-          shortAnswerValue = ansMatch[1].trim();
-          questionPart = questionPart.replace(shortAnsHeaderRegex, '').trim();
-          solutionPart = solutionPart.replace(shortAnsHeaderRegex, '').trim();
-        }
-
-        let mainQuestion = fixMathSpacing(questionPart);
-
-        let exCode = `\\begin{ex}\n`;
-        exCode += `    ${mainQuestion}\n\n`;
-        exCode += `    \\shortans{${shortAnswerValue}}\n\n`;
-
-        if (solutionPart) {
-          let cleanSol = fixMathSpacing(solutionPart);
-          const indentedSolution = cleanSol.split('\n').map(line => line ? `        ${line}` : '').join('\n');
-          exCode += `    \\loigiai{\n${indentedSolution}\n    }\n`;
-        } else {
-          exCode += `    \\loigiai{\n\n    }\n`;
-        }
-
-        exCode += `\\end{ex}`;
-        results.push(exCode);
-      });
-
-      setEditorValue('output-ex', cleanTextSpacingAndLines(results.join('\n\n')));
-    }
-
-    function extractAllTikZToSingleFile() {
-      const input = document.getElementById('input-tikz').value;
-      if (!input.trim()) return;
-
-      const tikzRegex = /\\begin\{tikzpicture\}[\s\S]*?\\end\{tikzpicture\}/g;
-      const matches = input.match(tikzRegex);
-
-      if (!matches || matches.length === 0) {
-        alert('Không tìm thấy môi trường \\begin{tikzpicture} nào trong dữ liệu!');
-        return;
-      }
-
-      let count = 0;
-      let combinedTikZContent = `% ==============================================\n`;
-      combinedTikZContent += `% TỔNG HỢP TẤT CẢ HÌNH TIKZ (${matches.length} HÌNH)\n`;
-      combinedTikZContent += `% ==============================================\n\n`;
-
-      const modifiedMainContent = input.replace(tikzRegex, (match) => {
-        count++;
-        combinedTikZContent += `% --- HÌNH SỐ ${count} ---\n${match}\n\n`;
-        return `% [Đã bóc tách hình TikZ số ${count}]`;
-      });
-
-      setEditorValue('output-main', cleanTextSpacingAndLines(modifiedMainContent));
-      setEditorValue('output-tikz-single', cleanTextSpacingAndLines(combinedTikZContent.trim()));
-
-      document.getElementById('tikz-count-badge').textContent = `${matches.length} hình TikZ`;
-      document.getElementById('single-tikz-container').classList.remove('hidden');
-      lucide.createIcons();
-    }
-
-    function getTikZFilename() {
-      const name = document.getElementById('file-name-tikz').value || 'tat_ca_hinh_tikz';
-      const ext = document.getElementById('file-ext-tikz').value || '.tex';
-      return `${name}${ext}`;
-    }
-
-    const PDFJS_VERSION = '2.16.105';
-    pdfjsLib.GlobalWorkerOptions.workerSrc = `https://cdnjs.cloudflare.com/ajax/libs/pdf.js/${PDFJS_VERSION}/pdf.worker.min.js`;
-
-    const pdfInput = document.getElementById('pdf-input');
-    const formatSelect = document.getElementById('format-select');
-    const modeSelect = document.getElementById('mode-select');
-    const widthInput = document.getElementById('width-input');
-    const heightInput = document.getElementById('height-input');
-    const widthBox = document.getElementById('width-box');
-    const heightBox = document.getElementById('height-box');
-    const convertBtn = document.getElementById('convert-btn');
-    const statusDiv = document.getElementById('status');
-    const downloadContainer = document.getElementById('download-container');
-    const downloadBtn = document.getElementById('download-btn');
-
-    let zipBlob = null;
-
-    modeSelect.addEventListener('change', () => {
-      const mode = modeSelect.value;
-      if (mode === 'width') {
-        widthBox.classList.remove('opacity-50', 'pointer-events-none');
-        heightBox.classList.add('opacity-50', 'pointer-events-none');
-      } else if (mode === 'height') {
-        widthBox.classList.add('opacity-50', 'pointer-events-none');
-        heightBox.classList.remove('opacity-50', 'pointer-events-none');
-      } else {
-        widthBox.classList.remove('opacity-50', 'pointer-events-none');
-        heightBox.classList.remove('opacity-50', 'pointer-events-none');
-      }
-    });
-
-    convertBtn.addEventListener('click', async () => {
-      const file = pdfInput.files[0];
-      if (!file) {
-        alert('Vui lòng chọn file PDF!');
-        return;
-      }
-
-      const format = formatSelect.value;
-      const mode = modeSelect.value;
-      const targetWidth = parseFloat(widthInput.value);
-      const targetHeight = parseFloat(heightInput.value);
-
-      if ((mode === 'width' || mode === 'exact') && (!targetWidth || targetWidth <= 0)) {
-        alert('Vui lòng nhập Chiều Rộng hợp lệ!');
-        return;
-      }
-      if ((mode === 'height' || mode === 'exact') && (!targetHeight || targetHeight <= 0)) {
-        alert('Vui lòng nhập Chiều Cao hợp lệ!');
-        return;
-      }
-
-      convertBtn.disabled = true;
-      downloadContainer.classList.add('hidden');
-      statusDiv.textContent = 'Đang đọc file PDF...';
-
-      try {
-        const arrayBuffer = await file.arrayBuffer();
-        const loadingTask = pdfjsLib.getDocument({
-          data: arrayBuffer,
-          cMapUrl: `https://cdnjs.cloudflare.com/ajax/libs/pdf.js/${PDFJS_VERSION}/cmaps/`,
-          cMapPacked: true,
-          standardFontDataUrl: `https://cdnjs.cloudflare.com/ajax/libs/pdf.js/${PDFJS_VERSION}/standard_fonts/`
-        });
-
-        const pdf = await loadingTask.promise;
-        const totalPages = pdf.numPages;
-        const zip = new JSZip();
-
-        for (let i = 1; i <= totalPages; i++) {
-          const page = await pdf.getPage(i);
-          const pageNumString = String(i).padStart(3, '0');
-          const mimeType = format === 'png' ? 'image/png' : 'image/jpeg';
-          const unscaledViewport = page.getViewport({ scale: 1.0 });
-
-          let scale = 1.0;
-          if (mode === 'width') {
-            scale = targetWidth / unscaledViewport.width;
-          } else if (mode === 'height') {
-            scale = targetHeight / unscaledViewport.height;
-          } else if (mode === 'exact') {
-            const scaleX = targetWidth / unscaledViewport.width;
-            const scaleY = targetHeight / unscaledViewport.height;
-            scale = Math.min(scaleX, scaleY);
-          }
-
-          const viewport = page.getViewport({ scale: scale });
-          const canvas = document.createElement('canvas');
-          const ctx = canvas.getContext('2d');
-
-          if (mode === 'exact') {
-            canvas.width = targetWidth;
-            canvas.height = targetHeight;
-            ctx.fillStyle = '#FFFFFF';
-            ctx.fillRect(0, 0, canvas.width, canvas.height);
-            const offsetX = (targetWidth - viewport.width) / 2;
-            const offsetY = (targetHeight - viewport.height) / 2;
-
-            statusDiv.textContent = `Đang xuất trang ${i} / ${totalPages} (${targetWidth}x{targetHeight} px)...`;
-            await page.render({
-              canvasContext: ctx,
-              viewport: viewport,
-              transform: [1, 0, 0, 1, offsetX, offsetY]
-            }).promise;
-          } else {
-            canvas.width = Math.round(viewport.width);
-            canvas.height = Math.round(viewport.height);
-
-            statusDiv.textContent = `Đang xuất trang ${i} / ${totalPages} (${canvas.width}x{canvas.height} px)...`;
-            await page.render({
-              canvasContext: ctx,
-              viewport: viewport
-            }).promise;
-          }
-
-          const imgDataUrl = canvas.toDataURL(mimeType, 0.95);
-          const base64Data = imgDataUrl.split(',')[1];
-          zip.file(`trang_${pageNumString}.${format}`, base64Data, { base64: true });
-        }
-
-        statusDiv.textContent = 'Đang đóng gói file ZIP...';
-        zipBlob = await zip.generateAsync({ type: 'blob' });
-
-        statusDiv.textContent = `Hoàn thành! Đã xuất ${totalPages} trang dạng ${format.toUpperCase()}.`;
-        downloadContainer.classList.remove('hidden');
-      } catch (err) {
-        console.error(err);
-        statusDiv.textContent = 'Có lỗi xảy ra trong quá trình chuyển đổi: ' + err.message;
-      } finally {
-        convertBtn.disabled = false;
-      }
-    });
-
-    downloadBtn.addEventListener('click', () => {
-      if (!zipBlob) return;
-      saveBlob(zipBlob, `pdf_converted_${formatSelect.value}.zip`);
-    });
-  </script>
+  <!-- NẠP CÁC FILE SCRIPT DỰ ÁN -->
+  <script src="js/editor.js"></script>
+  <script src="js/clean-tool.js"></script>
+  <script src="js/ex-processor.js"></script>
+  <script src="js/tikz-extractor.js"></script>
+  <script src="js/pdf-converter.js"></script>
+  <script src="js/app.js"></script>
 </body>
 </html>
