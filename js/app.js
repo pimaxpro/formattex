@@ -1,80 +1,82 @@
-lucide.createIcons();
-
-let activeMainMenu = 1;
-function switchMainMenu(menuIndex) {
-  activeMainMenu = menuIndex;
-  for (let i = 1; i <= 3; i++) {
-    const btn = document.getElementById(`nav-btn-${i}`);
-    const sec = document.getElementById(`menu-section-${i}`);
-    if (i === menuIndex) {
-      btn.className = "px-4 py-2 text-xs font-semibold transition-all flex items-center space-x-2 theme-btn-dark";
-      sec.classList.remove('hidden');
-    } else {
-      btn.className = "px-4 py-2 text-xs font-semibold transition-all flex items-center space-x-2 opacity-75 hover:opacity-100";
-      sec.classList.add('hidden');
+// Quản lý Chuyển Menu Chính
+function switchMainMenu(menuNum) {
+  // Hide all sections
+  [1, 2, 3].forEach(n => {
+    const section = document.getElementById(`menu-section-${n}`);
+    const btn = document.getElementById(`nav-btn-${n}`);
+    if (section) section.classList.add('hidden');
+    if (btn) {
+      btn.classList.remove('theme-btn-dark', 'theme-btn-pimax');
+      btn.classList.add('opacity-75');
     }
+  });
+
+  // Show active section & highlight button
+  const activeSection = document.getElementById(`menu-section-${menuNum}`);
+  const activeBtn = document.getElementById(`nav-btn-${menuNum}`);
+  if (activeSection) activeSection.classList.remove('hidden');
+  if (activeBtn) {
+    activeBtn.classList.add('theme-btn-dark');
+    activeBtn.classList.remove('opacity-75');
   }
+
+  // Refreshes Lucide icons
+  if (window.lucide) lucide.createIcons();
 }
 
-let subModeEx = 1;
-function switchSubMode(mode) {
-  subModeEx = mode;
-  const btn1 = document.getElementById('sub-btn-1');
-  const btn2 = document.getElementById('sub-btn-2');
-  const btn3 = document.getElementById('sub-btn-3');
+// Quản lý Chuyển Sub-Mode (CN 1, CN 2, CN 3)
+function switchSubMode(modeNum) {
+  [1, 2, 3].forEach(n => {
+    const btn = document.getElementById(`sub-btn-${n}`);
+    if (btn) {
+      btn.classList.remove('theme-btn-dark', 'theme-btn-pimax');
+      btn.classList.add('opacity-75');
+    }
+  });
+
+  const activeSubBtn = document.getElementById(`sub-btn-${modeNum}`);
+  if (activeSubBtn) {
+    activeSubBtn.classList.add('theme-btn-dark');
+    activeSubBtn.classList.remove('opacity-75');
+  }
+
+  // Cập nhật nhãn thông báo & nhãn nút Chuẩn hóa
   const desc = document.getElementById('sub-mode-desc');
   const label = document.getElementById('btn-ex-label');
 
-  [btn1, btn2, btn3].forEach(b => {
-    b.className = "px-3 py-1.5 text-xs font-semibold transition flex items-center justify-center space-x-1.5 opacity-75 hover:opacity-100 whitespace-nowrap";
-  });
-
-  if (mode === 1) {
-    btn1.className = "px-3 py-1.5 text-xs font-semibold transition flex items-center justify-center space-x-1.5 theme-btn-dark whitespace-nowrap";
-    desc.innerHTML = "Chế độ: <b>Trắc nghiệm 4 phương án (A, B, C, D)</b>";
-    label.innerText = "Chuẩn Hóa Ngay (CN 1)";
-  } else if (mode === 2) {
-    btn2.className = "px-3 py-1.5 text-xs font-semibold transition flex items-center justify-center space-x-1.5 theme-btn-dark whitespace-nowrap";
-    desc.innerHTML = "Chế độ: <b>Trắc nghiệm Đúng/Sai (a, b, c, d)</b>";
-    label.innerText = "Chuẩn Hóa Ngay (CN 2)";
-  } else {
-    btn3.className = "px-3 py-1.5 text-xs font-semibold transition flex items-center justify-center space-x-1.5 theme-btn-dark whitespace-nowrap";
-    desc.innerHTML = "Chế độ: <b>Trắc nghiệm trả lời ngắn (\\shortans)</b>";
-    label.innerText = "Chuẩn Hóa Ngay (CN 3)";
+  if (modeNum === 1) {
+    if (desc) desc.innerHTML = 'Chế độ: <b>Trắc nghiệm 4 phương án (A, B, C, D)</b>';
+    if (label) label.innerText = 'Chuẩn Hóa Ngay (CN 1)';
+  } else if (modeNum === 2) {
+    if (desc) desc.innerHTML = 'Chế độ: <b>Trắc nghiệm Đúng / Sai (a, b, c, d)</b>';
+    if (label) label.innerText = 'Chuẩn Hóa Ngay (CN 2)';
+  } else if (modeNum === 3) {
+    if (desc) desc.innerHTML = 'Chế độ: <b>Trả lời ngắn / Tự luận</b>';
+    if (label) label.innerText = 'Chuẩn Hóa Ngay (CN 3)';
   }
+
+  window.currentExSubMode = modeNum;
 }
 
+// Quản lý Dark / Light Mode
 function toggleDarkMode() {
-  const body = document.body;
+  const isDark = document.body.classList.toggle('dark');
+  localStorage.setItem('pimax_theme', isDark ? 'dark' : 'light');
+  
   const icon = document.getElementById('theme-icon');
-  
-  body.classList.toggle('dark');
-  const isDark = body.classList.contains('dark');
-  
-  if (isDark) {
-    icon.setAttribute('data-lucide', 'sun');
-    localStorage.setItem('pimax_theme', 'dark');
-  } else {
-    icon.setAttribute('data-lucide', 'moon');
-    localStorage.setItem('pimax_theme', 'light');
+  if (icon) {
+    icon.setAttribute('data-lucide', isDark ? 'sun' : 'moon');
+    if (window.lucide) lucide.createIcons();
   }
-  lucide.createIcons();
 }
 
-window.addEventListener('DOMContentLoaded', () => {
+// Khởi tạo trạng thái ban đầu khi tải trang
+document.addEventListener('DOMContentLoaded', () => {
   const savedTheme = localStorage.getItem('pimax_theme');
   if (savedTheme === 'dark') {
     document.body.classList.add('dark');
     const icon = document.getElementById('theme-icon');
     if (icon) icon.setAttribute('data-lucide', 'sun');
-    lucide.createIcons();
   }
-
-  ['input-ex', 'output-ex', 'input-tikz', 'output-main', 'output-tikz-single'].forEach(id => {
-    initHistory(id);
-    const el = document.getElementById(id);
-    if (el) {
-      saveState(id, true);
-    }
-  });
+  if (window.lucide) lucide.createIcons();
 });
