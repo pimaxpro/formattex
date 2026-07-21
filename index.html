@@ -1,237 +1,366 @@
 <!DOCTYPE html>
-<html lang="vi" class="h-full">
+<html lang="vi">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>PimaX Tool — Chuẩn Hóa Mã LaTeX & Môi Trường Ex</title>
-  
-  <!-- Tailwind CSS CDN -->
+  <title>PimaX Tool Beta — Bộ Công Cụ LaTeX & PDF Toàn Diện</title>
+  <!-- Tailwind CSS -->
   <script src="https://cdn.tailwindcss.com"></script>
-  
-  <!-- Font Awesome Icons -->
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-  
-  <!-- Custom CSS -->
-  <link rel="stylesheet" href="css/style.css">
+  <!-- Lucide Icons -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <!-- PDF.js v2.16.105 -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.16.105/pdf.min.js"></script>
+  <!-- JSZip library -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+  <!-- Custom Style -->
+  <link rel="stylesheet" href="css/style.css?v=3.0">
 </head>
-<body class="bg-gray-50 text-gray-800 h-full flex flex-col font-sans transition-colors duration-200" id="app-body">
+<body class="min-h-screen font-sans flex flex-col transition-colors duration-200">
 
-  <!-- HEADER / NAVBAR -->
-  <header class="bg-white border-b border-gray-200 px-6 py-3 flex items-center justify-between shadow-sm sticky top-0 z-30">
-    <div class="flex items-center space-x-3">
-      <div class="w-9 h-9 rounded-lg bg-[#db3c6e] text-white flex items-center justify-center font-bold text-lg shadow-sm">
-        P
-      </div>
-      <div>
-        <h1 class="font-bold text-base text-gray-800 leading-tight">PimaX Tool</h1>
-        <p class="text-xs text-gray-500">Bộ công cụ chuẩn hóa & xử lý tài liệu LaTeX Toán</p>
-      </div>
-    </div>
-
-    <!-- Thanh chuyển Tab & Darkmode -->
-    <div class="flex items-center space-x-3">
-      <div class="flex bg-gray-100 p-1 rounded-lg border border-gray-200 text-xs font-medium">
-        <button id="tab-btn-ex" onclick="switchMainTab('ex')" class="px-3 py-1.5 rounded-md bg-white text-[#db3c6e] font-semibold shadow-sm transition">
-          <i class="fa-solid fa-code-branch mr-1.5"></i>Chuẩn Hóa Ex
-        </button>
-        <button id="tab-btn-clean" onclick="switchMainTab('clean')" class="px-3 py-1.5 rounded-md text-gray-600 hover:text-gray-900 transition">
-          <i class="fa-solid fa-wand-magic-sparkles mr-1.5"></i>Dọn Dẹp Code
-        </button>
-        <button id="tab-btn-tikz" onclick="switchMainTab('tikz')" class="px-3 py-1.5 rounded-md text-gray-600 hover:text-gray-900 transition">
-          <i class="fa-solid fa-shapes mr-1.5"></i>Trích TikZ
-        </button>
+  <!-- ==================== HEADER & TOP NAVIGATION ==================== -->
+  <header class="theme-bg border-b sticky top-0 z-50 shadow-sm">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 py-3.5 flex flex-col md:flex-row justify-between items-center gap-4">
+      <div class="flex items-center space-x-3">
+        <div class="theme-btn-pimax p-2 rounded-md shadow-sm transition-colors">
+          <i data-lucide="sparkles" class="w-6 h-6"></i>
+        </div>
+        <div>
+          <h1 class="text-xl font-bold tracking-tight flex items-center gap-2">
+            PimaX Tool
+            <span class="text-xs theme-badge-pimax px-2 py-0.5 font-semibold border rounded">Beta</span>
+          </h1>
+          <p class="text-xs opacity-75">Bộ công cụ hỗ trợ chuẩn hóa LaTeX & Xử lý tài liệu</p>
+        </div>
       </div>
 
-      <button id="theme-toggle-btn" onclick="toggleDarkMode()" class="w-9 h-9 rounded-lg border border-gray-200 flex items-center justify-center text-gray-600 hover:bg-gray-100 transition">
-        <i class="fa-solid fa-moon text-sm"></i>
-      </button>
+      <!-- NAV MENU CHÍNH GỐC CỦA THẦY -->
+      <nav class="flex theme-sub-bg p-1 border rounded-md">
+        <button id="nav-btn-1" onclick="switchMainMenu(1)" class="px-4 py-2 text-xs font-semibold rounded transition-all flex items-center space-x-2 theme-btn-pimax">
+          <i data-lucide="file-code-2" class="w-4 h-4"></i>
+          <span>Chuẩn Hóa LaTeX</span>
+        </button>
+        <button id="nav-btn-2" onclick="switchMainMenu(2)" class="px-4 py-2 text-xs font-semibold rounded transition-all flex items-center space-x-2 opacity-75 hover:opacity-100">
+          <i data-lucide="scissors" class="w-4 h-4"></i>
+          <span>Lọc TikZ</span>
+        </button>
+        <button id="nav-btn-3" onclick="switchMainMenu(3)" class="px-4 py-2 text-xs font-semibold rounded transition-all flex items-center space-x-2 opacity-75 hover:opacity-100">
+          <i data-lucide="file-image" class="w-4 h-4"></i>
+          <span>Chuyển PDF Thành Ảnh</span>
+        </button>
+      </nav>
     </div>
   </header>
 
-  <!-- MAIN CONTAINER -->
-  <main class="flex-1 p-4 md:p-6 overflow-hidden flex flex-col max-w-[1700px] w-full mx-auto">
+  <!-- ==================== MAIN CONTENT AREA ==================== -->
+  <main class="flex-1 max-w-7xl w-full mx-auto p-4 sm:p-6">
 
-    <!-- SUB TOOLBAR: CHỌN CHẾ ĐỘ CN1 - CN2 - CN3 -->
-    <section id="ex-sub-toolbar" class="mb-4 bg-white p-3 rounded-xl border border-gray-200 shadow-sm flex flex-wrap items-center justify-between gap-3">
-      <div class="flex items-center space-x-2">
-        <span class="text-xs font-semibold text-gray-500 uppercase tracking-wider mr-1">Chế độ:</span>
-        <button id="sub-btn-1" onclick="switchSubMode(1)" class="px-3 py-1.5 text-xs font-semibold rounded-lg transition flex items-center space-x-1.5 theme-btn-pimax whitespace-nowrap">
-          <i class="fa-solid fa-list-check"></i>
-          <span>CN 1: Trắc nghiệm 4PA</span>
-        </button>
-        <button id="sub-btn-2" onclick="switchSubMode(2)" class="px-3 py-1.5 text-xs font-semibold rounded-lg transition flex items-center space-x-1.5 bg-gray-100 text-gray-700 hover:bg-gray-200 whitespace-nowrap">
-          <i class="fa-solid fa-square-check"></i>
-          <span>CN 2: Đúng / Sai</span>
-        </button>
-        <button id="sub-btn-3" onclick="switchSubMode(3)" class="px-3 py-1.5 text-xs font-semibold rounded-lg transition flex items-center space-x-1.5 bg-gray-100 text-gray-700 hover:bg-gray-200 whitespace-nowrap">
-          <i class="fa-solid fa-pen-to-square"></i>
-          <span>CN 3: Trả lời ngắn</span>
-        </button>
+    <!-- MENU 1: CHUẨN HÓA LATEX -->
+    <section id="menu-section-1" class="space-y-4">
+      <div class="theme-bg p-3 border shadow-sm flex flex-col sm:flex-row justify-between items-center gap-3 rounded-md">
+        <div class="flex theme-sub-bg p-1 border rounded w-full sm:w-auto overflow-x-auto">
+          <button id="sub-btn-1" onclick="switchSubMode(1)" class="px-3 py-1.5 text-xs font-semibold rounded transition flex items-center justify-center space-x-1.5 theme-btn-pimax whitespace-nowrap">
+            <i data-lucide="check-square" class="w-3.5 h-3.5"></i>
+            <span>CN 1: \choice</span>
+          </button>
+          <button id="sub-btn-2" onclick="switchSubMode(2)" class="px-3 py-1.5 text-xs font-semibold rounded transition flex items-center justify-center space-x-1.5 opacity-75 hover:opacity-100 whitespace-nowrap">
+            <i data-lucide="list-checks" class="w-3.5 h-3.5"></i>
+            <span>CN 2: \choiceTF</span>
+          </button>
+          <button id="sub-btn-3" onclick="switchSubMode(3)" class="px-3 py-1.5 text-xs font-semibold rounded transition flex items-center justify-center space-x-1.5 opacity-75 hover:opacity-100 whitespace-nowrap">
+            <i data-lucide="pen-tool" class="w-3.5 h-3.5"></i>
+            <span>CN 3: \shortans</span>
+          </button>
+        </div>
+        <span id="sub-mode-desc" class="text-xs opacity-75 font-medium">Chế độ: <b>Trắc nghiệm 4 phương án (A, B, C, D)</b></span>
       </div>
 
-      <div id="sub-mode-desc" class="text-xs text-gray-500 font-medium">
-        Chế độ: <b>Trắc nghiệm 4 phương án (\choice)</b>
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <!-- Input Box 1 -->
+        <div class="theme-bg border p-4 shadow-sm flex flex-col h-[640px] rounded-md">
+          <div class="flex justify-between items-center text-xs font-bold h-8 mb-3 pb-2 border-b border-slate-200 dark:border-slate-700 shrink-0">
+            <span class="flex items-center gap-1.5"><i data-lucide="file-input" class="w-4 h-4 text-[#db3c6e]"></i> Dữ liệu thô đầu vào:</span>
+            <div class="flex items-center space-x-1.5">
+              <button id="btn-undo-input-ex" onclick="undo('input-ex')" disabled class="btn-history theme-sub-bg px-2 h-7 flex items-center gap-1 border rounded transition text-[11px]" title="Hoàn tác (Ctrl+Z)"><i data-lucide="undo-2" class="w-3.5 h-3.5"></i></button>
+              <button id="btn-redo-input-ex" onclick="redo('input-ex')" disabled class="btn-history theme-sub-bg px-2 h-7 flex items-center gap-1 border rounded transition text-[11px]" title="Làm lại (Ctrl+Y)"><i data-lucide="redo-2" class="w-3.5 h-3.5"></i></button>
+              <span class="opacity-30">|</span>
+              <label class="cursor-pointer theme-sub-bg px-2.5 h-7 flex items-center transition border rounded gap-1 text-xs hover:border-[#db3c6e]">
+                <i data-lucide="upload" class="w-3 h-3"></i> Tải file
+                <input type="file" accept=".tex,.txt" class="hidden" onchange="loadFile(event, 'input-ex')">
+              </label>
+              <button onclick="clearText('input-ex')" class="hover:underline h-7 px-1 flex items-center opacity-75">Xóa</button>
+            </div>
+          </div>
+          <div class="editor-container border border-slate-200 dark:border-slate-700 flex-1">
+            <div id="lines-input-ex" class="line-numbers min-w-[42px]">1</div>
+            <div class="editor-area">
+              <div id="hl-input-ex" class="code-highlight"></div>
+              <textarea id="input-ex" oninput="handleInput('input-ex')" onkeydown="handleKeyDown(event, 'input-ex')" onscroll="syncScroll('input-ex')" class="code-input custom-scroll" placeholder="Dán nội dung câu hỏi thô vào đây..."></textarea>
+              <div id="autocomplete-input-ex" class="autocomplete-dropdown theme-bg"></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Output Box 1 -->
+        <div class="theme-bg border p-4 shadow-sm flex flex-col h-[640px] rounded-md">
+          <div class="flex justify-between items-center text-xs font-bold h-8 mb-2 pb-2 border-b border-slate-200 dark:border-slate-700 shrink-0">
+            <span class="flex items-center gap-1.5"><i data-lucide="file-output" class="w-4 h-4 text-[#db3c6e]"></i> Kết quả chuẩn hóa:</span>
+            <div class="flex items-center space-x-1">
+              <button id="btn-undo-output-ex" onclick="undo('output-ex')" disabled class="btn-history theme-sub-bg p-1.5 h-7 w-7 rounded flex items-center justify-center border transition" title="Hoàn tác"><i data-lucide="undo-2" class="w-3.5 h-3.5"></i></button>
+              <button id="btn-redo-output-ex" onclick="redo('output-ex')" disabled class="btn-history theme-sub-bg p-1.5 h-7 w-7 rounded flex items-center justify-center border transition" title="Làm lại"><i data-lucide="redo-2" class="w-3.5 h-3.5"></i></button>
+              <span class="opacity-30">|</span>
+              <button onclick="openAnswerModal()" class="theme-badge-pimax px-2 h-7 flex items-center gap-1 border rounded transition font-medium text-[11px]" title="Bảng chèn đáp án trắc nghiệm nhanh">
+                <i data-lucide="grid" class="w-3.5 h-3.5"></i>
+                <span>Thêm đáp án</span>
+              </button>
+              <span class="opacity-30">|</span>
+              <button onclick="applyAutoMath('output-ex')" class="theme-sub-bg hover:border-[#db3c6e] p-1.5 h-7 w-7 rounded flex items-center justify-center border transition" title="Tự động bọc $"><i data-lucide="variable" class="w-4 h-4 text-[#db3c6e]"></i></button>
+              <button onclick="convertArrayToAligned('output-ex')" class="theme-sub-bg hover:border-[#db3c6e] p-1.5 h-7 w-7 rounded flex items-center justify-center border transition" title="Chuyển array thành aligned"><i data-lucide="columns-2" class="w-4 h-4 text-[#db3c6e]"></i></button>
+              <button onclick="applyCleanSpacingTool('output-ex')" class="theme-sub-bg hover:border-[#db3c6e] p-1.5 h-7 w-7 rounded flex items-center justify-center border transition" title="Dọn dẹp khoảng trắng dấu câu"><svg class="w-4 h-4 text-[#db3c6e]" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m2 22 10-10"/><path d="M9.5 12.5 14 17"/><path d="m15 11 3 3"/><path d="m17 7 2 2"/><path d="M19 2l3 3-7 7-3-3z"/></svg></button>
+              <button onclick="wrapSelectionWithEnv('output-ex', 'itemize')" class="theme-sub-bg p-1.5 h-7 w-7 rounded flex items-center justify-center border transition" title="Chuyển itemize"><i data-lucide="list" class="w-4 h-4"></i></button>
+              <button onclick="wrapSelectionWithEnv('output-ex', 'enumerate')" class="theme-sub-bg p-1.5 h-7 w-7 rounded flex items-center justify-center border transition" title="Chuyển enumerate"><i data-lucide="list-ordered" class="w-4 h-4"></i></button>
+              <span class="opacity-30">|</span>
+              <button onclick="copyToClipboard('output-ex')" class="theme-sub-bg p-1.5 h-7 w-7 rounded flex items-center justify-center border transition" title="Copy"><i data-lucide="copy" class="w-3.5 h-3.5"></i></button>
+              <button onclick="downloadSingleText('output-ex', 'chuan_hoa_ex.tex')" class="theme-sub-bg p-1.5 h-7 w-7 rounded flex items-center justify-center border transition" title="Tải file .tex"><i data-lucide="download" class="w-3.5 h-3.5"></i></button>
+            </div>
+          </div>
+
+          <!-- Tìm kiếm & thay thế -->
+          <div class="theme-sub-bg p-2 border rounded mb-2 flex flex-col gap-2 text-xs shrink-0">
+            <div class="flex items-center gap-2 flex-wrap">
+              <div class="flex items-center space-x-1 flex-1 min-w-[150px]">
+                <i data-lucide="search" class="w-3.5 h-3.5 opacity-50"></i>
+                <input type="text" id="find-output-ex" placeholder="Tìm kiếm..." oninput="findText('output-ex')" class="w-full theme-bg border rounded px-2 py-1 outline-none">
+              </div>
+              <div class="flex items-center space-x-1 border rounded theme-bg px-1 py-0.5">
+                <button onclick="navigateSearch('output-ex', -1)" class="hover:opacity-100 p-1 rounded opacity-75"><i data-lucide="chevron-left" class="w-3.5 h-3.5"></i></button>
+                <span id="count-output-ex" class="text-[11px] font-mono px-1 min-w-[50px] text-center">0/0</span>
+                <button onclick="navigateSearch('output-ex', 1)" class="hover:opacity-100 p-1 rounded opacity-75"><i data-lucide="chevron-right" class="w-3.5 h-3.5"></i></button>
+              </div>
+              <label class="flex items-center space-x-1 cursor-pointer select-none opacity-75"><input type="checkbox" id="match-case-output-ex" onchange="findText('output-ex')" class="rounded"><span>Match case</span></label>
+            </div>
+            <div class="flex items-center gap-2">
+              <div class="flex items-center space-x-1 flex-1">
+                <i data-lucide="replace" class="w-3.5 h-3.5 opacity-50"></i>
+                <input type="text" id="replace-output-ex" placeholder="Thay thế bằng..." class="w-full theme-bg border rounded px-2 py-1 outline-none">
+              </div>
+              <div class="flex items-center space-x-1">
+                <button onclick="replaceText('output-ex', false)" class="theme-sub-bg border rounded px-2.5 py-1 font-medium transition opacity-75 hover:opacity-100">Thay</button>
+                <button onclick="replaceText('output-ex', true)" class="theme-btn-pimax rounded px-2.5 py-1 font-medium transition">Thay tất cả</button>
+              </div>
+            </div>
+          </div>
+
+          <div class="editor-container border border-slate-200 dark:border-slate-700 flex-1">
+            <div id="lines-output-ex" class="line-numbers min-w-[42px]">1</div>
+            <div class="editor-area">
+              <div id="hl-output-ex" class="code-highlight"></div>
+              <textarea id="output-ex" oninput="handleInput('output-ex')" onkeydown="handleKeyDown(event, 'output-ex')" onscroll="syncScroll('output-ex')" class="code-input custom-scroll" placeholder="Kết quả chuẩn hóa sẽ xuất hiện tại đây..."></textarea>
+              <div id="autocomplete-output-ex" class="autocomplete-dropdown theme-bg"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="flex justify-end pt-2">
+        <button onclick="processExEnvironment()" class="theme-btn-pimax font-semibold px-6 py-2.5 rounded transition flex items-center space-x-2 shadow">
+          <i data-lucide="wand-2" class="w-4 h-4"></i>
+          <span id="btn-ex-label">Chuẩn Hóa Ngay (CN 1)</span>
+        </button>
       </div>
     </section>
 
-    <!-- WORKSPACE / EDITORS SECTION (HAI CỘT) -->
-    <div class="flex-1 grid grid-cols-1 lg:grid-cols-2 gap-4 min-h-0">
-
-      <!-- CỘT 1: INPUT EDITOR -->
-      <div class="flex flex-col bg-white border border-gray-200 rounded-xl shadow-sm overflow-hidden h-full">
-        <!-- Header Cột Trái -->
-        <div class="px-4 py-2.5 bg-gray-50 border-b border-gray-200 flex items-center justify-between">
-          <div class="flex items-center space-x-2">
-            <i class="fa-solid fa-file-import text-[#db3c6e] text-sm"></i>
-            <span class="font-semibold text-xs text-gray-700 uppercase tracking-wider">Dữ liệu thô đầu vào:</span>
+    <!-- MENU 2: LỌC TIKZ -->
+    <section id="menu-section-2" class="hidden space-y-4">
+      <div class="theme-bg p-4 border rounded-md shadow-sm"><p class="text-sm opacity-75">Tự động lọc và tách toàn bộ các khối <code class="font-bold">\begin{tikzpicture}...\end{tikzpicture}</code> ra khỏi file LaTeX gốc.</p></div>
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <!-- Input TikZ -->
+        <div class="theme-bg border p-4 shadow-sm flex flex-col h-[580px] rounded-md">
+          <div class="flex justify-between items-center text-xs font-bold h-8 mb-3 pb-2 border-b border-slate-200 dark:border-slate-700 shrink-0">
+            <span class="flex items-center gap-1.5"><i data-lucide="file-text" class="w-4 h-4 text-[#db3c6e]"></i> Code LaTeX gốc:</span>
+            <div class="flex items-center space-x-1.5">
+              <button id="btn-undo-input-tikz" onclick="undo('input-tikz')" disabled class="btn-history theme-sub-bg px-2 h-7 border rounded transition text-[11px]"><i data-lucide="undo-2" class="w-3.5 h-3.5"></i></button>
+              <button id="btn-redo-input-tikz" onclick="redo('input-tikz')" disabled class="btn-history theme-sub-bg px-2 h-7 border rounded transition text-[11px]"><i data-lucide="redo-2" class="w-3.5 h-3.5"></i></button>
+              <span class="opacity-30">|</span>
+              <label class="cursor-pointer theme-sub-bg px-2.5 h-7 flex items-center transition border rounded gap-1 text-xs hover:border-[#db3c6e]"><i data-lucide="upload" class="w-3 h-3"></i> Tải file<input type="file" accept=".tex,.txt" class="hidden" onchange="loadFile(event, 'input-tikz')"></label>
+              <button onclick="clearText('input-tikz')" class="hover:underline h-7 px-1 flex items-center opacity-75">Xóa</button>
+            </div>
           </div>
-
-          <!-- Thanh nút tác vụ Nhanh Cột Trái -->
-          <div class="flex items-center space-x-1">
-            <button onclick="undoEditor('input-ex')" title="Undo" class="p-1.5 text-gray-500 hover:text-gray-800 rounded hover:bg-gray-200 text-xs">
-              <i class="fa-solid fa-rotate-left"></i>
-            </button>
-            <button onclick="redoEditor('input-ex')" title="Redo" class="p-1.5 text-gray-500 hover:text-gray-800 rounded hover:bg-gray-200 text-xs">
-              <i class="fa-solid fa-rotate-right"></i>
-            </button>
-            <div class="h-3 w-[1px] bg-gray-300 mx-1"></div>
-            <label class="px-2 py-1 text-xs font-medium text-gray-600 bg-white border border-gray-300 rounded cursor-pointer hover:bg-gray-50 transition flex items-center space-x-1">
-              <i class="fa-solid fa-upload"></i>
-              <span>Tải file</span>
-              <input type="file" id="file-upload-input" accept=".tex,.txt" class="hidden" onchange="handleFileUpload(event, 'input-ex')">
-            </label>
-            <button onclick="clearEditor('input-ex')" class="px-2 py-1 text-xs font-medium text-red-600 bg-white border border-gray-300 rounded hover:bg-red-50 transition">
-              Xóa
-            </button>
+          <div class="editor-container border border-slate-200 dark:border-slate-700 flex-1">
+            <div id="lines-input-tikz" class="line-numbers min-w-[42px]">1</div>
+            <div class="editor-area">
+              <div id="hl-input-tikz" class="code-highlight"></div>
+              <textarea id="input-tikz" oninput="handleInput('input-tikz')" onkeydown="handleKeyDown(event, 'input-tikz')" onscroll="syncScroll('input-tikz')" class="code-input custom-scroll" placeholder="Dán nội dung LaTeX chứa TikZ vào đây..."></textarea>
+              <div id="autocomplete-input-tikz" class="autocomplete-dropdown theme-bg"></div>
+            </div>
           </div>
         </div>
 
-        <!-- Khung Nhập Liệu (Input Editor Container) -->
-        <div class="flex-1 relative overflow-hidden flex flex-row editor-wrapper">
-          <div id="line-numbers-input-ex" class="line-numbers-sidebar select-none">1</div>
-          <textarea 
-            id="input-ex" 
-            spellcheck="false"
-            placeholder="Dán mã LaTeX thô hoặc danh sách câu hỏi tại đây..."
-            class="editor-textarea flex-1 p-3 font-mono text-sm resize-none focus:outline-none leading-relaxed"
-            onscroll="syncScroll('input-ex')"
-            oninput="handleInput('input-ex')"></textarea>
+        <!-- Output Main -->
+        <div class="theme-bg border p-4 shadow-sm flex flex-col h-[580px] rounded-md">
+          <div class="flex justify-between items-center text-xs font-bold h-8 mb-2 pb-2 border-b border-slate-200 dark:border-slate-700 shrink-0">
+            <span class="flex items-center gap-1.5"><i data-lucide="file-check" class="w-4 h-4 text-[#db3c6e]"></i> File gốc (Đã gỡ TikZ):</span>
+            <div class="flex items-center space-x-1">
+              <button id="btn-undo-output-main" onclick="undo('output-main')" disabled class="btn-history theme-sub-bg p-1.5 h-7 w-7 border rounded transition"><i data-lucide="undo-2" class="w-3.5 h-3.5"></i></button>
+              <button id="btn-redo-output-main" onclick="redo('output-main')" disabled class="btn-history theme-sub-bg p-1.5 h-7 w-7 border rounded transition"><i data-lucide="redo-2" class="w-3.5 h-3.5"></i></button>
+              <span class="opacity-30">|</span>
+              <button onclick="applyAutoMath('output-main')" class="theme-sub-bg p-1.5 h-7 w-7 border rounded transition"><i data-lucide="variable" class="w-4 h-4 text-[#db3c6e]"></i></button>
+              <button onclick="convertArrayToAligned('output-main')" class="theme-sub-bg p-1.5 h-7 w-7 border rounded transition"><i data-lucide="columns-2" class="w-4 h-4 text-[#db3c6e]"></i></button>
+              <button onclick="applyCleanSpacingTool('output-main')" class="theme-sub-bg p-1.5 h-7 w-7 border rounded transition"><svg class="w-4 h-4 text-[#db3c6e]" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m2 22 10-10"/><path d="M9.5 12.5 14 17"/><path d="m15 11 3 3"/><path d="m17 7 2 2"/><path d="M19 2l3 3-7 7-3-3z"/></svg></button>
+              <button onclick="wrapSelectionWithEnv('output-main', 'itemize')" class="theme-sub-bg p-1.5 h-7 w-7 border rounded transition"><i data-lucide="list" class="w-4 h-4"></i></button>
+              <button onclick="wrapSelectionWithEnv('output-main', 'enumerate')" class="theme-sub-bg p-1.5 h-7 w-7 border rounded transition"><i data-lucide="list-ordered" class="w-4 h-4"></i></button>
+              <span class="opacity-30">|</span>
+              <button onclick="copyToClipboard('output-main')" class="theme-sub-bg p-1.5 h-7 w-7 border rounded transition"><i data-lucide="copy" class="w-3.5 h-3.5"></i></button>
+              <button onclick="downloadSingleText('output-main', 'file_goc_no_tikz.tex')" class="theme-sub-bg p-1.5 h-7 w-7 border rounded transition"><i data-lucide="download" class="w-3.5 h-3.5"></i></button>
+            </div>
+          </div>
+          <div class="editor-container border border-slate-200 dark:border-slate-700 flex-1">
+            <div id="lines-output-main" class="line-numbers min-w-[42px]">1</div>
+            <div class="editor-area">
+              <div id="hl-output-main" class="code-highlight"></div>
+              <textarea id="output-main" oninput="handleInput('output-main')" onkeydown="handleKeyDown(event, 'output-main')" onscroll="syncScroll('output-main')" class="code-input custom-scroll" placeholder="File gốc sau khi gỡ các khối TikZ..."></textarea>
+              <div id="autocomplete-output-main" class="autocomplete-dropdown theme-bg"></div>
+            </div>
+          </div>
         </div>
       </div>
 
-      <!-- CỘT 2: OUTPUT EDITOR -->
-      <div class="flex flex-col bg-white border border-gray-200 rounded-xl shadow-sm overflow-hidden h-full">
-        <!-- Header Cột Phải -->
-        <div class="px-4 py-2.5 bg-gray-50 border-b border-gray-200 flex items-center justify-between">
-          <div class="flex items-center space-x-2">
-            <i class="fa-solid fa-file-export text-[#db3c6e] text-sm"></i>
-            <span class="font-semibold text-xs text-gray-700 uppercase tracking-wider">Kết quả chuẩn hóa:</span>
-          </div>
-
-          <!-- Thanh nút tác vụ Cột Phải -->
-          <div class="flex items-center space-x-1.5">
-            <button onclick="undoEditor('output-ex')" title="Undo" class="p-1.5 text-gray-500 hover:text-gray-800 rounded hover:bg-gray-200 text-xs">
-              <i class="fa-solid fa-rotate-left"></i>
-            </button>
-            <button onclick="redoEditor('output-ex')" title="Redo" class="p-1.5 text-gray-500 hover:text-gray-800 rounded hover:bg-gray-200 text-xs">
-              <i class="fa-solid fa-rotate-right"></i>
-            </button>
-            <div class="h-3 w-[1px] bg-gray-300 mx-1"></div>
-
-            <!-- Nút Thêm Đáp Án -->
-            <button onclick="openAnswerModal()" class="px-2.5 py-1 text-xs font-medium text-white bg-[#db3c6e] hover:bg-[#c22e5d] rounded shadow-sm transition flex items-center space-x-1">
-              <i class="fa-solid fa-table-cells"></i>
-              <span>Thêm đáp án</span>
-            </button>
-
-            <!-- Nút Công cụ nhanh -->
-            <button onclick="applyCleanSpacingTool('output-ex')" title="Định dạng khoảng cách & dòng" class="p-1.5 text-gray-600 hover:text-[#db3c6e] rounded hover:bg-gray-200 text-xs">
-              <i class="fa-solid fa-broom"></i>
-            </button>
-            <button onclick="applyAutoMath('output-ex')" title="Tự động bọc dấu $" class="p-1.5 text-gray-600 hover:text-[#db3c6e] rounded hover:bg-gray-200 text-xs">
-              <i class="fa-solid fa-dollar-sign"></i>
-            </button>
-            <button onclick="convertArrayToAligned('output-ex')" title="Chuyển array thành aligned" class="p-1.5 text-gray-600 hover:text-[#db3c6e] rounded hover:bg-gray-200 text-xs">
-              <i class="fa-solid fa-align-center"></i>
-            </button>
-
-            <div class="h-3 w-[1px] bg-gray-300 mx-1"></div>
-
-            <button onclick="copyToClipboard('output-ex')" class="p-1.5 text-gray-600 hover:text-[#db3c6e] rounded hover:bg-gray-200 text-xs" title="Sao chép">
-              <i class="fa-regular fa-copy"></i>
-            </button>
-            <button onclick="downloadOutput('output-ex', 'PimaX_Normalized.tex')" class="p-1.5 text-gray-600 hover:text-[#db3c6e] rounded hover:bg-gray-200 text-xs" title="Tải file .tex">
-              <i class="fa-solid fa-download"></i>
-            </button>
-          </div>
+      <div class="theme-bg p-4 border rounded-md shadow-sm flex flex-wrap justify-between items-center gap-4">
+        <div class="flex items-center space-x-3">
+          <label class="text-xs font-semibold opacity-75">Tên file TikZ tổng:</label>
+          <input type="text" id="file-name-tikz" value="tat_ca_hinh_tikz" class="theme-bg border rounded px-3 py-1.5 text-xs font-mono outline-none w-48">
+          <label class="text-xs font-semibold opacity-75 ml-2">Đuôi file:</label>
+          <select id="file-ext-tikz" class="theme-bg border rounded text-xs px-2 py-1.5 outline-none">
+            <option value=".tex" selected>.tex</option>
+            <option value=".txt">.txt</option>
+          </select>
         </div>
-
-        <!-- Khung Kết Quả (Output Editor Container) -->
-        <div class="flex-1 relative overflow-hidden flex flex-row editor-wrapper">
-          <div id="line-numbers-output-ex" class="line-numbers-sidebar select-none">1</div>
-          <textarea 
-            id="output-ex" 
-            spellcheck="false"
-            placeholder="Kết quả chuẩn hóa sẽ xuất hiện tại đây..."
-            class="editor-textarea flex-1 p-3 font-mono text-sm resize-none focus:outline-none leading-relaxed"
-            onscroll="syncScroll('output-ex')"
-            oninput="handleInput('output-ex')"></textarea>
-        </div>
-      </div>
-
-    </div>
-
-    <!-- MAIN ACTION BUTTON: NÚT CHUẨN HÓA NGAY -->
-    <div class="mt-4 flex justify-end">
-      <button 
-        id="btn-process-ex" 
-        onclick="processExEnvironment()" 
-        class="px-6 py-2.5 theme-btn-pimax text-white font-semibold rounded-xl shadow-lg hover:shadow-xl transition flex items-center space-x-2 text-sm">
-        <i class="fa-solid fa-wand-magic-sparkles"></i>
-        <span id="btn-ex-label">Chuẩn Hóa Ngay (CN 1)</span>
-      </button>
-    </div>
-
-  </main>
-
-  <!-- MODAL BẢNG GÁN ĐÁP ÁN (ANSWER MODAL) -->
-  <div id="answer-modal" class="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center hidden">
-    <div class="bg-white rounded-2xl shadow-2xl border border-gray-200 w-full max-w-xl overflow-hidden animate-in fade-in zoom-in duration-150">
-      <div class="px-6 py-4 border-b border-gray-200 flex items-center justify-between bg-gray-50">
-        <h3 class="font-bold text-gray-800 text-sm flex items-center space-x-2">
-          <i class="fa-solid fa-table-cells text-[#db3c6e]"></i>
-          <span>Gán Đáp Án Hàng Loạt</span>
-        </h3>
-        <button onclick="closeAnswerModal()" class="text-gray-400 hover:text-gray-600">
-          <i class="fa-solid fa-xmark text-lg"></i>
+        <button onclick="extractAllTikZToSingleFile()" class="theme-btn-pimax font-semibold px-6 py-2.5 rounded transition flex items-center space-x-2 shadow">
+          <i data-lucide="scissors" class="w-4 h-4"></i>
+          <span>Tách & Gom Vào 1 File</span>
         </button>
       </div>
 
-      <div class="p-6 space-y-4">
-        <div>
-          <label class="block text-xs font-semibold text-gray-700 uppercase tracking-wider mb-2">
-            Nhập chuỗi đáp án (Ví dụ: 1A 2B 3C hoặc A B C D):
-          </label>
-          <textarea 
-            id="modal-answer-input" 
-            rows="4" 
-            placeholder="1A 2B 3C 4D... hoặc D S D S..." 
-            class="w-full p-3 border border-gray-300 rounded-xl font-mono text-sm focus:outline-none focus:border-[#db3c6e] focus:ring-1 focus:ring-[#db3c6e]"></textarea>
+      <div id="single-tikz-container" class="hidden theme-bg p-5 border rounded-md shadow-sm space-y-3">
+        <div class="flex justify-between items-center border-b border-slate-200 dark:border-slate-700 pb-3 flex-wrap gap-2">
+          <div class="flex items-center space-x-2">
+            <i data-lucide="file-code-2" class="w-5 h-5 text-[#db3c6e]"></i>
+            <h3 class="font-bold text-sm">File chứa toàn bộ hình TikZ</h3>
+            <span id="tikz-count-badge" class="text-xs theme-badge-pimax font-semibold px-2.5 py-0.5 border rounded">0 hình</span>
+          </div>
+          <div class="flex items-center space-x-1.5">
+            <button id="btn-undo-output-tikz-single" onclick="undo('output-tikz-single')" disabled class="btn-history theme-sub-bg p-1.5 h-7 w-7 border rounded transition"><i data-lucide="undo-2" class="w-3.5 h-3.5"></i></button>
+            <button id="btn-redo-output-tikz-single" onclick="redo('output-tikz-single')" disabled class="btn-history theme-sub-bg p-1.5 h-7 w-7 border rounded transition"><i data-lucide="redo-2" class="w-3.5 h-3.5"></i></button>
+            <span class="opacity-30">|</span>
+            <button onclick="copyToClipboard('output-tikz-single')" class="theme-sub-bg p-1.5 h-7 w-7 border rounded transition"><i data-lucide="copy" class="w-3.5 h-3.5"></i></button>
+            <button onclick="downloadSingleText('output-tikz-single', getTikZFilename())" class="theme-sub-bg p-1.5 h-7 w-7 border rounded transition"><i data-lucide="download" class="w-3.5 h-3.5"></i></button>
+          </div>
         </div>
+        <div class="editor-container border border-slate-200 dark:border-slate-700 h-80">
+          <div id="lines-output-tikz-single" class="line-numbers min-w-[42px]">1</div>
+          <div class="editor-area">
+            <div id="hl-output-tikz-single" class="code-highlight"></div>
+            <textarea id="output-tikz-single" oninput="handleInput('output-tikz-single')" onkeydown="handleKeyDown(event, 'output-tikz-single')" onscroll="syncScroll('output-tikz-single')" class="code-input custom-scroll" placeholder="Code các hình TikZ sẽ gom vào đây..."></textarea>
+            <div id="autocomplete-output-tikz-single" class="autocomplete-dropdown theme-bg"></div>
+          </div>
+        </div>
+      </div>
+    </section>
 
-        <div class="flex justify-end space-x-3 pt-2">
-          <button onclick="closeAnswerModal()" class="px-4 py-2 text-xs font-medium text-gray-600 bg-gray-100 hover:bg-gray-200 rounded-lg transition">
-            Hủy
-          </button>
-          <button onclick="applyAnswersFromModal()" class="px-5 py-2 text-xs font-semibold text-white theme-btn-pimax rounded-lg shadow transition">
-            Gán Ngay
+    <!-- MENU 3: CHUYỂN PDF THÀNH ẢNH -->
+    <section id="menu-section-3" class="hidden space-y-4">
+      <div class="max-w-3xl mx-auto theme-bg p-6 sm:p-8 border rounded-md shadow-sm space-y-6">
+        <div>
+          <h2 class="text-lg font-bold flex items-center gap-2"><i data-lucide="file-image" class="w-5 h-5 text-[#db3c6e]"></i> Chuyển PDF sang Ảnh (PNG / JPG)</h2>
+          <p class="text-xs opacity-75 mt-1">Xuất các trang trong file PDF thành file ảnh chất lượng cao và đóng gói file ZIP.</p>
+        </div>
+        <div class="space-y-4">
+          <div>
+            <label class="block text-xs font-bold mb-1">Chọn file PDF:</label>
+            <input type="file" id="pdf-input" accept="application/pdf" class="w-full text-xs theme-sub-bg border rounded p-2.5 outline-none">
+          </div>
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div>
+              <label class="block text-xs font-bold mb-1">Định dạng ảnh xuất:</label>
+              <select id="format-select" class="w-full text-xs theme-sub-bg border rounded p-2.5 outline-none font-medium">
+                <option value="png" selected>PNG (Sắc nét, không nén)</option>
+                <option value="jpeg">JPG (Dung lượng nhẹ)</option>
+              </select>
+            </div>
+            <div>
+              <label class="block text-xs font-bold mb-1">Kiểu chỉnh độ phân giải:</label>
+              <select id="mode-select" class="w-full text-xs theme-sub-bg border rounded p-2.5 outline-none font-medium">
+                <option value="width">Cố định Chiều Rộng</option>
+                <option value="height">Cố định Chiều Cao</option>
+                <option value="exact">Cố định Cả 2</option>
+              </select>
+            </div>
+          </div>
+          <div id="dimension-box" class="grid grid-cols-2 gap-4 theme-sub-bg p-4 border rounded">
+            <div id="width-box">
+              <label class="block text-xs font-bold mb-1">Chiều Rộng (px):</label>
+              <input type="number" id="width-input" value="1920" min="100" max="10000" class="w-full theme-bg border rounded p-2 text-xs outline-none font-mono" placeholder="VD: 1920">
+            </div>
+            <div id="height-box" class="opacity-50 pointer-events-none">
+              <label class="block text-xs font-bold mb-1">Chiều Cao (px):</label>
+              <input type="number" id="height-input" value="1080" min="100" max="10000" class="w-full theme-bg border rounded p-2 text-xs outline-none font-mono" placeholder="VD: 1080">
+            </div>
+          </div>
+          <button id="convert-btn" class="w-full theme-btn-pimax py-3 rounded font-semibold transition shadow disabled:opacity-50">Chuyển Đổi Sang Ảnh</button>
+        </div>
+        <div id="status" class="text-center text-xs font-semibold"></div>
+        <div id="download-container" class="text-center hidden">
+          <button id="download-btn" class="theme-btn-pimax px-6 py-2.5 text-xs font-semibold rounded transition shadow flex items-center justify-center space-x-2 mx-auto">
+            <i data-lucide="download" class="w-4 h-4"></i>
+            <span>Tải File ZIP Ảnh</span>
           </button>
         </div>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- MODAL BẢNG TÍCH ĐÁP ÁN TRẮC NGHIỆM -->
+  <div id="answer-modal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-[100] hidden flex items-center justify-center p-4">
+    <div class="theme-bg border border-slate-300 dark:border-slate-700 rounded-lg shadow-2xl max-w-2xl w-full max-h-[85vh] flex flex-col overflow-hidden">
+      <div class="p-4 border-b border-slate-200 dark:border-slate-700 flex justify-between items-center theme-sub-bg">
+        <div class="flex items-center space-x-2">
+          <i data-lucide="grid" class="w-5 h-5 text-[#db3c6e]"></i>
+          <h3 class="font-bold text-sm" id="answer-modal-title">Bảng Tích Đáp Án Trắc Nghiệm</h3>
+        </div>
+        <button onclick="closeAnswerModal()" class="hover:bg-slate-200 dark:hover:bg-slate-700 p-1 rounded text-slate-500 hover:text-slate-800 dark:hover:text-slate-200 transition">
+          <i data-lucide="x" class="w-5 h-5"></i>
+        </button>
+      </div>
+
+      <div class="px-4 py-2 text-xs opacity-75 border-b border-slate-100 dark:border-slate-800 theme-sub-bg">
+        Tích chọn đáp án đúng cho từng câu bên dưới. Hệ thống sẽ tự động cập nhật lệnh <code class="font-mono bg-slate-200 dark:bg-slate-800 px-1 py-0.5 rounded">\True</code> vào ô Output ngay lập tức.
+      </div>
+
+      <div class="flex-1 overflow-y-auto p-4 custom-scroll">
+        <div id="answer-table-container"></div>
+      </div>
+
+      <div class="p-3 border-t border-slate-200 dark:border-slate-700 flex justify-between items-center theme-sub-bg">
+        <button onclick="clearAllAnswersInModal()" class="text-xs text-[#db3c6e] hover:underline font-medium flex items-center gap-1">
+          <i data-lucide="rotate-ccw" class="w-3.5 h-3.5"></i> Xóa tất cả tích
+        </button>
+        <button onclick="saveAndCloseAnswerModal()" class="theme-btn-pimax px-5 py-2 text-xs font-semibold rounded shadow transition flex items-center gap-1.5">
+          <i data-lucide="check" class="w-4 h-4"></i> Hoàn thành
+        </button>
       </div>
     </div>
   </div>
 
-  <!-- CÁC FILE SCRIPT CỦA HỆ THỐNG -->
+  <!-- Toggle Dark/Light Mode Button -->
+  <button onclick="toggleDarkMode()" class="fixed bottom-6 right-6 z-50 theme-btn-pimax p-3.5 rounded-full shadow-lg hover:scale-105 transition flex items-center justify-center" title="Chuyển đổi giao diện Sáng / Tối">
+    <i id="theme-icon" data-lucide="moon" class="w-5 h-5"></i>
+  </button>
+
+  <footer class="theme-bg border-t py-3 text-center text-xs opacity-75">
+    PimaX Tool Beta — Hệ sinh thái hỗ trợ soạn thảo LaTeX & Xử lý tài liệu
+  </footer>
+
+  <!-- NẠP CÁC FILE SCRIPT DỰ ÁN -->
   <script src="js/editor.js"></script>
   <script src="js/clean-tool.js"></script>
   <script src="js/ex-processor.js"></script>
