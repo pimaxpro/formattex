@@ -1,9 +1,6 @@
 // Biến lưu danh sách câu hỏi và trạng thái đáp án
 let parsedQuestions = [];
 
-/**
- * Thuật toán đếm ngoặc lồng nhau chuẩn xác cho các hàm LaTeX
- */
 function extractCurlyBrackets(text) {
   const results = [];
   let depth = 0;
@@ -11,9 +8,7 @@ function extractCurlyBrackets(text) {
 
   for (let i = 0; i < text.length; i++) {
     if (text[i] === '{') {
-      if (depth === 0) {
-        startIdx = i;
-      }
+      if (depth === 0) startIdx = i;
       depth++;
     } else if (text[i] === '}') {
       if (depth > 0) {
@@ -64,7 +59,6 @@ function openAnswerModal() {
         currentAnswers = [false, false, false, false];
       }
     } else if (!isShortAns) {
-      // Phân biệt chính xác \choice với \choiceTF
       const choiceRegex = /\\choice\b/;
       const choiceMatch = choiceRegex.exec(innerContent);
       let selectedOption = null;
@@ -133,7 +127,6 @@ function renderAnswerTable() {
 
     parsedQuestions.forEach((q, qIdx) => {
       if (q.isShortAns) return;
-
       const tfState = Array.isArray(q.selectedAnswer) ? q.selectedAnswer : [false, false, false, false];
 
       html += `
@@ -148,11 +141,11 @@ function renderAnswerTable() {
         html += `
           <td class="p-2 border-r border-slate-200 dark:border-slate-700">
             <div class="flex justify-center items-center space-x-2">
-              <label class="cursor-pointer flex items-center space-x-1 px-1.5 py-0.5 rounded ${isTrue ? 'bg-emerald-100 dark:bg-emerald-900/60 font-bold text-emerald-700 dark:text-emerald-300' : ''}">
+              <label class="cursor-pointer flex items-center space-x-1 px-1.5 py-0.5 rounded ${isTrue ? 'theme-btn-pimax font-bold' : ''}">
                 <input type="radio" name="tf_${qIdx}_${i}" value="true" ${isTrue ? 'checked' : ''} onchange="toggleTFAnswer(${qIdx}, ${i}, true)">
                 <span>Đ</span>
               </label>
-              <label class="cursor-pointer flex items-center space-x-1 px-1.5 py-0.5 rounded ${isFalse ? 'bg-rose-100 dark:bg-rose-900/60 font-bold text-rose-700 dark:text-rose-300' : ''}">
+              <label class="cursor-pointer flex items-center space-x-1 px-1.5 py-0.5 rounded ${isFalse ? 'bg-slate-200 dark:bg-slate-700 font-bold' : ''}">
                 <input type="radio" name="tf_${qIdx}_${i}" value="false" ${isFalse ? 'checked' : ''} onchange="toggleTFAnswer(${qIdx}, ${i}, false)">
                 <span>S</span>
               </label>
@@ -176,7 +169,6 @@ function renderAnswerTable() {
 
     parsedQuestions.forEach((q, qIdx) => {
       if (q.isShortAns) return;
-
       const selected = q.selectedAnswer;
 
       html += `
@@ -188,7 +180,7 @@ function renderAnswerTable() {
         const isChecked = selected === label;
         html += `
           <td class="p-2 border-r border-slate-200 dark:border-slate-700 cursor-pointer" onclick="selectChoiceAnswer(${qIdx}, '${label}')">
-            <div class="h-7 flex items-center justify-center font-bold text-sm ${isChecked ? 'bg-indigo-100 dark:bg-indigo-900/60 text-indigo-700 dark:text-indigo-300 rounded border border-indigo-400' : 'opacity-30 hover:opacity-100'}">
+            <div class="h-7 flex items-center justify-center font-bold text-sm rounded ${isChecked ? 'theme-btn-pimax border border-[#db3c6e]' : 'opacity-30 hover:opacity-100'}">
               ${isChecked ? label : ''}
             </div>
           </td>
