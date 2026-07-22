@@ -1,5 +1,5 @@
 /* =========================================================
-   PIMAX TOOL — EX ENVIRONMENT PROCESSOR (FULL FIX PARSER)
+   PIMAX TOOL — EX ENVIRONMENT PROCESSOR (STABLE INDENT & LINE PARSER)
    ========================================================= */
 
 if (typeof window.subModeEx === 'undefined') {
@@ -56,24 +56,23 @@ function processMode1() {
       questionPart = questionPart.replace(/(?:Chọn\s*(?:ý|đáp\s*án)?|Đáp\s*án)\s*[A-D][\.\s]*/gi, '').trim();
     }
 
-    // TÁCH PHƯƠNG ÁN CHUẨN XÁC
-    const optionsData = parseChoiceOptionsRobust(questionPart, ['A', 'B', 'C', 'D']);
+    // TÁCH PHƯƠNG ÁN AN TOÀN
+    const optionsData = parseChoicesLineByLine(questionPart, ['A', 'B', 'C', 'D']);
 
-    let mainQuestion = cleanTextSpacingAndLines(optionsData.stem);
+    let mainQuestion = optionsData.stem;
 
-    let exCode = `\\begin{ex}\n${mainQuestion}\n\\choice\n`;
+    let exCode = `\\begin{ex}\n    ${mainQuestion}\n    \\choice\n`;
     ['A', 'B', 'C', 'D'].forEach(key => {
       let optionText = optionsData.choices[key] || '';
       let isTrue = (key === trueAnswerKey) ? '\\True ' : '';
-      exCode += `{${isTrue}${optionText}}\n`;
+      exCode += `    {${isTrue}${optionText}}\n`;
     });
 
     if (solutionPart) {
-      let cleanSol = cleanTextSpacingAndLines(solutionPart);
-      const indentedSolution = cleanSol.split('\n').map(line => line ? `    ${line}` : '').join('\n');
-      exCode += `\\loigiai{\n${indentedSolution}\n}\n`;
+      const indentedSolution = solutionPart.split('\n').map(line => line.trim() ? `        ${line.trim()}` : '').join('\n');
+      exCode += `    \\loigiai{\n${indentedSolution}\n    }\n`;
     } else {
-      exCode += `\\loigiai{}\n`;
+      exCode += `    \\loigiai{\n    }\n`;
     }
 
     exCode += `\\end{ex}`;
@@ -121,24 +120,23 @@ function processMode2() {
     questionPart = questionPart.replace(/(?:Đáp\s*án|Chọn)[\.\s:]*([DĐS[\s\-\,\.]+){4}\.?\s*/gi, '').trim();
     solutionPart = solutionPart.replace(/(?:Đáp\s*án|Chọn)[\.\s:]*([DĐS[\s\-\,\.]+){4}\.?\s*/gi, '').trim();
 
-    const optionsData = parseChoiceOptionsRobust(questionPart, ['A', 'B', 'C', 'D']);
+    const optionsData = parseChoicesLineByLine(questionPart, ['A', 'B', 'C', 'D']);
 
-    let mainQuestion = cleanTextSpacingAndLines(optionsData.stem);
+    let mainQuestion = optionsData.stem;
 
-    let exCode = `\\begin{ex}\n${mainQuestion}\n\\choiceTF\n`;
+    let exCode = `\\begin{ex}\n    ${mainQuestion}\n    \\choiceTF\n`;
     const keys = ['A', 'B', 'C', 'D'];
     keys.forEach((key, index) => {
       let optionText = optionsData.choices[key] || '';
       let isTrue = (tfPattern && tfPattern[index]) ? '\\True ' : '';
-      exCode += `{${isTrue}${optionText}}\n`;
+      exCode += `    {${isTrue}${optionText}}\n`;
     });
 
     if (solutionPart) {
-      let cleanSol = cleanTextSpacingAndLines(solutionPart);
-      const indentedSolution = cleanSol.split('\n').map(line => line ? `    ${line}` : '').join('\n');
-      exCode += `\\loigiai{\n${indentedSolution}\n}\n`;
+      const indentedSolution = solutionPart.split('\n').map(line => line.trim() ? `        ${line.trim()}` : '').join('\n');
+      exCode += `    \\loigiai{\n${indentedSolution}\n    }\n`;
     } else {
-      exCode += `\\loigiai{}\n`;
+      exCode += `    \\loigiai{\n    }\n`;
     }
 
     exCode += `\\end{ex}`;
@@ -182,15 +180,14 @@ function processMode3() {
       solutionPart = solutionPart.replace(shortAnsHeaderRegex, '').trim();
     }
 
-    let mainQuestion = cleanTextSpacingAndLines(questionPart);
+    let mainQuestion = questionPart.trim();
 
-    let exCode = `\\begin{ex}\n${mainQuestion}\n\\shortans{${shortAnswerValue}}\n`;
+    let exCode = `\\begin{ex}\n    ${mainQuestion}\n    \\shortans{${shortAnswerValue}}\n`;
     if (solutionPart) {
-      let cleanSol = cleanTextSpacingAndLines(solutionPart);
-      const indentedSolution = cleanSol.split('\n').map(line => line ? `    ${line}` : '').join('\n');
-      exCode += `\\loigiai{\n${indentedSolution}\n}\n`;
+      const indentedSolution = solutionPart.split('\n').map(line => line.trim() ? `        ${line.trim()}` : '').join('\n');
+      exCode += `    \\loigiai{\n${indentedSolution}\n    }\n`;
     } else {
-      exCode += `\\loigiai{}\n`;
+      exCode += `    \\loigiai{\n    }\n`;
     }
 
     exCode += `\\end{ex}`;
@@ -201,66 +198,64 @@ function processMode3() {
 }
 
 /* =========================================================
-   THUẬT TOÁN TÁCH NHÃN PHƯƠNG ÁN SIÊU ỔN ĐỊNH
+   THUẬT TOÁN TÁCH PHƯƠNG ÁN AN TOÀN TUỆT ĐỐI (LINE & ANCHOR)
    ========================================================= */
 
-function parseChoiceOptionsRobust(text, targetKeys) {
+function parseChoicesLineByLine(text, targetKeys) {
   let choices = {};
   
-  // Tìm tất cả các điểm xuất hiện của A., B., C., D. hoặc a), b), c), d) ở biên từ hoặc đầu dòng
-  const optionRegex = /(?:^|\n|\s+)([A-Da-d])[\.\)]\s*/g;
+  // Regex bắt nhãn phương án chỉ khi đứng ở đầu dòng HOẶC sau khoảng trắng có dạng A., B., C., D.
+  // và kiểm tra ranh giới bằng Lookahead để tránh ăn nhầm vào biểu thức toán
+  const choiceRegex = /(?:^|\n|\r)\s*([A-Da-d])[\.\)]\s*/g;
   let matches = [];
   let match;
 
-  while ((match = optionRegex.exec(text)) !== null) {
+  while ((match = choiceRegex.exec(text)) !== null) {
     const key = match[1].toUpperCase();
-    const fullMatchText = match[0];
-    const matchIndex = match.index + (fullMatchText.length - fullMatchText.trimStart().length - match[1].length - 1);
     
-    // Kiểm tra tính hợp lệ: Nhãn A phải xuất hiện trước, B sau A, C sau B, D sau C
-    if (targetKeys.includes(key)) {
+    // Kiểm tra xem vị trí nhãn có nằm bên trong dấu $...$ hay không
+    const beforeText = text.substring(0, match.index);
+    const dollarCount = (beforeText.match(/\$/g) || []).length;
+    
+    // Nếu số lượng $ trước nhãn là số chẵn -> Nhãn nằm ngoài môi trường Toán -> Hợp lệ!
+    if (dollarCount % 2 === 0) {
       matches.push({
         key: key,
-        startContentIndex: match.index + fullMatchText.length,
-        matchIndex: match.index
+        matchIndex: match.index,
+        contentStart: match.index + match[0].length
       });
     }
   }
 
-  // Lọc chỉ lấy chuỗi tuần tự hợp lệ đầu tiên của A -> B -> C -> D
-  let validSequence = [];
-  let expectedIndex = 0;
+  // Lọc lấy danh sách A -> B -> C -> D đúng thứ tự
+  let filteredMatches = [];
+  let keyIndex = 0;
   for (let m of matches) {
-    if (m.key === targetKeys[expectedIndex]) {
-      validSequence.push(m);
-      expectedIndex++;
-      if (expectedIndex >= targetKeys.length) break;
+    if (m.key === targetKeys[keyIndex]) {
+      filteredMatches.push(m);
+      keyIndex++;
+      if (keyIndex >= targetKeys.length) break;
     }
   }
 
-  // Nếu không đủ chuỗi A, B, C, D chuẩn thì fallback lại
-  if (validSequence.length === 0) {
-    return { stem: text, choices: {} };
+  if (filteredMatches.length === 0) {
+    return { stem: text.trim(), choices: {} };
   }
 
-  let stem = text.substring(0, validSequence[0].matchIndex).trim();
+  let stem = text.substring(0, filteredMatches[0].matchIndex).trim();
 
-  for (let i = 0; i < validSequence.length; i++) {
-    const current = validSequence[i];
-    const nextIndex = (i < validSequence.length - 1) ? validSequence[i + 1].matchIndex : text.length;
+  for (let i = 0; i < filteredMatches.length; i++) {
+    const current = filteredMatches[i];
+    const nextStart = (i < filteredMatches.length - 1) ? filteredMatches[i + 1].matchIndex : text.length;
     
-    let rawVal = text.substring(current.startContentIndex, nextIndex).trim();
-    rawVal = rawVal.replace(/\.\s*$/, ''); // Gỡ dấu chấm cuối câu phương án nếu có
+    let rawVal = text.substring(current.contentStart, nextStart).trim();
+    rawVal = rawVal.replace(/\.\s*$/, ''); // Bỏ dấu chấm thừa cuối câu
     
-    choices[current.key] = formatOptionTextClean(rawVal);
+    choices[current.key] = formatOptionClean(rawVal);
   }
 
   return { stem: stem, choices: choices };
 }
-
-/* =========================================================
-   HÀM CHUẨN HÓA NỘI DUNG VÀ DẤU $ TOÁN HỌC
-   ========================================================= */
 
 function cleanHeaderPrefix(rawText) {
   let str = rawText.trim();
@@ -271,43 +266,22 @@ function cleanHeaderPrefix(rawText) {
   return str;
 }
 
-function formatOptionTextClean(str) {
+function formatOptionClean(str) {
   if (!str) return '';
   let text = str.trim();
 
-  // Bỏ hết các dấu $ kép hoặc rác dính vào
+  // Bỏ hết các dấu $ kép bị lặp
   text = text.replace(/\$\$+/g, '$');
 
-  // Nếu chuỗi chứa các ký tự/lệnh toán học LaTeX mà chưa bọc $ trọn vẹn
-  const containsMathSymbol = /\\[a-zA-Z]+|[\(\)\=\+\-\cup\cap\backslash\subset\in]/.test(text);
-  const isWrapped = text.startsWith('$') && text.endsWith('$') && (text.match(/\$/g) || []).length === 2;
+  // Nếu phương án có lệnh LaTeX như \cup, \cap, \backslash mà chưa bọc $
+  const hasLatex = /\\[a-zA-Z]+/.test(text);
+  const isWrapped = text.startsWith('$') && text.endsWith('$');
 
-  if (containsMathSymbol && !isWrapped) {
-    // Làm sạch các dấu $ lẻ ngoằn ngoè bên trong rồi bọc trọn vẹn
-    let unescaped = text.replace(/\$/g, '').trim();
-    return `$${unescaped}$`;
+  if (hasLatex && !isWrapped) {
+    return `$${text}$`;
   }
 
   return text;
-}
-
-function cleanTextSpacingAndLines(text) {
-  if (!text) return '';
-
-  let cleaned = text.replace(/\$\$/g, '$');
-  cleaned = cleaned.replace(/\s+([\?\,\.\!])/g, '$1');
-  
-  let lines = cleaned.split('\n');
-  let filteredLines = [];
-
-  for (let i = 0; i < lines.length; i++) {
-    let line = lines[i].trimEnd();
-    if (line.trim() !== '') {
-      filteredLines.push(line);
-    }
-  }
-
-  return filteredLines.join('\n').trim();
 }
 
 function setEditorValue(id, val) {
