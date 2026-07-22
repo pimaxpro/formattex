@@ -215,6 +215,65 @@ function processMode3() {
 }
 
 /* =========================================================
+   CN 4: CHUẨN HÓA INDENT / TAB LATEX (CONVENTION FORMATTER)
+   ========================================================= */
+
+function processMode4() {
+  const inputEl = document.getElementById('input-ex');
+  if (!inputEl || !inputEl.value.trim()) return;
+  const input = inputEl.value;
+
+  const formattedCode = formatLatexIndent(input);
+  setEditorValue('output-ex', formattedCode);
+}
+
+function formatLatexIndent(code) {
+  const lines = code.split('\n');
+  let indentLevel = 0;
+  const indentStr = '    '; // 4 khoảng trắng
+  let result = [];
+
+  for (let i = 0; i < lines.length; i++) {
+    let line = lines[i].trim();
+
+    // Bỏ qua nếu dòng rỗng hoàn toàn
+    if (line === '') {
+      result.push('');
+      continue;
+    }
+
+    // Tự động đóng cấp độ Indent nếu gặp đóng môi trường hoặc đóng ngoặc nhọn đơn dòng
+    const isEndEnv = /^\\end\{[^\}]+\}/.test(line);
+    const isClosingBrace = /^\}\s*$/.test(line) || /^\}\s*\\[a-zA-Z]+/.test(line);
+
+    if ((isEndEnv || isClosingBrace) && indentLevel > 0) {
+      indentLevel--;
+    }
+
+    // Áp dụng Indent cho dòng hiện tại
+    const currentIndent = indentStr.repeat(indentLevel);
+    result.push(currentIndent + line);
+
+    // Tự động tăng cấp độ Indent cho dòng tiếp theo nếu gặp mở môi trường hoặc mở ngoặc nhọn
+    const isBeginEnv = /^\\begin\{[^\}]+\}/.test(line);
+    const isOpeningBrace = /^\{$/.test(line) || /\{$/.test(line);
+
+    // Nếu là môi trường hoặc mở ngoặc nhọn đơn dòng {
+    if (isBeginEnv || isOpeningBrace) {
+      indentLevel++;
+    }
+  }
+
+  // Chuẩn hóa khoảng trắng và dòng trống
+  return cleanBlankLines(result.join('\n'));
+}
+
+function cleanBlankLines(text) {
+  // Loại bỏ các dòng trắng thừa lặp lại > 2 dòng
+  return text.replace(/\n{3,}/g, '\n\n').trim();
+}
+
+/* =========================================================
    THUẬT TOÁN PLACEHOLDER: BẢO VỆ TUYỆT ĐỐI MÔI TRƯỜNG MATH
    ========================================================= */
 
