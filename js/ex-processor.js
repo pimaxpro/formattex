@@ -149,6 +149,9 @@ function processMode2() {
 /* =========================================================
    CN 3: TRẢ LỜI NGẮN (\shortans)
    ========================================================= */
+   /* =========================================================
+   CN 3: TRẢ LỜI NGẮN (\shortans) — FIXED ANCHOR & PATTERN
+   ========================================================= */
 function processMode3() {
   const inputEl = document.getElementById('input-ex');
   if (!inputEl || !inputEl.value.trim()) return;
@@ -171,13 +174,27 @@ function processMode3() {
     }
 
     let shortAnswerValue = "";
-    const shortAnsHeaderRegex = /(?:Đáp\s*án|Đáp\s*số|Kết\s*quả)[\.\s:]*([^\n]+)/i;
-    const ansMatch = questionPart.match(shortAnsHeaderRegex) || solutionPart.match(shortAnsHeaderRegex);
+
+    // REGEX CHUẨN: Chỉ bắt "Đáp án/Đáp số/Kết quả/KQ" ở ĐẦU DÒNG hoặc CUỐI CÂU
+    // Cấu trúc: (Đầu dòng hoặc \n) + (Đáp án|Đáp số|Kết quả|KQ) + (dấu . : hoặc khoảng trắng) + Nội dung đáp án đến hết dòng
+    const strictShortAnsRegex = /(?:^|\n)\s*(?:Đáp\s*án|Đáp\s*số|Kết\s*quả|KQ)[\.\s:]*([^\n]+)/i;
+
+    let ansMatch = questionPart.match(strictShortAnsRegex) || solutionPart.match(strictShortAnsRegex);
 
     if (ansMatch) {
       shortAnswerValue = ansMatch[1].trim();
-      questionPart = questionPart.replace(shortAnsHeaderRegex, '').trim();
-      solutionPart = solutionPart.replace(shortAnsHeaderRegex, '').trim();
+      // Bỏ đoạn "Đáp án..." ra khỏi nội dung câu hỏi/lời giải
+      questionPart = questionPart.replace(strictShortAnsRegex, '').trim();
+      solutionPart = solutionPart.replace(strictShortAnsRegex, '').trim();
+    } else {
+      // Fallback: Tìm dòng cuối cùng nếu có dạng gán giá trị ngắn (VD dán dính không xuống dòng)
+      const inlineAnsRegex = /(?:Đáp\s*án|Đáp\s*số|KQ)[\.\s:]*([A-Za-z0-9\$\\\+\-\{\}\.,\s]+)$/i;
+      let inlineMatch = questionPart.match(inlineAnsRegex) || solutionPart.match(inlineAnsRegex);
+      if (inlineMatch) {
+        shortAnswerValue = inlineMatch[1].trim();
+        questionPart = questionPart.replace(inlineAnsRegex, '').trim();
+        solutionPart = solutionPart.replace(inlineAnsRegex, '').trim();
+      }
     }
 
     let mainQuestion = questionPart.trim();
