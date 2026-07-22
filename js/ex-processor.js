@@ -1,5 +1,5 @@
 /* =========================================================
-   PIMAX TOOL — EX ENVIRONMENT PROCESSOR (STABLE INDENT & LINE PARSER)
+   PIMAX TOOL — EX ENVIRONMENT PROCESSOR (PLACEHOLDER PARSER)
    ========================================================= */
 
 if (typeof window.subModeEx === 'undefined') {
@@ -56,8 +56,8 @@ function processMode1() {
       questionPart = questionPart.replace(/(?:Chọn\s*(?:ý|đáp\s*án)?|Đáp\s*án)\s*[A-D][\.\s]*/gi, '').trim();
     }
 
-    // TÁCH PHƯƠNG ÁN AN TOÀN
-    const optionsData = parseChoicesLineByLine(questionPart, ['A', 'B', 'C', 'D']);
+    // TÁCH PHƯƠNG ÁN BẰNG THUẬT TOÁN PLACEHOLDER SIÊU AN TOÀN
+    const optionsData = parseChoicesWithPlaceholder(questionPart, ['A', 'B', 'C', 'D']);
 
     let mainQuestion = optionsData.stem;
 
@@ -120,7 +120,7 @@ function processMode2() {
     questionPart = questionPart.replace(/(?:Đáp\s*án|Chọn)[\.\s:]*([DĐS[\s\-\,\.]+){4}\.?\s*/gi, '').trim();
     solutionPart = solutionPart.replace(/(?:Đáp\s*án|Chọn)[\.\s:]*([DĐS[\s\-\,\.]+){4}\.?\s*/gi, '').trim();
 
-    const optionsData = parseChoicesLineByLine(questionPart, ['A', 'B', 'C', 'D']);
+    const optionsData = parseChoicesWithPlaceholder(questionPart, ['A', 'B', 'C', 'D']);
 
     let mainQuestion = optionsData.stem;
 
@@ -198,63 +198,70 @@ function processMode3() {
 }
 
 /* =========================================================
-   THUẬT TOÁN TÁCH PHƯƠNG ÁN AN TOÀN TUỆT ĐỐI (LINE & ANCHOR)
+   THUẬT TOÁN PLACEHOLDER: BẢO VỆ TUYỆT ĐỐI MÔI TRƯỜNG MATH
    ========================================================= */
 
-function parseChoicesLineByLine(text, targetKeys) {
-  let choices = {};
+function parseChoicesWithPlaceholder(text, targetKeys) {
+  let mathBlocks = [];
   
-  // Regex bắt nhãn phương án chỉ khi đứng ở đầu dòng HOẶC sau khoảng trắng có dạng A., B., C., D.
-  // và kiểm tra ranh giới bằng Lookahead để tránh ăn nhầm vào biểu thức toán
-  const choiceRegex = /(?:^|\n|\r)\s*([A-Da-d])[\.\)]\s*/g;
+  // 1. Ẩn tất cả công thức toán $...$ vào danh sách mảng tạm
+  let maskedText = text.replace(/\$((?:\\.|[^$])+)\$/g, (m) => {
+    mathBlocks.push(m);
+    return `___MATH_BLOCK_${mathBlocks.length - 1}___`;
+  });
+
+  // 2. Tìm vị trí nhãn A., B., C., D. trên chuỗi đã được giấu công thức
+  const choiceRegex = /(?:^|\n|\s+)([A-Da-d])[\.\)]\s*/g;
   let matches = [];
   let match;
 
-  while ((match = choiceRegex.exec(text)) !== null) {
+  while ((match = choiceRegex.exec(maskedText)) !== null) {
     const key = match[1].toUpperCase();
-    
-    // Kiểm tra xem vị trí nhãn có nằm bên trong dấu $...$ hay không
-    const beforeText = text.substring(0, match.index);
-    const dollarCount = (beforeText.match(/\$/g) || []).length;
-    
-    // Nếu số lượng $ trước nhãn là số chẵn -> Nhãn nằm ngoài môi trường Toán -> Hợp lệ!
-    if (dollarCount % 2 === 0) {
-      matches.push({
-        key: key,
-        matchIndex: match.index,
-        contentStart: match.index + match[0].length
-      });
-    }
+    matches.push({
+      key: key,
+      matchIndex: match.index,
+      contentStart: match.index + match[0].length
+    });
   }
 
-  // Lọc lấy danh sách A -> B -> C -> D đúng thứ tự
-  let filteredMatches = [];
-  let keyIndex = 0;
+  // Lọc đúng tuần tự A -> B -> C -> D
+  let validMatches = [];
+  let expectedIndex = 0;
   for (let m of matches) {
-    if (m.key === targetKeys[keyIndex]) {
-      filteredMatches.push(m);
-      keyIndex++;
-      if (keyIndex >= targetKeys.length) break;
+    if (m.key === targetKeys[expectedIndex]) {
+      validMatches.push(m);
+      expectedIndex++;
+      if (expectedIndex >= targetKeys.length) break;
     }
   }
 
-  if (filteredMatches.length === 0) {
-    return { stem: text.trim(), choices: {} };
+  if (validMatches.length === 0) {
+    return { stem: restoreMath(maskedText, mathBlocks).trim(), choices: {} };
   }
 
-  let stem = text.substring(0, filteredMatches[0].matchIndex).trim();
+  // Tách đề bài và các phương án
+  let stem = restoreMath(maskedText.substring(0, validMatches[0].matchIndex), mathBlocks).trim();
+  let choices = {};
 
-  for (let i = 0; i < filteredMatches.length; i++) {
-    const current = filteredMatches[i];
-    const nextStart = (i < filteredMatches.length - 1) ? filteredMatches[i + 1].matchIndex : text.length;
+  for (let i = 0; i < validMatches.length; i++) {
+    const current = validMatches[i];
+    const nextStart = (i < validMatches.length - 1) ? validMatches[i + 1].matchIndex : maskedText.length;
     
-    let rawVal = text.substring(current.contentStart, nextStart).trim();
-    rawVal = rawVal.replace(/\.\s*$/, ''); // Bỏ dấu chấm thừa cuối câu
+    let rawVal = maskedText.substring(current.contentStart, nextStart).trim();
+    rawVal = rawVal.replace(/\.\s*$/, ''); // Bỏ dấu chấm thừa cuối đáp án
     
-    choices[current.key] = formatOptionClean(rawVal);
+    // Khôi phục lại công thức toán cho từng phương án
+    let restoredVal = restoreMath(rawVal, mathBlocks);
+    choices[current.key] = formatOptionClean(restoredVal);
   }
 
   return { stem: stem, choices: choices };
+}
+
+function restoreMath(maskedText, mathBlocks) {
+  return maskedText.replace(/___MATH_BLOCK_(\d+)___/g, (m, id) => {
+    return mathBlocks[parseInt(id, 10)];
+  });
 }
 
 function cleanHeaderPrefix(rawText) {
@@ -270,10 +277,10 @@ function formatOptionClean(str) {
   if (!str) return '';
   let text = str.trim();
 
-  // Bỏ hết các dấu $ kép bị lặp
+  // Bỏ bớt dấu $ trùng
   text = text.replace(/\$\$+/g, '$');
 
-  // Nếu phương án có lệnh LaTeX như \cup, \cap, \backslash mà chưa bọc $
+  // Nếu phương án chưa có $ bọc mà chứa ký tự toán
   const hasLatex = /\\[a-zA-Z]+/.test(text);
   const isWrapped = text.startsWith('$') && text.endsWith('$');
 
