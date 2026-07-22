@@ -1,5 +1,5 @@
 /* =========================================================
-   PIMAX TOOL — EX ENVIRONMENT PROCESSOR (CN1, CN2, CN3 FULL FIX)
+   PIMAX TOOL — EX ENVIRONMENT PROCESSOR (FIX CHOICEREX & MATH)
    ========================================================= */
 
 if (typeof window.subModeEx === 'undefined') {
@@ -56,28 +56,15 @@ function processMode1() {
       questionPart = questionPart.replace(/(?:Chọn\s*(?:ý|đáp\s*án)?|Đáp\s*án)\s*[A-D][\.\s]*/gi, '').trim();
     }
 
-    // TÁCH PHƯƠNG ÁN AN TOÀN TRÁNH BẮT LẦM CÁC CHỮ CÁI LATEX
-    const choiceMatches = Array.from(questionPart.matchAll(/(?:^|\n|\s+)([A-D])[\.\)]\s*/g));
-    let choices = {};
-    let firstChoiceIndex = -1;
+    // TÁCH ĐÁP ÁN CHUẨN XÁC KHÔNG BỊ NUỐT CÁC CHỮ CÁI A, B, C, D TRONG MÔI TRƯỜNG MATH $...$
+    const optionsData = parseChoiceOptions(questionPart, ['A', 'B', 'C', 'D']);
 
-    if (choiceMatches.length > 0) {
-      firstChoiceIndex = choiceMatches[0].index;
-      for (let i = 0; i < choiceMatches.length; i++) {
-        const key = choiceMatches[i][1].toUpperCase();
-        const startVal = choiceMatches[i].index + choiceMatches[i][0].length;
-        const endVal = (i < choiceMatches.length - 1) ? choiceMatches[i + 1].index : questionPart.length;
-        let choiceVal = questionPart.substring(startVal, endVal).trim().replace(/\.\s*$/, '');
-        choices[key] = formatOptionText(choiceVal);
-      }
-    }
-
-    let mainQuestion = firstChoiceIndex !== -1 ? questionPart.substring(0, firstChoiceIndex).trim() : questionPart;
+    let mainQuestion = optionsData.stem;
     mainQuestion = fixMathSpacing(mainQuestion);
 
     let exCode = `\\begin{ex}\n    ${mainQuestion}\n    \\choice\n`;
     ['A', 'B', 'C', 'D'].forEach(key => {
-      let optionText = choices[key] || '';
+      let optionText = optionsData.choices[key] || '';
       let isTrue = (key === trueAnswerKey) ? '\\True ' : '';
       exCode += `    {${isTrue}${optionText}}\n`;
     });
@@ -135,28 +122,15 @@ function processMode2() {
     questionPart = questionPart.replace(/(?:Đáp\s*án|Chọn)[\.\s:]*([DĐS[\s\-\,\.]+){4}\.?\s*/gi, '').trim();
     solutionPart = solutionPart.replace(/(?:Đáp\s*án|Chọn)[\.\s:]*([DĐS[\s\-\,\.]+){4}\.?\s*/gi, '').trim();
 
-    const choiceMatches = Array.from(questionPart.matchAll(/(?:^|\n|\s+)([a-dA-D])[\)\.]\s*/g));
-    let choices = {};
-    let firstChoiceIndex = -1;
+    const optionsData = parseChoiceOptions(questionPart, ['a', 'b', 'c', 'd']);
 
-    if (choiceMatches.length > 0) {
-      firstChoiceIndex = choiceMatches[0].index;
-      for (let i = 0; i < choiceMatches.length; i++) {
-        const key = choiceMatches[i][1].toLowerCase();
-        const startVal = choiceMatches[i].index + choiceMatches[i][0].length;
-        const endVal = (i < choiceMatches.length - 1) ? choiceMatches[i + 1].index : questionPart.length;
-        let choiceVal = questionPart.substring(startVal, endVal).trim().replace(/\.\s*$/, '');
-        choices[key] = formatOptionText(choiceVal);
-      }
-    }
-
-    let mainQuestion = firstChoiceIndex !== -1 ? questionPart.substring(0, firstChoiceIndex).trim() : questionPart;
+    let mainQuestion = optionsData.stem;
     mainQuestion = fixMathSpacing(mainQuestion);
 
     let exCode = `\\begin{ex}\n    ${mainQuestion}\n    \\choiceTF\n`;
     const keys = ['a', 'b', 'c', 'd'];
     keys.forEach((key, index) => {
-      let optionText = choices[key] || '';
+      let optionText = optionsData.choices[key] || '';
       let isTrue = (tfPattern && tfPattern[index]) ? '\\True ' : '';
       exCode += `    {${isTrue}${optionText}}\n`;
     });
@@ -229,7 +203,74 @@ function processMode3() {
 }
 
 /* =========================================================
-   HÀM BỔ TRỢ & TỰ ĐỘNG CẬP NHẬT SỐ DÒNG
+   BO PHAN TACH PHUONG AN THONG MINH CHONG NHOI CONG THUC
+   ========================================================= */
+
+function parseChoiceOptions(text, keysList) {
+  let choices = {};
+  let isOutsideMath = true;
+  let matches = [];
+
+  // Tìm vị trí các nhãn A., B., C., D. chuẩn xác (Chỉ tìm khi nằm ngoài $)
+  for (let i = 0; i < text.length; i++) {
+    if (text[i] === '$') {
+      isOutsideMath = !isOutsideMath;
+    }
+
+    if (isOutsideMath) {
+      // Kiểm tra ranh giới nhãn phương án
+      const sub = text.substring(i);
+      const m = sub.match(/^(?:^|\n|\s+)([A-Da-d])[\.\)]\s*/);
+      if (m) {
+        const key = m[1];
+        if (keysList.includes(key) || keysList.includes(key.toUpperCase()) || keysList.includes(key.toLowerCase())) {
+          matches.push({
+            key: key.toUpperCase(),
+            index: i + (m[0].length - m[1].length - m[0].trimStart().length) - (m[0].startsWith(' ') || m[0].startsWith('\n') ? 0 : 0),
+            fullMatchLength: m[0].length,
+            matchStr: m[0]
+          });
+          i += m[0].length - 1; // Nhảy qua đoạn nhãn vừa bắt
+        }
+      }
+    }
+  }
+
+  // Lọc trùng và sắp xếp thứ tự nhãn A -> B -> C -> D
+  let cleanMatches = [];
+  let foundKeys = new Set();
+  for (let m of matches) {
+    if (!foundKeys.has(m.key)) {
+      foundKeys.add(m.key);
+      cleanMatches.push(m);
+    }
+  }
+
+  if (cleanMatches.length === 0) {
+    return { stem: text, choices: {} };
+  }
+
+  let stem = text.substring(0, cleanMatches[0].index).trim();
+
+  for (let i = 0; i < cleanMatches.length; i++) {
+    const current = cleanMatches[i];
+    const startVal = current.index + current.fullMatchLength;
+    const endVal = (i < cleanMatches.length - 1) ? cleanMatches[i + 1].index : text.length;
+
+    let rawVal = text.substring(startVal, endVal).trim();
+    // Bỏ dấu chấm thừa ở cuối đáp án nếu có
+    rawVal = rawVal.replace(/\.\s*$/, '');
+    
+    // Đưa vào chuẩn hóa định dạng toán
+    choices[current.key.toUpperCase()] = formatOptionText(rawVal);
+    choices[current.key.toLowerCase()] = choices[current.key.toUpperCase()];
+  }
+
+  return { stem: stem, choices: choices };
+}
+
+/* =========================================================
+   HÀM BỔ TRỢ & CHUẨN HÓA DẤU $ TOÁN HỌC
    ========================================================= */
 
 function cleanHeaderPrefix(rawText) {
@@ -244,19 +285,20 @@ function cleanHeaderPrefix(rawText) {
 function formatOptionText(str) {
   if (!str) return '';
   let text = str.trim();
-  
-  // NẾU CÓ CÁC LỆNH LATEX MÀ CHƯA CÓ DẤU $ THÌ BỌC VÀO $...$
-  const hasLatexCommand = /\\[a-zA-Z]+/.test(text);
-  const isWrapped = text.startsWith('$') && text.endsWith('$');
 
-  if (hasLatexCommand && !isWrapped) {
-    return `$${text}$`;
+  // Làm sạch các dấu $ trùng lặp từ trước
+  text = text.replace(/\$\$+/g, '$');
+
+  // Kiểm tra nếu có lệnh LaTeX (\cup, \cap, \backslash...) mà chưa được bọc $
+  const hasLatexCmd = /\\[a-zA-Z]+/.test(text);
+  const isFullyWrapped = text.startsWith('$') && text.endsWith('$') && (text.match(/\$/g) || []).length === 2;
+
+  if (hasLatexCmd && !isFullyWrapped) {
+    // Nếu chưa bọc $ thì bọc lại toàn bộ phương án
+    text = text.replace(/^\$|\$$/g, ''); // Bỏ các dấu $ lẻ loi ở đầu/cuối
+    return `$${text.trim()}$`;
   }
 
-  const containsWords = /[a-zA-ZÀ-ỹ]/.test(text.replace(/\\[a-zA-Z]+/g, ''));
-  if (!containsWords && !isWrapped) {
-    return `$${text}$`;
-  }
   return fixMathSpacing(text);
 }
 
@@ -264,18 +306,19 @@ function fixMathSpacing(str) {
   if (!str) return '';
   let text = str;
 
-  text = text.replace(/\$+/g, '$');
+  // Dọn dẹp dấu $ trùng lặp
+  text = text.replace(/\$\$+/g, '$');
+  
+  // Chuẩn hóa khoảng trắng bên trong công thức $ ... $
   text = text.replace(/\$((?:\\.|[^$])+)\$/g, (m, inner) => `$${inner.trim()}$`);
 
-  // Tránh dán cách làm hỏng \backslash hoặc các ký tự đặc biệt
+  // Đảm bảo khoảng cách giữa chữ tiếng Việt và dấu $
   text = text.replace(/([\p{L}\p{N}:,;\.\?!])\$/gu, '$1 $');
   text = text.replace(/\$([\p{L}\p{N}])/gu, '$ $1');
 
   text = text.replace(/[ \t]+/g, ' ');
   text = text.replace(/\s+([\.,;\)])/g, '$1');
   text = text.replace(/([\(\[])\s+/g, '$1');
-
-  text = text.replace(/\$((?:\\.|[^$])+)\$/g, (m, inner) => `$${inner.trim()}$`);
 
   return text.trim();
 }
