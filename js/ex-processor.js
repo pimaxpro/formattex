@@ -2,6 +2,10 @@
    PIMAX TOOL — EX ENVIRONMENT PROCESSOR (CN1, CN2, CN3 FULL FIX)
    ========================================================= */
 
+if (typeof window.subModeEx === 'undefined') {
+  window.subModeEx = 1;
+}
+
 function processExEnvironment() {
   const currentMode = window.subModeEx || 1;
   
@@ -52,16 +56,20 @@ function processMode1() {
       questionPart = questionPart.replace(/(?:Chọn\s*(?:ý|đáp\s*án)?|Đáp\s*án)\s*[A-D][\.\s]*/gi, '').trim();
     }
 
-    const choiceRegex = /(?:^|\n|\s)\s*([A-D])[\.\)]\s*([\s\S]*?)(?=(?:\n|\s)\s*[A-D][\.\)]|$)/gi;
+    // TÁCH PHƯƠNG ÁN AN TOÀN TRÁNH BẮT LẦM CÁC CHỮ CÁI LATEX
+    const choiceMatches = Array.from(questionPart.matchAll(/(?:^|\n|\s+)([A-D])[\.\)]\s*/g));
     let choices = {};
-    let matches;
     let firstChoiceIndex = -1;
 
-    while ((matches = choiceRegex.exec(questionPart)) !== null) {
-      if (firstChoiceIndex === -1) firstChoiceIndex = matches.index;
-      const key = matches[1].toUpperCase();
-      let choiceVal = matches[2].trim().replace(/\.\s*$/, '');
-      choices[key] = formatOptionText(choiceVal);
+    if (choiceMatches.length > 0) {
+      firstChoiceIndex = choiceMatches[0].index;
+      for (let i = 0; i < choiceMatches.length; i++) {
+        const key = choiceMatches[i][1].toUpperCase();
+        const startVal = choiceMatches[i].index + choiceMatches[i][0].length;
+        const endVal = (i < choiceMatches.length - 1) ? choiceMatches[i + 1].index : questionPart.length;
+        let choiceVal = questionPart.substring(startVal, endVal).trim().replace(/\.\s*$/, '');
+        choices[key] = formatOptionText(choiceVal);
+      }
     }
 
     let mainQuestion = firstChoiceIndex !== -1 ? questionPart.substring(0, firstChoiceIndex).trim() : questionPart;
@@ -113,7 +121,6 @@ function processMode2() {
       solutionPart = content.substring(solMatch.index + solMatch[0].length).trim();
     }
 
-    // Tách mẫu Đúng/Sai (Đ S D S)
     let tfPattern = null;
     const answerTFRegex = /(?:Đáp\s*án|Chọn)[\.\s:]*([DĐS[\s\-\,\.]+){4}/gi;
 
@@ -128,23 +135,24 @@ function processMode2() {
     questionPart = questionPart.replace(/(?:Đáp\s*án|Chọn)[\.\s:]*([DĐS[\s\-\,\.]+){4}\.?\s*/gi, '').trim();
     solutionPart = solutionPart.replace(/(?:Đáp\s*án|Chọn)[\.\s:]*([DĐS[\s\-\,\.]+){4}\.?\s*/gi, '').trim();
 
-    // Regex linh hoạt bắt a), b), c), d) hoặc A), B), C), D)
-    const choiceTFRegex = /(?:^|\n|\s)\s*([a-dA-D])[\)\.]\s*([\s\S]*?)(?=(?:\n|\s)\s*[a-dA-D][\)\.]|$)/gi;
+    const choiceMatches = Array.from(questionPart.matchAll(/(?:^|\n|\s+)([a-dA-D])[\)\.]\s*/g));
     let choices = {};
-    let matches;
     let firstChoiceIndex = -1;
 
-    while ((matches = choiceTFRegex.exec(questionPart)) !== null) {
-      if (firstChoiceIndex === -1) firstChoiceIndex = matches.index;
-      const key = matches[1].toLowerCase();
-      let choiceVal = matches[2].trim().replace(/\.\s*$/, '');
-      choices[key] = formatOptionText(choiceVal);
+    if (choiceMatches.length > 0) {
+      firstChoiceIndex = choiceMatches[0].index;
+      for (let i = 0; i < choiceMatches.length; i++) {
+        const key = choiceMatches[i][1].toLowerCase();
+        const startVal = choiceMatches[i].index + choiceMatches[i][0].length;
+        const endVal = (i < choiceMatches.length - 1) ? choiceMatches[i + 1].index : questionPart.length;
+        let choiceVal = questionPart.substring(startVal, endVal).trim().replace(/\.\s*$/, '');
+        choices[key] = formatOptionText(choiceVal);
+      }
     }
 
     let mainQuestion = firstChoiceIndex !== -1 ? questionPart.substring(0, firstChoiceIndex).trim() : questionPart;
     mainQuestion = fixMathSpacing(mainQuestion);
 
-    // Xuất mã \choiceTF
     let exCode = `\\begin{ex}\n    ${mainQuestion}\n    \\choiceTF\n`;
     const keys = ['a', 'b', 'c', 'd'];
     keys.forEach((key, index) => {
@@ -204,7 +212,6 @@ function processMode3() {
 
     let mainQuestion = fixMathSpacing(questionPart);
 
-    // Xuất mã \shortans
     let exCode = `\\begin{ex}\n    ${mainQuestion}\n    \\shortans{${shortAnswerValue}}\n`;
     if (solutionPart) {
       let cleanSol = fixMathSpacing(solutionPart);
@@ -237,8 +244,17 @@ function cleanHeaderPrefix(rawText) {
 function formatOptionText(str) {
   if (!str) return '';
   let text = str.trim();
+  
+  // NẾU CÓ CÁC LỆNH LATEX MÀ CHƯA CÓ DẤU $ THÌ BỌC VÀO $...$
+  const hasLatexCommand = /\\[a-zA-Z]+/.test(text);
+  const isWrapped = text.startsWith('$') && text.endsWith('$');
+
+  if (hasLatexCommand && !isWrapped) {
+    return `$${text}$`;
+  }
+
   const containsWords = /[a-zA-ZÀ-ỹ]/.test(text.replace(/\\[a-zA-Z]+/g, ''));
-  if (!containsWords && !text.startsWith('$') && !text.endsWith('$')) {
+  if (!containsWords && !isWrapped) {
     return `$${text}$`;
   }
   return fixMathSpacing(text);
@@ -251,6 +267,7 @@ function fixMathSpacing(str) {
   text = text.replace(/\$+/g, '$');
   text = text.replace(/\$((?:\\.|[^$])+)\$/g, (m, inner) => `$${inner.trim()}$`);
 
+  // Tránh dán cách làm hỏng \backslash hoặc các ký tự đặc biệt
   text = text.replace(/([\p{L}\p{N}:,;\.\?!])\$/gu, '$1 $');
   text = text.replace(/\$([\p{L}\p{N}])/gu, '$ $1');
 
@@ -259,8 +276,6 @@ function fixMathSpacing(str) {
   text = text.replace(/([\(\[])\s+/g, '$1');
 
   text = text.replace(/\$((?:\\.|[^$])+)\$/g, (m, inner) => `$${inner.trim()}$`);
-
-  text = cleanTextSpacingAndLines(text);
 
   return text.trim();
 }
