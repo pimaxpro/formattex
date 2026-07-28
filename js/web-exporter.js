@@ -1,5 +1,5 @@
 /* =========================================================
-   FORMATTEX — WEB EXPORTER MODULE (ĐÃ FIX LỖI BẮT \True TRONG \left\{ )
+   FORMATTEX — WEB EXPORTER MODULE (SỬA LỖI DƯ THỪA { } CỦA IMMINI)
    ========================================================= */
 
 /** Trích xuất chính xác 1 nhóm ngoặc nhọn cân bằng {}, bỏ qua ngoặc thoát \{ và \} */
@@ -7,7 +7,6 @@ function extractBracedGroup(str, startIndex) {
   let depth = 0;
   let start = -1;
   for (let i = startIndex; i < str.length; i++) {
-    // Bỏ qua ký tự thoát \{ và \}
     if (str[i] === '\\' && (i + 1 < str.length) && (str[i + 1] === '{' || str[i + 1] === '}')) {
       i++;
       continue;
@@ -107,29 +106,39 @@ function cleanTextForWeb(text) {
     } else break;
   }
 
-  // 2. Gỡ khối TikZ
-  cleaned = cleaned.replace(/\\begin\{tikzpicture\}[\s\S]*?\\end\{tikzpicture\}/gi, '');
-
-  // 3. Chỉ gỡ thẻ \begin{center} và \end{center}, giữ lại nội dung bên trong
-  cleaned = cleaned.replace(/\\begin\{center\}/gi, '');
-  cleaned = cleaned.replace(/\\end\{center\}/gi, '');
-
-  // 4. Xử lý \immini
+  // 2. Xử lý \immini chuẩn xác: Bóc đối số 1 (Đề) và gỡ triệt để đối số 2 (Hình)
   cleaned = cleaned.replace(/\\begin\{immini\}[\s\S]*?\\end\{immini\}/gi, '');
-  const imminiRegex = /\\immini\s*\{/g;
+  const imminiRegex = /\\immini\s*/g;
   while ((match = imminiRegex.exec(cleaned)) !== null) {
-    const arg1 = extractBracedGroup(cleaned, match.index + match[0].length - 1);
-    if (arg1) {
-      const arg2 = extractBracedGroup(cleaned, arg1.endIndex + 1);
-      const endIndex = arg2 ? arg2.endIndex : arg1.endIndex;
-      cleaned = cleaned.substring(0, match.index) + arg1.content + cleaned.substring(endIndex + 1);
-      imminiRegex.lastIndex = match.index;
+    const startIdx = match.index;
+    const afterImmini = skipWhitespaceAndComments(cleaned, startIdx + match[0].length);
+    if (cleaned[afterImmini] === '{') {
+      const arg1 = extractBracedGroup(cleaned, afterImmini);
+      if (arg1) {
+        const afterArg1 = skipWhitespaceAndComments(cleaned, arg1.endIndex + 1);
+        let endIdx = arg1.endIndex;
+        if (cleaned[afterArg1] === '{') {
+          const arg2 = extractBracedGroup(cleaned, afterArg1);
+          if (arg2) endIdx = arg2.endIndex;
+        }
+        cleaned = cleaned.substring(0, startIdx) + arg1.content + cleaned.substring(endIdx + 1);
+        imminiRegex.lastIndex = startIdx;
+      } else {
+        cleaned = cleaned.substring(0, startIdx) + cleaned.substring(afterImmini);
+        imminiRegex.lastIndex = startIdx;
+      }
     } else {
-      cleaned = cleaned.substring(0, match.index) + cleaned.substring(match.index + match[0].length);
-      imminiRegex.lastIndex = match.index;
+      cleaned = cleaned.replace(/\\immini\b/gi, '');
+      break;
     }
   }
-  cleaned = cleaned.replace(/\\immini\b/gi, '');
+
+  // 3. Gỡ khối TikZ dư thừa nếu có ngoài immini
+  cleaned = cleaned.replace(/\\begin\{tikzpicture\}[\s\S]*?\\end\{tikzpicture\}/gi, '');
+
+  // 4. Chỉ gỡ thẻ \begin{center} và \end{center}, giữ lại nội dung bên trong
+  cleaned = cleaned.replace(/\\begin\{center\}/gi, '');
+  cleaned = cleaned.replace(/\\end\{center\}/gi, '');
 
   // 5. Chuyển môi trường danh sách
   cleaned = cleaned.replace(/\\begin\{itemize\}([\s\S]*?)\\end\{itemize\}/gi, (m, body) => {
