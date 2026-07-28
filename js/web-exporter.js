@@ -2,9 +2,7 @@
    FORMATTEX — WEB EXPORTER MODULE (VỨT LÊN WEB & GỘP WORD)
    ========================================================= */
 
-/**
- * Trích xuất nội dung bên trong cặp ngoặc nhọn cân bằng {}
- */
+/** Trích xuất nội dung bên trong cặp ngoặc nhọn cân bằng {} */
 function extractBracedGroup(str, startIndex) {
   let depth = 0;
   let start = -1;
@@ -15,10 +13,7 @@ function extractBracedGroup(str, startIndex) {
     } else if (str[i] === '}') {
       depth--;
       if (depth === 0) {
-        return {
-          content: str.substring(start, i),
-          endIndex: i
-        };
+        return { content: str.substring(start, i), endIndex: i };
       }
     }
   }
@@ -33,9 +28,7 @@ function skipWhitespaceAndComments(str, startIndex) {
       continue;
     }
     if (str[curr] === '%' && !/^%\s*\\(ans|shortans)\{/i.test(str.substring(curr))) {
-      while (curr < str.length && str[curr] !== '\n') {
-        curr++;
-      }
+      while (curr < str.length && str[curr] !== '\n') curr++;
       continue;
     }
     break;
@@ -46,7 +39,6 @@ function skipWhitespaceAndComments(str, startIndex) {
 function extractMultipleBracedGroups(str, startIndex) {
   const groups = [];
   let curr = startIndex;
-
   while (curr < str.length) {
     curr = skipWhitespaceAndComments(str, curr);
     if (curr < str.length && str[curr] === '{') {
@@ -54,12 +46,8 @@ function extractMultipleBracedGroups(str, startIndex) {
       if (res) {
         groups.push(res.content);
         curr = res.endIndex + 1;
-      } else {
-        break;
-      }
-    } else {
-      break;
-    }
+      } else break;
+    } else break;
   }
   return { groups, endIndex: curr };
 }
@@ -67,9 +55,7 @@ function extractMultipleBracedGroups(str, startIndex) {
 function cleanComments(text) {
   if (!text) return "";
   return text.split('\n').map(line => {
-    if (/%\s*\\ans\{/i.test(line) || /%\s*\\shortans/i.test(line)) {
-      return line;
-    }
+    if (/%\s*\\ans\{/i.test(line) || /%\s*\\shortans/i.test(line)) return line;
     return line.replace(/(^|[^\\])%.*/, '$1');
   }).join('\n');
 }
@@ -95,15 +81,12 @@ function convertDisplayMathToInline(text) {
 function ensureEndingDot(text) {
   if (!text) return "";
   let trimmed = text.trim();
-  if (!/[.!?]$/.test(trimmed)) {
-    trimmed += ".";
-  }
+  if (!/[.!?]$/.test(trimmed)) trimmed += ".";
   return trimmed;
 }
 
 function cleanTextForWeb(text) {
   if (!text) return "";
-
   let cleaned = cleanComments(text);
   cleaned = convertDisplayMathToInline(cleaned);
 
@@ -114,9 +97,7 @@ function cleanTextForWeb(text) {
     if (res) {
       cleaned = cleaned.substring(0, match.index) + cleaned.substring(res.endIndex + 1);
       loigiaiRegex.lastIndex = match.index;
-    } else {
-      break;
-    }
+    } else break;
   }
 
   cleaned = cleaned.replace(/\\begin\{tikzpicture\}[\s\S]*?\\end\{tikzpicture\}/gi, '');
@@ -139,20 +120,12 @@ function cleanTextForWeb(text) {
   cleaned = cleaned.replace(/\\immini\b/gi, '');
 
   cleaned = cleaned.replace(/\\begin\{itemize\}([\s\S]*?)\\end\{itemize\}/gi, (m, body) => {
-    return '\n' + body.split('\\item')
-      .map(item => item.trim())
-      .filter(item => item.length > 0)
-      .map(item => `- ${item}`)
-      .join('\n');
+    return '\n' + body.split('\\item').map(i => i.trim()).filter(i => i.length > 0).map(i => `- ${i}`).join('\n');
   });
 
   cleaned = cleaned.replace(/\\begin\{enumerate\}([\s\S]*?)\\end\{enumerate\}/gi, (m, body) => {
     let count = 1;
-    return '\n' + body.split('\\item')
-      .map(item => item.trim())
-      .filter(item => item.length > 0)
-      .map(item => `${count++}. ${item}`)
-      .join('\n');
+    return '\n' + body.split('\\item').map(i => i.trim()).filter(i => i.length > 0).map(i => `${count++}. ${i}`).join('\n');
   });
 
   const textCmds = ['textbf', 'textit', 'texttt', 'textsl', 'textsc', 'textsf', 'text'];
@@ -164,36 +137,26 @@ function cleanTextForWeb(text) {
       if (res) {
         cleaned = cleaned.substring(0, m.index) + res.content + cleaned.substring(res.endIndex + 1);
         regex.lastIndex = m.index;
-      } else {
-        break;
-      }
+      } else break;
     }
   });
 
   const layoutCmds = ['noindent', 'hfill', 'vfill', 'centering', 'raggedright', 'raggedleft', 'clearpage', 'newpage'];
   layoutCmds.forEach(cmd => {
-    const r = new RegExp(`\\\\${cmd}\\b`, 'gi');
-    cleaned = cleaned.replace(r, '');
+    cleaned = cleaned.replace(new RegExp(`\\\\${cmd}\\b`, 'gi'), '');
   });
 
   cleaned = cleaned.replace(/%\s*\\ans\{[^}]*\}/gi, '');
   cleaned = cleaned.replace(/(?:%|\s)*\\shortans(?:\[[^\]]*\])?\s*\{[^}]*\}/gi, '');
-
   cleaned = cleaned.replace(/\\\\/g, '\n');
   cleaned = cleaned.replace(/\\vspace\{[^}]*\}/gi, '');
   cleaned = cleaned.replace(/\\hspace\{[^}]*\}/gi, '');
 
-  const lines = cleaned.split('\n')
-    .map(l => l.trim())
-    .filter(l => l.length > 0);
-
-  return lines.join('\n');
+  return cleaned.split('\n').map(l => l.trim()).filter(l => l.length > 0).join('\n');
 }
 
 function hasGraphicElement(exContent) {
-  return /\\begin\{tikzpicture\}/i.test(exContent) || 
-         /\\immini/i.test(exContent) || 
-         /\\begin\{center\}/i.test(exContent);
+  return /\\begin\{tikzpicture\}/i.test(exContent) || /\\immini/i.test(exContent) || /\\begin\{center\}/i.test(exContent);
 }
 
 function processWebExporter() {
@@ -201,7 +164,6 @@ function processWebExporter() {
   const outputEl = document.getElementById('output-web');
 
   if (!inputEl || !outputEl) return;
-
   const rawText = inputEl.value;
   if (!rawText.trim()) {
     alert('Vui lòng nhập mã LaTeX gốc vào ô Input!');
@@ -223,7 +185,6 @@ function processWebExporter() {
       const choiceIdx = exContent.search(/\\choice\b/i);
       const stemRaw = exContent.substring(0, choiceIdx);
       const stemClean = cleanTextForWeb(stemRaw);
-
       const rest = exContent.substring(choiceIdx + 7);
       const { groups } = extractMultipleBracedGroups(rest, 0);
 
@@ -237,16 +198,13 @@ function processWebExporter() {
           correctAnsLabel = labels[idx];
           rawGroupText = rawGroupText.replace(/\\True\b/gi, '').trim();
         }
-
         let textClean = cleanTextForWeb(rawGroupText);
         textClean = ensureEndingDot(textClean);
         choicesFormatted.push(`${labels[idx]}. ${textClean}`);
       });
 
       processedQuestion += stemClean;
-      if (needsImageNote) {
-        processedQuestion += '\n[Thêm hình vẽ vào đây]';
-      }
+      if (needsImageNote) processedQuestion += '\n[Thêm hình vẽ vào đây]';
       processedQuestion += '\n' + choicesFormatted.join('\n');
 
       if (correctAnsLabel) {
@@ -255,12 +213,10 @@ function processWebExporter() {
         processedQuestion += `\nĐáp án TN: `;
         errorMessage = "Câu này thiếu đáp án";
       }
-    }
-    else if (/\\choiceTF[t]?\b/i.test(exContent)) {
+    } else if (/\\choiceTF[t]?\b/i.test(exContent)) {
       const choiceIdx = exContent.search(/\\choiceTF[t]?\b/i);
       const stemRaw = exContent.substring(0, choiceIdx);
       const stemClean = cleanTextForWeb(stemRaw);
-
       const matchTF = exContent.match(/\\choiceTF[t]?\b/i);
       const rest = exContent.substring(choiceIdx + matchTF[0].length);
       const { groups } = extractMultipleBracedGroups(rest, 0);
@@ -272,7 +228,6 @@ function processWebExporter() {
 
       groups.slice(0, 4).forEach((g, idx) => {
         let rawGroupText = g.trim();
-
         if (/\\True\b/i.test(rawGroupText)) {
           tfResults.push('D');
           hasAnyTrue = true;
@@ -280,38 +235,27 @@ function processWebExporter() {
         } else {
           tfResults.push('S');
         }
-
         let textClean = cleanTextForWeb(rawGroupText);
         textClean = ensureEndingDot(textClean);
         choicesFormatted.push(`${labels[idx]}) ${textClean}`);
       });
 
       processedQuestion += stemClean;
-      if (needsImageNote) {
-        processedQuestion += '\n[Thêm hình vẽ vào đây]';
-      }
+      if (needsImageNote) processedQuestion += '\n[Thêm hình vẽ vào đây]';
       processedQuestion += '\n' + choicesFormatted.join('\n');
       processedQuestion += `\nĐáp án DS: ${tfResults.join('|')}`;
 
-      if (!hasAnyTrue) {
-        errorMessage = "Câu này thiếu đáp án";
-      }
-    }
-    else if (/\\doa\b/i.test(exContent) || /\\dienkt\b/i.test(exContent)) {
+      if (!hasAnyTrue) errorMessage = "Câu này thiếu đáp án";
+    } else if (/\\doa\b/i.test(exContent) || /\\dienkt\b/i.test(exContent)) {
       let stemRaw = exContent;
-
       let doaString = "";
       if (/\\doa\b/i.test(stemRaw)) {
         const doaIdx = stemRaw.search(/\\doa\b/i);
         const { groups, endIndex } = extractMultipleBracedGroups(stemRaw, doaIdx + 4);
         if (groups.length > 0) {
           doaString = groups.map(g => {
-            let cleanedItem = g.replace(/\\True\b/gi, '').trim();
-            cleanedItem = cleanTextForWeb(cleanedItem);
-            if (cleanedItem.startsWith('$') && cleanedItem.endsWith('$')) {
-              return cleanedItem;
-            }
-            return `$${cleanedItem}$`;
+            let cleanedItem = cleanTextForWeb(g.replace(/\\True\b/gi, '').trim());
+            return (cleanedItem.startsWith('$') && cleanedItem.endsWith('$')) ? cleanedItem : `$${cleanedItem}$`;
           }).join(' @ ');
         }
         stemRaw = stemRaw.substring(endIndex);
@@ -319,27 +263,14 @@ function processWebExporter() {
 
       let ansList = [];
       const ansMatch = exContent.match(/%\s*\\ans\{([^}]+)\}/i);
-      if (ansMatch) {
-        ansList = ansMatch[1].split('|').map(a => a.trim());
-      }
+      if (ansMatch) ansList = ansMatch[1].split('|').map(a => a.trim());
 
       let dienktCount = 0;
-      stemRaw = stemRaw.replace(/\\dienkt\b/g, () => {
-        dienktCount++;
-        return '<KT/>';
-      });
+      stemRaw = stemRaw.replace(/\\dienkt\b/g, () => { dienktCount++; return '<KT/>'; });
 
       const stemClean = cleanTextForWeb(stemRaw);
-
-      if (doaString) {
-        processedQuestion += doaString + '\n' + stemClean;
-      } else {
-        processedQuestion += stemClean;
-      }
-
-      if (needsImageNote) {
-        processedQuestion += '\n[Thêm hình vẽ vào đây]';
-      }
+      processedQuestion += doaString ? (doaString + '\n' + stemClean) : stemClean;
+      if (needsImageNote) processedQuestion += '\n[Thêm hình vẽ vào đây]';
 
       const formattedAns = ansList.map(a => `${a}>`).join('|');
       processedQuestion += `\nĐáp án KT: ${formattedAns}`;
@@ -347,25 +278,18 @@ function processWebExporter() {
       if (dienktCount === 0 || ansList.length === 0 || dienktCount !== ansList.length) {
         errorMessage = "Câu này thiếu đáp án";
       }
-    }
-    else if (/\\dienkq\b/i.test(exContent) || /\\shortans\b/i.test(exContent)) {
+    } else if (/\\dienkq\b/i.test(exContent) || /\\shortans\b/i.test(exContent)) {
       let stemRaw = exContent;
-
       let shortansVal = "";
       const shortansMatch = exContent.match(/(?:%|\s|^)*\\shortans(?:\s*\[[^\]]*\])?\s*\{([^}]+)\}/i);
       if (shortansMatch) {
-        shortansVal = shortansMatch[1].trim();
-        shortansVal = shortansVal.replace(/\$/g, '').trim();
+        shortansVal = shortansMatch[1].trim().replace(/\$/g, '').trim();
       }
-
       stemRaw = stemRaw.replace(/\\dienkq\b/g, '__________');
-
       const stemClean = cleanTextForWeb(stemRaw);
 
       processedQuestion += stemClean;
-      if (needsImageNote) {
-        processedQuestion += '\n[Thêm hình vẽ vào đây]';
-      }
+      if (needsImageNote) processedQuestion += '\n[Thêm hình vẽ vào đây]';
 
       if (shortansVal) {
         processedQuestion += `\nĐáp án TLN: ${shortansVal}`;
@@ -373,57 +297,43 @@ function processWebExporter() {
         processedQuestion += `\nĐáp án TLN: `;
         errorMessage = "Câu này thiếu đáp án";
       }
-    }
-    else {
-      const stemClean = cleanTextForWeb(exContent);
-      processedQuestion += stemClean;
-      if (needsImageNote) {
-        processedQuestion += '\n[Thêm hình vẽ vào đây]';
-      }
+    } else {
+      processedQuestion += cleanTextForWeb(exContent);
+      if (needsImageNote) processedQuestion += '\n[Thêm hình vẽ vào đây]';
       errorMessage = "Câu này thiếu đáp án";
     }
 
-    if (errorMessage) {
-      processedQuestion += `\n${errorMessage}`;
-    }
-
+    if (errorMessage) processedQuestion += `\n${errorMessage}`;
     results.push(processedQuestion);
     questionIndex++;
   }
 
   outputEl.value = results.join('\n\n');
-
-  if (typeof handleInput === 'function') {
-    handleInput('output-web');
-  }
+  if (typeof handleInput === 'function') handleInput('output-web');
 }
 
 /* =========================================================
-   LOGIC POPUP GỘP WORD (DPI SCALE TỈ LỆ CHUẨN + CHECK ĐÁP ÁN)
+   LOGIC CỬA SỔ POPUP GỘP FILE WORD
    ========================================================= */
 
 let questionImagesMap = {};
 
-/**
- * Kiểm tra các câu thiếu đáp án và bật thông báo
- */
-function checkMissingAnswersInOutput(outputText) {
-  const missingQuestions = [];
-  const questions = outputText.split(/(?=Câu \d+\.)/g);
-
-  questions.forEach(qText => {
-    if (qText.includes("Câu này thiếu đáp án")) {
-      const matchNum = qText.match(/Câu (\d+)\./);
-      if (matchNum) {
-        missingQuestions.push(`Câu ${matchNum[1]}`);
-      }
+/** Cuộn mượt tới câu được chọn từ Menu dọc */
+function scrollToQuestionCard(qIndex) {
+  const card = document.getElementById(`q-card-${qIndex}`);
+  if (card) {
+    card.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    
+    // Highlight câu được chọn
+    document.querySelectorAll('.q-nav-btn').forEach(btn => {
+      btn.classList.remove('bg-indigo-700', 'text-white');
+      btn.classList.add('bg-slate-200', 'text-slate-700');
+    });
+    const activeBtn = document.getElementById(`q-nav-btn-${qIndex}`);
+    if (activeBtn) {
+      activeBtn.classList.remove('bg-slate-200', 'text-slate-700');
+      activeBtn.classList.add('bg-indigo-700', 'text-white');
     }
-  });
-
-  if (missingQuestions.length > 0) {
-    alert(`⚠️ THÔNG BÁO: Phát hiện ${missingQuestions.length} câu CHƯA CÓ ĐÁP ÁN:\n👉 ${missingQuestions.join(', ')}\n\nVui lòng kiểm tra lại trước khi gộp file!`);
-  } else {
-    alert(`✅ TẤT CẢ CÁC CÂU HỎI ĐÃ CÓ ĐẦY ĐỦ ĐÁP ÁN! Sẵn sàng gộp file Word.`);
   }
 }
 
@@ -436,36 +346,59 @@ function openWordMergeModal() {
     return;
   }
 
-  // 1. KIỂM TRA ĐÁP ÁN VÀ THÔNG BÁO NGAY KHI BẤM GỘP FILE
-  checkMissingAnswersInOutput(outputText);
+  // CHECK ĐÁP ÁN: KHÔNG CHO VÀO PHẦN GỘP FILE NẾU CÓ CÂU THIẾU ĐÁP ÁN
+  const missingQuestions = [];
+  const rawQuestions = outputText.split(/(?=Câu \d+\.)/g).filter(q => q.trim().length > 0);
+
+  rawQuestions.forEach(qText => {
+    if (qText.includes("Câu này thiếu đáp án")) {
+      const matchNum = qText.match(/Câu (\d+)\./);
+      if (matchNum) missingQuestions.push(`Câu ${matchNum[1]}`);
+    }
+  });
+
+  if (missingQuestions.length > 0) {
+    alert(`⛔ KHÔNG THỂ VÀO GỘP FILE!\n\nPhát hiện ${missingQuestions.length} câu CHƯA CÓ ĐÁP ÁN:\n👉 ${missingQuestions.join(', ')}\n\nVui lòng cập nhật đầy đủ đáp án ở ô Output trước khi gộp file Word!`);
+    return; // Dừng lại không mở Modal
+  }
 
   const container = document.getElementById('word-merge-preview-container');
+  const navContainer = document.getElementById('word-merge-nav-container');
   const modal = document.getElementById('word-merge-modal');
 
-  if (!container || !modal) {
+  if (!container || !modal || !navContainer) {
     alert('Không tìm thấy khung Modal trong trang HTML!');
     return;
   }
 
   container.innerHTML = '';
+  navContainer.innerHTML = '';
   questionImagesMap = {};
 
-  const questions = outputText.split(/(?=Câu \d+\.)/g).filter(q => q.trim().length > 0);
+  rawQuestions.forEach((qText, qIdx) => {
+    const qNumber = qIdx + 1;
 
-  if (questions.length === 0) {
-    container.innerHTML = '<div class="text-center text-xs text-slate-500 py-10">Không tìm thấy câu hỏi nào!</div>';
-  }
+    // 1. Tạo Nút Menu Dọc bên trái
+    const navBtn = document.createElement('button');
+    navBtn.id = `q-nav-btn-${qNumber}`;
+    navBtn.className = `q-nav-btn w-full py-1.5 px-2 text-xs font-bold rounded text-center transition ${
+      qIdx === 0 ? 'bg-indigo-700 text-white' : 'bg-slate-200 hover:bg-slate-300 text-slate-700'
+    }`;
+    navBtn.innerText = `Câu ${qNumber}`;
+    navBtn.onclick = () => scrollToQuestionCard(qNumber);
+    navContainer.appendChild(navBtn);
 
-  questions.forEach((qText, qIdx) => {
+    // 2. Tạo Card Nội Dung (Cho phép EDIT văn bản trực tiếp với contenteditable)
     const card = document.createElement('div');
-    card.className = "bg-white p-3.5 border border-slate-300 rounded shadow-sm space-y-2 text-xs font-mono text-slate-800 leading-relaxed";
+    card.id = `q-card-${qNumber}`;
+    card.className = "bg-white p-3.5 border border-slate-300 rounded shadow-sm space-y-2 text-xs font-mono text-slate-800 leading-relaxed transition hover:border-indigo-400";
 
     if (qText.includes('[Thêm hình vẽ vào đây]')) {
       const parts = qText.split('[Thêm hình vẽ vào đây]');
       const dropZoneId = `dropzone-${qIdx}`;
 
       card.innerHTML = `
-        <div class="whitespace-pre-wrap">${escapeHtml(parts[0].trim())}</div>
+        <div contenteditable="true" class="q-text-box editable-content focus:outline-none focus:ring-1 focus:ring-indigo-400 p-1.5 rounded bg-slate-50/50 hover:bg-amber-50/30 whitespace-pre-wrap">${escapeHtml(parts[0].trim())}</div>
         <div id="${dropZoneId}" 
              ondragover="handleDragOver(event)" 
              ondragleave="handleDragLeave(event)" 
@@ -474,12 +407,12 @@ function openWordMergeModal() {
            <i data-lucide="image-plus" class="w-6 h-6 text-indigo-500 mb-1 pointer-events-none"></i>
            <span class="text-[11px] text-indigo-700 font-bold pointer-events-none">[Kéo thả hình vẽ từ cột phải vào đây]</span>
         </div>
-        <div class="whitespace-pre-wrap">${escapeHtml(parts[1].trim())}</div>
+        <div contenteditable="true" class="q-text-box editable-content focus:outline-none focus:ring-1 focus:ring-indigo-400 p-1.5 rounded bg-slate-50/50 hover:bg-amber-50/30 whitespace-pre-wrap">${escapeHtml(parts[1].trim())}</div>
       `;
     } else {
       const dropZoneId = `dropzone-optional-${qIdx}`;
       card.innerHTML = `
-        <div class="whitespace-pre-wrap">${escapeHtml(qText.trim())}</div>
+        <div contenteditable="true" class="q-text-box editable-content focus:outline-none focus:ring-1 focus:ring-indigo-400 p-1.5 rounded bg-slate-50/50 hover:bg-amber-50/30 whitespace-pre-wrap">${escapeHtml(qText.trim())}</div>
         <div id="${dropZoneId}" 
              ondragover="handleDragOver(event)" 
              ondragleave="handleDragLeave(event)" 
@@ -496,10 +429,7 @@ function openWordMergeModal() {
 
   modal.classList.remove('hidden');
   modal.classList.add('flex');
-
-  if (window.lucide) {
-    lucide.createIcons();
-  }
+  if (window.lucide) lucide.createIcons();
 }
 
 function closeWordMergeModal() {
@@ -512,12 +442,7 @@ function closeWordMergeModal() {
 
 function escapeHtml(text) {
   if (!text) return "";
-  return text
-    .replace(/&/g, "&amp;")
-    .replace(/</g, "&lt;")
-    .replace(/>/g, "&gt;")
-    .replace(/"/g, "&quot;")
-    .replace(/'/g, "&#039;");
+  return text.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#039;");
 }
 
 function handleDragOver(e) {
@@ -536,8 +461,8 @@ function handleDropImage(e, dropZoneId) {
   if (!dropZone) return;
 
   dropZone.classList.remove('border-indigo-600', 'bg-indigo-100');
-
   const imgDataUrl = e.dataTransfer.getData('text/plain');
+
   if (!imgDataUrl || !imgDataUrl.startsWith('data:image')) {
     alert('Vui lòng kéo một hình ảnh hợp lệ từ danh sách bên phải!');
     return;
@@ -547,7 +472,7 @@ function handleDropImage(e, dropZoneId) {
 
   dropZone.innerHTML = `
     <div class="relative group my-1">
-      <img src="${imgDataUrl}" class="max-h-48 max-w-full rounded border border-slate-300 shadow-sm mx-auto">
+      <img src="${imgDataUrl}" id="img-${dropZoneId}" class="dropped-img max-h-52 max-w-full rounded border border-slate-300 shadow-sm mx-auto object-contain">
       <button onclick="removeDroppedImage(event, '${dropZoneId}')" class="absolute top-1 right-1 bg-rose-700 text-white p-1 rounded-full opacity-80 hover:opacity-100 transition shadow">
         <i data-lucide="x" class="w-3.5 h-3.5"></i>
       </button>
@@ -570,9 +495,7 @@ function removeDroppedImage(e, dropZoneId) {
   if (window.lucide) lucide.createIcons();
 }
 
-/**
- * Render PDF thành danh sách ảnh ở Cột Phải DỰA TRÊN MẬT ĐỘ DPI (TỈ LỆ TỰ NHIÊN CHUẨN KHOẢNG MÉO)
- */
+/** Render PDF thành danh sách ảnh từ 1 - 3600 DPI mượt mà */
 async function renderModalPdfImages() {
   const fileInput = document.getElementById('modal-pdf-input');
   const gallery = document.getElementById('modal-image-gallery');
@@ -586,11 +509,10 @@ async function renderModalPdfImages() {
 
   const file = fileInput.files[0];
   const targetDpi = parseInt(dpiInput?.value) || 300;
-  // Tỉ lệ scale = DPI / 72 (72 DPI là chuẩn PDF mặc định)
-  const scaleRatio = targetDpi / 72;
+  const scaleRatio = targetDpi / 72; // Standard PDF DPI is 72
 
   gallery.innerHTML = '';
-  statusEl.innerHTML = `<span class="text-indigo-700">Đang xuất PDF ở độ phân giải ${targetDpi} DPI...</span>`;
+  statusEl.innerHTML = `<span class="text-indigo-700 font-semibold">Đang đọc PDF ở độ phân giải ${targetDpi} DPI...</span>`;
 
   try {
     const arrayBuffer = await file.arrayBuffer();
@@ -598,11 +520,10 @@ async function renderModalPdfImages() {
     const totalPages = pdf.numPages;
 
     for (let i = 1; i <= totalPages; i++) {
-      statusEl.innerHTML = `<span class="text-indigo-700">Đang xuất trang ${i} / ${totalPages}...</span>`;
+      statusEl.innerHTML = `<span class="text-indigo-700 font-semibold">Đang xuất trang ${i} / ${totalPages}...</span>`;
       const page = await pdf.getPage(i);
-      
-      // Giữ đúng tỉ lệ chuẩn của trang PDF
       const viewport = page.getViewport({ scale: scaleRatio });
+
       const canvas = document.createElement('canvas');
       const ctx = canvas.getContext('2d');
       canvas.width = viewport.width;
@@ -612,7 +533,6 @@ async function renderModalPdfImages() {
       ctx.fillRect(0, 0, canvas.width, canvas.height);
 
       await page.render({ canvasContext: ctx, viewport: viewport }).promise;
-
       const imgDataUrl = canvas.toDataURL('image/png', 1.0);
 
       const item = document.createElement('div');
@@ -624,7 +544,7 @@ async function renderModalPdfImages() {
       gallery.appendChild(item);
     }
 
-    statusEl.innerHTML = `<span class="text-emerald-600 font-bold">Đã xuất ${totalPages} ảnh chuẩn tỉ lệ (${targetDpi} DPI)!</span>`;
+    statusEl.innerHTML = `<span class="text-emerald-600 font-bold">Đã xuất ${totalPages} ảnh (${targetDpi} DPI)!</span>`;
   } catch (err) {
     console.error(err);
     statusEl.innerHTML = `<span class="text-rose-600">Lỗi: ${err.message}</span>`;
@@ -635,6 +555,17 @@ function handleImageDragStart(e) {
   e.dataTransfer.setData('text/plain', e.target.src);
 }
 
+/** Tải một thẻ Image bất đồng bộ để đo chiều rộng/cao chuẩn gốc */
+function loadImageAsync(src) {
+  return new Promise((resolve, reject) => {
+    const img = new Image();
+    img.onload = () => resolve(img);
+    img.onerror = reject;
+    img.src = src;
+  });
+}
+
+/** XUẤT FILE WORD .DOCX CHỨA CẢ VĂN BẢN VÀ ẢNH GIỮ NGUYÊN TỶ LỆ GỐC MẤT MÉO */
 async function exportToWordDocx() {
   if (typeof docx === 'undefined') {
     alert('Thư viện docx chưa tải xong. Vui lòng kiểm tra lại kết nối mạng!');
@@ -655,7 +586,8 @@ async function exportToWordDocx() {
     const childNodes = card.childNodes;
 
     for (let node of childNodes) {
-      if (node.nodeType === Node.ELEMENT_NODE && node.classList.contains('whitespace-pre-wrap')) {
+      // 1. Nếu là khối Văn Bản (Lấy văn bản mới nhất người dùng vừa sửa)
+      if (node.nodeType === Node.ELEMENT_NODE && node.classList.contains('editable-content')) {
         const text = node.innerText.trim();
         if (text) {
           text.split('\n').forEach(line => {
@@ -672,30 +604,44 @@ async function exportToWordDocx() {
           });
         }
       } 
+      // 2. Nếu là khung DropZone chứa Ảnh
       else if (node.nodeType === Node.ELEMENT_NODE && node.id && node.id.startsWith('dropzone')) {
         const dropZoneId = node.id;
         const imgDataUrl = questionImagesMap[dropZoneId];
 
         if (imgDataUrl) {
-          const base64Data = imgDataUrl.split(',')[1];
-          const binaryString = window.atob(base64Data);
-          const bytes = new Uint8Array(binaryString.length);
-          for (let i = 0; i < binaryString.length; i++) {
-            bytes[i] = binaryString.charCodeAt(i);
-          }
+          try {
+            // ĐO KÍCH THƯỚC ẢNH THỰC TẾ ĐỂ TÍNH TỶ LỆ KHÔNG BỊ KÉO DÃN
+            const loadedImg = await loadImageAsync(imgDataUrl);
+            const naturalW = loadedImg.naturalWidth || 400;
+            const naturalH = loadedImg.naturalHeight || 300;
 
-          docParagraphs.push(new Paragraph({
-            children: [
-              new ImageRun({
-                data: bytes.buffer,
-                transformation: {
-                  width: 320,
-                  height: 200,
-                },
-              })
-            ],
-            spacing: { before: 180, after: 180 }
-          }));
+            // Đặt Chiều Rộng chuẩn trang Word (450pt) và tự tính Chiều Cao chuẩn tỷ lệ
+            const wordTargetWidth = 450; 
+            const wordTargetHeight = Math.round((wordTargetWidth * naturalH) / naturalW);
+
+            const base64Data = imgDataUrl.split(',')[1];
+            const binaryString = window.atob(base64Data);
+            const bytes = new Uint8Array(binaryString.length);
+            for (let i = 0; i < binaryString.length; i++) {
+              bytes[i] = binaryString.charCodeAt(i);
+            }
+
+            docParagraphs.push(new Paragraph({
+              children: [
+                new ImageRun({
+                  data: bytes.buffer,
+                  transformation: {
+                    width: wordTargetWidth,
+                    height: wordTargetHeight, // CHUẨN TỶ LỆ GỐC KHI BẤM MỞ WORD
+                  },
+                })
+              ],
+              spacing: { before: 180, after: 180 }
+            }));
+          } catch (e) {
+            console.error('Lỗi tính tỷ lệ ảnh:', e);
+          }
         }
       }
     }
@@ -713,7 +659,7 @@ async function exportToWordDocx() {
   const blob = await Packer.toBlob(doc);
   const a = document.createElement('a');
   a.href = URL.createObjectURL(blob);
-  a.download = `VutLenWeb_${Date.now()}.docx`;
+  a.download = `FormatTex_Export_${Date.now()}.docx`;
   document.body.appendChild(a);
   a.click();
   document.body.removeChild(a);
