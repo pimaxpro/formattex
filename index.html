@@ -311,10 +311,12 @@
             <button onclick="downloadSingleText('output-tikz-single', getTikZFilename())" class="bg-slate-200 hover:bg-slate-300 text-slate-800 p-1.5 h-7 w-7 border border-slate-300 rounded transition cursor-pointer"><i data-lucide="download" class="w-4 h-4 pointer-events-none"></i></button>
           </div>
         </div>
-        <div class="editor-container h-80">
+        
+        <!-- SỬA KHUNG EDITOR TIKZ TỔNG: h-[550px] v-scroll h-full w-full -->
+        <div class="editor-container h-[550px]">
           <div id="lines-output-tikz-single" class="line-numbers">1</div>
-          <div class="editor-area">
-            <textarea id="output-tikz-single" oninput="handleInput('output-tikz-single')" onkeydown="handleKeyDown(event, 'output-tikz-single')" onscroll="syncScroll('output-tikz-single')" class="code-input custom-scroll" placeholder="Code các hình TikZ sẽ gom vào đây..."></textarea>
+          <div class="editor-area h-full flex-1 relative">
+            <textarea id="output-tikz-single" oninput="handleInput('output-tikz-single')" onkeydown="handleKeyDown(event, 'output-tikz-single')" onscroll="syncScroll('output-tikz-single')" class="code-input custom-scroll h-full w-full resize-none" placeholder="Code các hình TikZ sẽ gom vào đây..."></textarea>
             <div id="autocomplete-output-tikz-single" class="autocomplete-dropdown shadow-lg"></div>
           </div>
         </div>
