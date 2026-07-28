@@ -1,5 +1,5 @@
 /* =========================================================
-   FORMATTEX — WEB EXPORTER MODULE (BẢN CẬP NHẬT TỐI ƯU CỰC ĐẠI)
+   FORMATTEX — WEB EXPORTER MODULE (ĐÃ FIX LỖI \True KHI CÓ CENTER/TIKZ)
    ========================================================= */
 
 /** Trích xuất nội dung bên trong cặp ngoặc nhọn cân bằng {} */
@@ -90,6 +90,7 @@ function cleanTextForWeb(text) {
   let cleaned = cleanComments(text);
   cleaned = convertDisplayMathToInline(cleaned);
 
+  // 1. Gỡ lời giải \loigiai{}
   const loigiaiRegex = /\\loigiai\s*\{/g;
   let match;
   while ((match = loigiaiRegex.exec(cleaned)) !== null) {
@@ -100,10 +101,15 @@ function cleanTextForWeb(text) {
     } else break;
   }
 
+  // 2. Gỡ khối TikZ (Tránh xóa nhầm văn bản xung quanh)
   cleaned = cleaned.replace(/\\begin\{tikzpicture\}[\s\S]*?\\end\{tikzpicture\}/gi, '');
-  cleaned = cleaned.replace(/\\begin\{center\}[\s\S]*?\\end\{center\}/gi, '');
-  cleaned = cleaned.replace(/\\begin\{immini\}[\s\S]*?\\end\{immini\}/gi, '');
 
+  // 3. Chỉ bóc thẻ \begin{center} và \end{center}, GIỮ LẠI NỘI DUNG VĂN BẢN
+  cleaned = cleaned.replace(/\\begin\{center\}/gi, '');
+  cleaned = cleaned.replace(/\\end\{center\}/gi, '');
+
+  // 4. Xử lý \immini
+  cleaned = cleaned.replace(/\\begin\{immini\}[\s\S]*?\\end\{immini\}/gi, '');
   const imminiRegex = /\\immini\s*\{/g;
   while ((match = imminiRegex.exec(cleaned)) !== null) {
     const arg1 = extractBracedGroup(cleaned, match.index + match[0].length - 1);
@@ -119,6 +125,7 @@ function cleanTextForWeb(text) {
   }
   cleaned = cleaned.replace(/\\immini\b/gi, '');
 
+  // 5. Chuyển môi trường danh sách
   cleaned = cleaned.replace(/\\begin\{itemize\}([\s\S]*?)\\end\{itemize\}/gi, (m, body) => {
     return '\n' + body.split('\\item').map(i => i.trim()).filter(i => i.length > 0).map(i => `- ${i}`).join('\n');
   });
@@ -128,6 +135,7 @@ function cleanTextForWeb(text) {
     return '\n' + body.split('\\item').map(i => i.trim()).filter(i => i.length > 0).map(i => `${count++}. ${i}`).join('\n');
   });
 
+  // 6. Gỡ lệnh định dạng chữ
   const textCmds = ['textbf', 'textit', 'texttt', 'textsl', 'textsc', 'textsf', 'text'];
   textCmds.forEach(cmd => {
     const regex = new RegExp(`\\\\${cmd}\\s*\\{`, 'g');
@@ -418,7 +426,6 @@ function openWordMergeModal() {
       missingQuestions.push(`Câu ${qNum}`);
     }
 
-    // Trích xuất đáp án để phục vụ xem nhanh
     let ansMatch = qText.match(/Đáp án (?:TN|DS|TLN|KT):\s*([^\n]+)/i);
     let ansVal = ansMatch ? ansMatch[1].trim() : 'N/A';
     parsedAnswersList.push({ number: qNum, answer: ansVal });
@@ -443,7 +450,6 @@ function openWordMergeModal() {
     const qNumber = qIdx + 1;
     const isImageRequired = qText.includes('[Thêm hình vẽ vào đây]');
 
-    // Nút Menu Dọc
     const navBtn = document.createElement('button');
     navBtn.id = `q-nav-btn-${qNumber}`;
     navBtn.innerText = `Câu ${qNumber}`;
@@ -452,21 +458,18 @@ function openWordMergeModal() {
 
     updateNavButtonState(qNumber, isImageRequired, false);
 
-    // Card Nội Dung: Tách văn bản thành nhiều dòng riêng biệt để chèn hình vào giữa
     const card = document.createElement('div');
     card.id = `q-card-${qNumber}`;
     card.className = "q-card-item bg-white p-3.5 border border-slate-300 rounded shadow-sm space-y-2 text-xs font-mono text-slate-800 leading-relaxed transition hover:border-rose-400";
 
     const dropZoneId = `dropzone-${qIdx}`;
 
-    // Tách văn bản câu hỏi theo dòng \n
     const textLines = qText.replace('[Thêm hình vẽ vào đây]', '').split('\n').filter(l => l.trim().length > 0);
     
     let htmlContent = '';
     textLines.forEach((line, lineIdx) => {
       htmlContent += `<div contenteditable="true" class="editable-line editable-content focus:outline-none focus:ring-1 focus:ring-rose-400 p-1 rounded bg-slate-50/50 hover:bg-amber-50/30 whitespace-pre-wrap">${escapeHtml(line.trim())}</div>`;
 
-      // Chèn box kéo thả hình vẽ ở vị trí dòng đầu tiên (hoặc giữa dòng)
       if (isImageRequired && lineIdx === 0) {
         htmlContent += `
           <div id="wrapper-${dropZoneId}" class="my-2 border border-slate-200 p-2 rounded bg-slate-50 w-full">
@@ -705,7 +708,6 @@ async function renderModalPdfImages() {
       await page.render({ canvasContext: ctx, viewport: viewport }).promise;
       const imgDataUrl = canvas.toDataURL('image/png', 1.0);
 
-      // Card chứa ảnh: w-fit h-fit KHÍT HOÀN TOÀN CẢ CHIỀU RỘNG VÀ CHIỀU DÀI
       const item = document.createElement('div');
       item.className = "bg-white p-1.5 border border-slate-300 rounded shadow-sm flex flex-col items-center space-y-1 cursor-grab active:cursor-grabbing hover:border-rose-500 transition w-fit h-fit mx-auto";
       item.innerHTML = `
