@@ -16,7 +16,7 @@ function switchMainMenu(menuIndex) {
   const activeClass = "px-4 py-2 text-xs font-bold rounded transition-all flex items-center space-x-2 bg-white text-slate-900 border border-slate-300 shadow-sm cursor-pointer";
   const inactiveClass = "px-4 py-2 text-xs font-semibold rounded transition-all flex items-center space-x-2 bg-transparent text-slate-500 hover:text-slate-800 hover:bg-slate-200/50 border border-transparent cursor-pointer";
 
-  for (let i = 1; i <= 3; i++) {
+  for (let i = 1; i <= 4; i++) {
     const btn = document.getElementById(`nav-btn-${i}`);
     const section = document.getElementById(`menu-section-${i}`);
 
@@ -31,6 +31,12 @@ function switchMainMenu(menuIndex) {
         section.classList.add('hidden');
       }
     }
+  }
+
+  // Khởi tạo lại số dòng khi kích hoạt Tab 4
+  if (menuIndex === 4 && typeof handleInput === 'function') {
+    handleInput('input-web');
+    handleInput('output-web');
   }
 
   if (window.lucide) {
