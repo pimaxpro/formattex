@@ -32,7 +32,6 @@ function extractMultipleBracedGroups(str, startIndex) {
   const groups = [];
   let curr = startIndex;
   while (curr < str.length) {
-    // Bỏ qua khoảng trắng
     while (curr < str.length && /\s/.test(str[curr])) curr++;
     if (curr < str.length && str[curr] === '{') {
       const res = extractBracedGroup(str, curr);
@@ -56,13 +55,38 @@ function extractMultipleBracedGroups(str, startIndex) {
 function stripLatexComments(text) {
   if (!text) return "";
   return text.split('\n').map(line => {
-    // Nếu dòng chứa comment đáp án đặc biệt thì giữ nguyên
     if (/%\s*\\ans\{/i.test(line) || /%\s*\\shortans\{/i.test(line)) {
       return line;
     }
-    // Ngược lại, xóa từ dấu % không được escaped (không phải \%) tới cuối dòng
     return line.replace(/(^|[^\\])%.*/, '$1');
   }).join('\n');
+}
+
+/**
+ * Chuyển đổi các môi trường toán hiển thị (Display Math) thành toán dòng (Inline Math $...$)
+ */
+function convertDisplayMathToInline(text) {
+  if (!text) return "";
+  let converted = text;
+
+  // 1. Chuyển \[...\] thành $...$
+  converted = converted.replace(/\\\[([\s\S]*?)\\\]/g, (m, math) => `$${math.trim()}$`);
+
+  // 2. Chuyển $$...$$ thành $...$
+  converted = converted.replace(/\$\$([\s\S]*?)\$\$/g, (m, math) => `$${math.trim()}$`);
+
+  // 3. Chuyển \begin{equation}...\end{equation}, align, aligned, equation*
+  const displayEnvs = ['equation', 'equation\\*', 'align', 'align\\*', 'gather', 'gather\\*'];
+  displayEnvs.forEach(env => {
+    const regex = new RegExp(`\\\\begin\\{${env}\\}([\\s\\S]*?)\\\\end\\{${env}\\}`, 'gi');
+    converted = converted.replace(regex, (m, math) => {
+      // Làm sạch các dấu xuống dòng hoặc lệnh \\ trong công thức
+      const cleanMath = math.replace(/\\\\/g, ' ').replace(/\s+/g, ' ').trim();
+      return `$${cleanMath}$`;
+    });
+  });
+
+  return converted;
 }
 
 /**
@@ -74,7 +98,10 @@ function cleanTextForWeb(text) {
 
   let cleaned = text;
 
-  // 1. Xóa khối \loigiai{...}
+  // 1. Chuyển đổi công thức toán Display Math sang Inline $...$ trước
+  cleaned = convertDisplayMathToInline(cleaned);
+
+  // 2. Xóa khối \loigiai{...}
   const loigiaiRegex = /\\loigiai\s*\{/g;
   let match;
   while ((match = loigiaiRegex.exec(cleaned)) !== null) {
@@ -87,18 +114,16 @@ function cleanTextForWeb(text) {
     }
   }
 
-  // 2. Xóa các môi trường TikZ, Center
+  // 3. Xóa các môi trường TikZ, Center
   cleaned = cleaned.replace(/\\begin\{tikzpicture\}[\s\S]*?\\end\{tikzpicture\}/gi, '');
   cleaned = cleaned.replace(/\\begin\{center\}[\s\S]*?\\end\{center\}/gi, '');
 
-  // 3. Xóa môi trường \begin{immini}...\end{immini} hoặc lệnh \immini{đề}{hình}
+  // 4. Xóa môi trường \begin{immini}...\end{immini} hoặc lệnh \immini{đề}{hình}
   cleaned = cleaned.replace(/\\begin\{immini\}[\s\S]*?\\end\{immini\}/gi, '');
   const imminiRegex = /\\immini\s*\{/g;
   while ((match = imminiRegex.exec(cleaned)) !== null) {
-    // Lấy đối số 1 (Đề bài)
     const arg1 = extractBracedGroup(cleaned, match.index + match[0].length - 1);
     if (arg1) {
-      // Lấy đối số 2 (Hình)
       const arg2 = extractBracedGroup(cleaned, arg1.endIndex + 1);
       const endIndex = arg2 ? arg2.endIndex : arg1.endIndex;
       cleaned = cleaned.substring(0, match.index) + arg1.content + cleaned.substring(endIndex + 1);
@@ -108,7 +133,7 @@ function cleanTextForWeb(text) {
     }
   }
 
-  // 4. Chuyển itemize thành danh sách gạch đầu dòng "-"
+  // 5. Chuyển itemize thành danh sách gạch đầu dòng "-"
   cleaned = cleaned.replace(/\\begin\{itemize\}([\s\S]*?)\\end\{itemize\}/gi, (m, body) => {
     return '\n' + body.split('\\item')
       .map(item => item.trim())
@@ -117,7 +142,7 @@ function cleanTextForWeb(text) {
       .join('\n');
   });
 
-  // 5. Chuyển enumerate thành danh sách số "1., 2.,..."
+  // 6. Chuyển enumerate thành danh sách số "1., 2.,..."
   cleaned = cleaned.replace(/\\begin\{enumerate\}([\s\S]*?)\\end\{enumerate\}/gi, (m, body) => {
     let count = 1;
     return '\n' + body.split('\\item')
@@ -127,7 +152,7 @@ function cleanTextForWeb(text) {
       .join('\n');
   });
 
-  // 6. Gỡ bỏ các lệnh định dạng văn bản (\textbf, \textit, \texttt, \text, \mathrm khi ở ngoài công thức)
+  // 7. Gỡ bỏ các lệnh định dạng văn bản (\textbf, \textit, \texttt, \text, \mathrm khi ở ngoài công thức)
   const textCmds = ['textbf', 'textit', 'texttt', 'textsl', 'textsc', 'textsf', 'text'];
   textCmds.forEach(cmd => {
     const regex = new RegExp(`\\\\${cmd}\\s*\\{`, 'g');
@@ -143,17 +168,26 @@ function cleanTextForWeb(text) {
     }
   });
 
-  // 7. Xóa các ký tự xuống dòng rác/dấu gạch nối LaTeX dư thừa (\vspace, \hspace, \\)
+  // 8. Xóa các ký tự xuống dòng rác/dấu gạch nối LaTeX dư thừa (\vspace, \hspace, \\)
   cleaned = cleaned.replace(/\\\\/g, '\n');
   cleaned = cleaned.replace(/\\vspace\{[^}]*\}/g, '');
   cleaned = cleaned.replace(/\\hspace\{[^}]*\}/g, '');
 
-  // 8. Thu gọn các dòng trống liên tiếp
+  // 9. Thu gọn các dòng trống liên tiếp
   const lines = cleaned.split('\n')
     .map(l => l.trim())
     .filter(l => l.length > 0);
 
   return lines.join('\n');
+}
+
+/**
+ * Kiểm tra xem câu hỏi có chứa hình vẽ/môi trường đồ họa bị gỡ bỏ không
+ */
+function hasGraphicElement(exContent) {
+  return /\\begin\{tikzpicture\}/i.test(exContent) || 
+         /\\immini/i.test(exContent) || 
+         /\\begin\{center\}/i.test(exContent);
 }
 
 /**
@@ -184,6 +218,7 @@ function processWebExporter() {
     const exContent = exMatch[1];
     let processedQuestion = `Câu ${questionIndex}. `;
     let errorMessage = "";
+    const needsImageNote = hasGraphicElement(exContent);
 
     // -------------------------------------------------------------
     // LOẠI 1: CÂU TRẮC NGHIỆM 4 PHƯƠNG ÁN (\choice hoặc \choice*)
@@ -209,12 +244,17 @@ function processWebExporter() {
         choicesFormatted.push(`${labels[idx]}. ${text}`);
       });
 
-      // Xuống dòng giữa Đề bài và Phương án
-      processedQuestion += stemClean + '\n' + choicesFormatted.join('\n');
+      processedQuestion += stemClean;
+      if (needsImageNote) {
+        processedQuestion += '\n[Thêm hình vẽ vào đây]';
+      }
+      processedQuestion += '\n' + choicesFormatted.join('\n');
+
       if (correctAnsLabel) {
         processedQuestion += `\nĐáp án TN: ${correctAnsLabel}`;
       } else {
-        processedQuestion += `\nĐáp án TN: [Chưa tích đáp án True]`;
+        processedQuestion += `\nĐáp án TN: `;
+        errorMessage = "Câu này thiếu đáp án";
       }
     }
 
@@ -233,11 +273,13 @@ function processWebExporter() {
       const labels = ['a', 'b', 'c', 'd'];
       const tfResults = [];
       const choicesFormatted = [];
+      let hasAnyTrue = false;
 
       groups.slice(0, 4).forEach((g, idx) => {
         let text = cleanTextForWeb(g.trim());
         if (text.startsWith('\\True')) {
           tfResults.push('D');
+          hasAnyTrue = true;
           text = text.replace(/^\\True\s*/, '').trim();
         } else {
           tfResults.push('S');
@@ -245,9 +287,16 @@ function processWebExporter() {
         choicesFormatted.push(`${labels[idx]}) ${text}`);
       });
 
-      // Xuống dòng giữa Đề bài và Đáp án Đúng/Sai
-      processedQuestion += stemClean + '\n' + choicesFormatted.join('\n');
+      processedQuestion += stemClean;
+      if (needsImageNote) {
+        processedQuestion += '\n[Thêm hình vẽ vào đây]';
+      }
+      processedQuestion += '\n' + choicesFormatted.join('\n');
       processedQuestion += `\nĐáp án DS: ${tfResults.join('|')}`;
+
+      if (!hasAnyTrue) {
+        errorMessage = "Câu này thiếu đáp án";
+      }
     }
 
     // -------------------------------------------------------------
@@ -264,7 +313,6 @@ function processWebExporter() {
         if (groups.length > 0) {
           doaString = groups.map(g => `$${cleanTextForWeb(g.trim())}$`).join(' @ ');
         }
-        // Gỡ đoạn \doa khỏi đề bài
         stemRaw = stemRaw.substring(endIndex);
       }
 
@@ -290,12 +338,14 @@ function processWebExporter() {
         processedQuestion += stemClean;
       }
 
-      // Đổi nhãn thành "Đáp án KT: "
+      if (needsImageNote) {
+        processedQuestion += '\n[Thêm hình vẽ vào đây]';
+      }
+
       const formattedAns = ansList.map(a => `${a}>`).join('|');
       processedQuestion += `\nĐáp án KT: ${formattedAns}`;
 
-      // Kiểm tra thiếu đáp án
-      if (dienktCount !== ansList.length) {
+      if (ansList.length === 0 || dienktCount !== ansList.length) {
         errorMessage = "Câu này thiếu đáp án";
       }
     }
@@ -306,10 +356,8 @@ function processWebExporter() {
     else if (/\\dienkq\b/i.test(exContent) || /%\s*\\shortans/i.test(exContent)) {
       let stemRaw = exContent;
 
-      // 1. Thay \dienkq thành 10 dấu gạch chân "__________"
       stemRaw = stemRaw.replace(/\\dienkq\b/g, '__________');
 
-      // 2. Lấy đáp án từ %\shortans{36}
       let shortansVal = "";
       const shortansMatch = exContent.match(/%\s*\\shortans\{([^}]+)\}/i);
       if (shortansMatch) {
@@ -319,10 +367,15 @@ function processWebExporter() {
       const stemClean = cleanTextForWeb(stemRaw);
 
       processedQuestion += stemClean;
+      if (needsImageNote) {
+        processedQuestion += '\n[Thêm hình vẽ vào đây]';
+      }
+
       if (shortansVal) {
         processedQuestion += `\nĐáp án TLN: ${shortansVal}`;
       } else {
-        processedQuestion += `\nĐáp án TLN: [Chưa có đáp án shortans]`;
+        processedQuestion += `\nĐáp án TLN: `;
+        errorMessage = "Câu này thiếu đáp án";
       }
     }
 
@@ -332,6 +385,10 @@ function processWebExporter() {
     else {
       const stemClean = cleanTextForWeb(exContent);
       processedQuestion += stemClean;
+      if (needsImageNote) {
+        processedQuestion += '\n[Thêm hình vẽ vào đây]';
+      }
+      errorMessage = "Câu này thiếu đáp án";
     }
 
     if (errorMessage) {
