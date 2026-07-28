@@ -218,13 +218,13 @@
       </div>
     </section>
 
-    <!-- MENU 2: LỌC TIKZ (TẬP TRUNG VÀO CỘT PHẢI OUTPUT-MAIN, ĐÃ BỎ BOX DƯ THỪA) -->
+    <!-- MENU 2: LỌC TIKZ -->
     <section id="menu-section-2" class="hidden space-y-4">
       <div class="bg-white p-4 border border-slate-300 rounded shadow-sm"><p class="text-sm font-medium">Tự động lọc và tách toàn bộ các khối <code class="font-bold text-rose-700">\begin{tikzpicture}...\end{tikzpicture}</code> ra khỏi file LaTeX gốc.</p></div>
       
       <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <!-- Input LaTeX -->
-        <div class="bg-white border border-slate-300 p-4 shadow-sm flex flex-col h-[600px] rounded">
+        <!-- Input Box: Code LaTeX Gốc -->
+        <div class="bg-white border border-slate-300 p-4 shadow-sm flex flex-col h-[580px] rounded">
           <div class="flex justify-between items-center text-xs font-bold h-8 mb-3 pb-2 border-b border-slate-200 shrink-0">
             <span class="flex items-center gap-1.5"><i data-lucide="file-text" class="w-4 h-4 text-rose-700"></i> Code LaTeX gốc:</span>
             <div class="flex items-center space-x-1.5">
@@ -247,33 +247,33 @@
           </div>
         </div>
 
-        <!-- Output TikZ gom chung trực tiếp vào cột bên phải -->
-        <div class="bg-white border border-slate-300 p-4 shadow-sm flex flex-col h-[600px] rounded">
+        <!-- Output Box: Mã TikZ Đã Tách -->
+        <div class="bg-white border border-slate-300 p-4 shadow-sm flex flex-col h-[580px] rounded">
           <div class="flex justify-between items-center text-xs font-bold h-8 mb-2 pb-2 border-b border-slate-200 shrink-0">
             <span class="flex items-center gap-1.5">
-              <i data-lucide="file-code-2" class="w-4 h-4 text-rose-700"></i>
-              <span>File Kết Quả Các Hình TikZ:</span>
-              <span id="tikz-count-badge" class="text-[10px] bg-rose-100 text-rose-800 font-bold px-2 py-0.5 border border-rose-300 rounded">0 hình</span>
+              <i data-lucide="file-code-2" class="w-4 h-4 text-rose-700"></i> 
+              <span>File chứa toàn bộ hình TikZ:</span>
+              <span id="tikz-count-badge" class="text-xs bg-rose-100 text-rose-800 font-bold px-2 py-0.5 border border-rose-300 rounded">0 hình</span>
             </span>
             <div class="flex items-center space-x-1">
               <button id="btn-undo-output-main" onclick="undo('output-main')" disabled class="btn-history bg-slate-100 hover:bg-slate-200 p-1.5 h-7 w-7 border border-slate-300 rounded transition"><i data-lucide="undo-2" class="w-3.5 h-3.5"></i></button>
               <button id="btn-redo-output-main" onclick="redo('output-main')" disabled class="btn-history bg-slate-100 hover:bg-slate-200 p-1.5 h-7 w-7 border border-slate-300 rounded transition"><i data-lucide="redo-2" class="w-3.5 h-3.5"></i></button>
               <span class="opacity-20">|</span>
-              <button onclick="copyToClipboard('output-main')" class="bg-slate-200 hover:bg-slate-300 text-slate-800 p-1.5 h-7 w-7 border border-slate-300 rounded transition cursor-pointer" title="Sao chép toàn bộ"><i data-lucide="copy" class="w-4 h-4 pointer-events-none"></i></button>
-              <button onclick="downloadSingleText('output-main', getTikZFilename())" class="bg-slate-200 hover:bg-slate-300 text-slate-800 p-1.5 h-7 w-7 border border-slate-300 rounded transition cursor-pointer" title="Tải file TikZ"><i data-lucide="download" class="w-4 h-4 pointer-events-none"></i></button>
+              <button onclick="copyToClipboard('output-main')" class="bg-slate-200 hover:bg-slate-300 text-slate-800 p-1.5 h-7 w-7 border border-slate-300 rounded transition cursor-pointer" title="Sao chép tất cả"><i data-lucide="copy" class="w-4 h-4 pointer-events-none"></i></button>
+              <button onclick="downloadSingleText('output-main', getTikZFilename())" class="bg-slate-200 hover:bg-slate-300 text-slate-800 p-1.5 h-7 w-7 border border-slate-300 rounded transition cursor-pointer" title="Tải file"><i data-lucide="download" class="w-4 h-4 pointer-events-none"></i></button>
             </div>
           </div>
           <div class="editor-container">
             <div id="lines-output-main" class="line-numbers">1</div>
             <div class="editor-area">
-              <textarea id="output-main" oninput="handleInput('output-main')" onkeydown="handleKeyDown(event, 'output-main')" onscroll="syncScroll('output-main')" class="code-input custom-scroll" placeholder="Nội dung các hình TikZ lọc ra sẽ nằm tại đây..."></textarea>
+              <textarea id="output-main" oninput="handleInput('output-main')" onkeydown="handleKeyDown(event, 'output-main')" onscroll="syncScroll('output-main')" class="code-input custom-scroll" placeholder="Kết quả các hình TikZ được tách sẽ hiển thị ở đây..."></textarea>
               <div id="autocomplete-output-main" class="autocomplete-dropdown shadow-lg"></div>
             </div>
           </div>
         </div>
       </div>
 
-      <!-- Thanh Tùy Chọn & Nút Thực Thi -->
+      <!-- Control Bar -->
       <div class="bg-white p-4 border border-slate-300 rounded shadow-sm flex flex-wrap justify-between items-center gap-4">
         <div class="flex items-center space-x-3 flex-wrap gap-y-2">
           <label class="text-xs font-bold text-slate-700">Chế độ lọc:</label>
@@ -297,7 +297,6 @@
           <span>Tách & Gom Vào File</span>
         </button>
       </div>
-
     </section>
 
     <!-- MENU 3: CHUYỂN PDF THÀNH ẢNH -->
