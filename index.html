@@ -514,7 +514,7 @@
           </button>
 
           <!-- NÚT GỘP FILE WORD KÈM ẢNH -->
-          <button onclick="openWordMergeModal()" class="bg-indigo-700 hover:bg-indigo-800 text-white font-bold px-6 py-2.5 rounded transition flex items-center space-x-2 shadow-md cursor-pointer border border-indigo-800">
+          <button onclick="openWordMergeModal()" class="bg-rose-700 hover:bg-rose-800 text-white font-bold px-6 py-2.5 rounded transition flex items-center space-x-2 shadow-md cursor-pointer border border-rose-800">
             <i data-lucide="file-type-2" class="w-4 h-4"></i>
             <span>Gộp File Word (.docx)</span>
           </button>
@@ -531,7 +531,7 @@
       <!-- Modal Header -->
       <div class="p-4 border-b border-slate-200 bg-slate-100 flex justify-between items-center shrink-0">
         <div class="flex items-center space-x-3">
-          <i data-lucide="file-type-2" class="w-6 h-6 text-indigo-700"></i>
+          <i data-lucide="file-type-2" class="w-6 h-6 text-rose-700"></i>
           <div>
             <h3 class="font-bold text-base text-slate-900">Gộp Hình Ảnh PDF & Xuất File Word (.docx)</h3>
             <p class="text-xs text-slate-500">Kéo thả ảnh ở cột bên phải vào vị trí khung nét đứt ở cột bên trái.</p>
@@ -542,7 +542,7 @@
             <i data-lucide="download" class="w-4 h-4"></i>
             <span>Tải File .DOCX</span>
           </button>
-          <button onclick="closeWordMergeModal()" class="hover:bg-slate-200 p-1.5 rounded text-slate-500 hover:text-slate-800 transition">
+          <button onclick="closeWordMergeModal()" class="hover:bg-slate-200 p-1.5 rounded text-slate-500 hover:text-slate-800 transition cursor-pointer">
             <i data-lucide="x" class="w-6 h-6"></i>
           </button>
         </div>
@@ -565,7 +565,7 @@
           <!-- Khung chứa Nội dung các câu hỏi (cho phép click sửa text trực tiếp) -->
           <div class="flex-1 p-4 overflow-y-auto custom-scroll space-y-4">
             <h4 class="font-bold text-xs text-slate-700 uppercase tracking-wider flex items-center gap-1.5 border-b border-slate-200 pb-2 sticky top-0 bg-slate-50 z-10">
-              <i data-lucide="list-tree" class="w-4 h-4 text-indigo-700"></i>
+              <i data-lucide="list-tree" class="w-4 h-4 text-rose-700"></i>
               <span>Nội Dung Đề Bài (Click trực tiếp vào box để chỉnh sửa)</span>
             </h4>
             <div id="word-merge-preview-container" class="space-y-4">
@@ -578,39 +578,39 @@
         <!-- Cột Phải: Upload & Preview PDF (5/12) -->
         <div class="lg:col-span-5 p-4 flex flex-col space-y-4 bg-white overflow-hidden">
           <h4 class="font-bold text-xs text-slate-700 uppercase tracking-wider flex items-center gap-1.5 border-b border-slate-200 pb-2 shrink-0">
-            <i data-lucide="image" class="w-4 h-4 text-indigo-700"></i>
+            <i data-lucide="image" class="w-4 h-4 text-rose-700"></i>
             <span>Tải PDF & Chọn Ảnh</span>
           </h4>
 
           <!-- Control PDF -->
           <div class="space-y-3 bg-slate-100 p-3 rounded border border-slate-300 shrink-0 text-xs">
             <div>
-              <label class="block font-bold mb-1">Chọn file PDF chứa hình vẽ:</label>
-              <input type="file" id="modal-pdf-input" accept="application/pdf" class="w-full bg-white border border-slate-300 rounded p-1.5 text-xs">
+              <label class="block font-bold mb-1 text-slate-800">Chọn file PDF chứa hình vẽ:</label>
+              <input type="file" id="modal-pdf-input" accept="application/pdf" class="w-full bg-white border border-slate-300 rounded p-1.5 text-xs text-slate-800">
             </div>
 
             <!-- THANH TRUỢT DPI 1 - 3600 KÉO MƯỢT MÀ -->
             <div class="space-y-1">
               <div class="flex justify-between items-center font-bold">
-                <label>Độ phân giải (DPI):</label>
-                <span id="modal-dpi-value" class="text-indigo-700 font-mono">300 DPI</span>
+                <label class="text-slate-800">Độ phân giải (DPI):</label>
+                <span id="modal-dpi-value" class="text-rose-700 font-mono">300 DPI</span>
               </div>
               <input type="range" id="modal-dpi-slider" min="1" max="3600" step="1" value="300" 
                      oninput="document.getElementById('modal-dpi-value').innerText = this.value + ' DPI'" 
-                     class="w-full accent-indigo-700 cursor-pointer">
+                     class="w-full accent-rose-700 cursor-pointer">
               <p class="text-[10px] text-slate-500">Tùy chỉnh độ phân giải mượt từ 1 DPI đến 3600 DPI (Chuẩn in ấn nét: 300 - 600 DPI).</p>
             </div>
 
-            <button onclick="renderModalPdfImages()" class="w-full bg-indigo-700 hover:bg-indigo-800 text-white font-bold py-2 rounded transition flex items-center justify-center gap-1.5 border border-indigo-800 cursor-pointer">
+            <button onclick="renderModalPdfImages()" class="w-full bg-rose-700 hover:bg-rose-800 text-white font-bold py-2 rounded transition flex items-center justify-center gap-1.5 border border-rose-800 cursor-pointer shadow-sm">
               <i data-lucide="refresh-cw" class="w-3.5 h-3.5"></i>
               <span>Xuất Danh Sách Ảnh</span>
             </button>
             <div id="modal-pdf-status" class="text-center font-bold text-[11px]"></div>
           </div>
 
-          <!-- Danh sách Ảnh preview từ PDF -->
-          <div id="modal-image-gallery" class="flex-1 overflow-y-auto custom-scroll grid grid-cols-2 gap-3 p-2 bg-slate-50 border border-slate-200 rounded">
-            <div class="col-span-2 text-center text-xs text-slate-400 py-10">
+          <!-- Danh sách Ảnh preview từ PDF: DẠNG DỌC KHÍT VỚI KÍCH THƯỚC HÌNH -->
+          <div id="modal-image-gallery" class="flex-1 overflow-y-auto custom-scroll flex flex-col space-y-3 p-2 bg-slate-50 border border-slate-200 rounded">
+            <div class="text-center text-xs text-slate-400 py-10">
               Vui lòng chọn file PDF và bấm "Xuất Danh Sách Ảnh"
             </div>
           </div>
