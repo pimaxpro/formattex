@@ -120,7 +120,6 @@
               <button onclick="clearText('input-ex')" class="hover:underline h-7 px-1 flex items-center text-rose-700 font-medium">Xóa</button>
             </div>
           </div>
-          <!-- EDITOR CONTAINER -->
           <div class="editor-container">
             <div id="lines-input-ex" class="line-numbers">1</div>
             <div class="editor-area">
@@ -135,7 +134,6 @@
           <div class="flex justify-between items-center text-xs font-bold h-8 mb-2 pb-2 border-b border-slate-200 shrink-0">
             <span class="flex items-center gap-1.5 text-slate-800"><i data-lucide="file-output" class="w-4 h-4 text-rose-700"></i> Cái mày cần ở đây:</span>
             
-            <!-- TOOLBAR TRÊN OUTPUT -->
             <div class="flex items-center space-x-1">
               <button id="btn-undo-output-ex" onclick="undo('output-ex')" disabled class="btn-history bg-slate-100 hover:bg-slate-200 p-1.5 h-7 w-7 rounded flex items-center justify-center border border-slate-300 transition" title="Hoàn tác (Ctrl+Z)">
                 <i data-lucide="undo-2" class="w-3.5 h-3.5"></i>
@@ -165,8 +163,6 @@
                 <i data-lucide="list-ordered" class="w-4 h-4"></i>
               </button>
               <span class="opacity-20">|</span>
-              
-              <!-- NÚT COPY & DOWNLOAD -->
               <button type="button" onclick="copyToClipboard('output-ex')" class="bg-slate-200 hover:bg-slate-300 text-slate-800 p-1.5 h-7 w-7 rounded flex items-center justify-center border border-slate-300 transition shadow-sm cursor-pointer" title="Sao chép toàn bộ">
                 <i data-lucide="copy" class="w-4 h-4 pointer-events-none"></i>
               </button>
@@ -176,7 +172,6 @@
             </div>
           </div>
 
-          <!-- Tìm kiếm & thay thế -->
           <div class="bg-slate-100 p-2 border border-slate-300 rounded mb-2 flex flex-col gap-2 text-xs shrink-0">
             <div class="flex items-center gap-2 flex-wrap">
               <div class="flex items-center space-x-1 flex-1 min-w-[150px]">
@@ -227,7 +222,6 @@
     <section id="menu-section-2" class="hidden space-y-4">
       <div class="bg-white p-4 border border-slate-300 rounded shadow-sm"><p class="text-sm font-medium">Tự động lọc và tách toàn bộ các khối <code class="font-bold text-rose-700">\begin{tikzpicture}...\end{tikzpicture}</code> ra khỏi file LaTeX gốc.</p></div>
       <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <!-- Input TikZ -->
         <div class="bg-white border border-slate-300 p-4 shadow-sm flex flex-col h-[580px] rounded">
           <div class="flex justify-between items-center text-xs font-bold h-8 mb-3 pb-2 border-b border-slate-200 shrink-0">
             <span class="flex items-center gap-1.5"><i data-lucide="file-text" class="w-4 h-4 text-rose-700"></i> Code LaTeX gốc:</span>
@@ -251,7 +245,6 @@
           </div>
         </div>
 
-        <!-- Output Main -->
         <div class="bg-white border border-slate-300 p-4 shadow-sm flex flex-col h-[580px] rounded">
           <div class="flex justify-between items-center text-xs font-bold h-8 mb-2 pb-2 border-b border-slate-200 shrink-0">
             <span class="flex items-center gap-1.5"><i data-lucide="file-check" class="w-4 h-4 text-rose-700"></i> File gốc (Đã gỡ TikZ):</span>
@@ -333,7 +326,6 @@
             <input type="file" id="pdf-input" accept="application/pdf" class="w-full text-xs bg-slate-100 border border-slate-300 rounded p-2.5 outline-none font-medium text-slate-800">
           </div>
 
-          <!-- OPTION CHỌN PHẠM VI TRANG -->
           <div class="bg-slate-100 p-4 border border-slate-300 rounded space-y-3">
             <label class="block text-xs font-bold text-slate-800">Chọn trang cần chuyển đổi:</label>
             <div class="flex items-center space-x-6 text-xs font-semibold text-slate-700">
@@ -414,7 +406,6 @@
               <button onclick="clearText('input-web')" class="hover:underline h-7 px-1 flex items-center text-rose-700 font-medium">Xóa</button>
             </div>
           </div>
-          <!-- EDITOR CONTAINER -->
           <div class="editor-container">
             <div id="lines-input-web" class="line-numbers">1</div>
             <div class="editor-area">
@@ -429,7 +420,6 @@
           <div class="flex justify-between items-center text-xs font-bold h-8 mb-2 pb-2 border-b border-slate-200 shrink-0">
             <span class="flex items-center gap-1.5 text-slate-800"><i data-lucide="file-output" class="w-4 h-4 text-rose-700"></i> Nội dung chuẩn hóa Upweb:</span>
             
-            <!-- TOOLBAR TRÊN OUTPUT WEB -->
             <div class="flex items-center space-x-1">
               <button id="btn-undo-output-web" onclick="undo('output-web')" disabled class="btn-history bg-slate-100 hover:bg-slate-200 p-1.5 h-7 w-7 rounded flex items-center justify-center border border-slate-300 transition" title="Hoàn tác (Ctrl+Z)">
                 <i data-lucide="undo-2" class="w-3.5 h-3.5"></i>
@@ -455,7 +445,6 @@
               </button>
               <span class="opacity-20">|</span>
               
-              <!-- NÚT COPY & DOWNLOAD TXT -->
               <button type="button" onclick="copyToClipboard('output-web')" class="bg-slate-200 hover:bg-slate-300 text-slate-800 p-1.5 h-7 w-7 rounded flex items-center justify-center border border-slate-300 transition shadow-sm cursor-pointer" title="Sao chép toàn bộ">
                 <i data-lucide="copy" class="w-4 h-4 pointer-events-none"></i>
               </button>
@@ -466,7 +455,6 @@
             </div>
           </div>
 
-          <!-- Tìm kiếm & thay thế -->
           <div class="bg-slate-100 p-2 border border-slate-300 rounded mb-2 flex flex-col gap-2 text-xs shrink-0">
             <div class="flex items-center gap-2 flex-wrap">
               <div class="flex items-center space-x-1 flex-1 min-w-[150px]">
@@ -513,7 +501,6 @@
             <span>Vứt Lên Web Ngay</span>
           </button>
 
-          <!-- NÚT GỘP FILE WORD KÈM ẢNH -->
           <button onclick="openWordMergeModal()" class="bg-rose-700 hover:bg-rose-800 text-white font-bold px-6 py-2.5 rounded transition flex items-center space-x-2 shadow-md cursor-pointer border border-rose-800">
             <i data-lucide="file-type-2" class="w-4 h-4"></i>
             <span>Gộp File Word (.docx)</span>
@@ -538,6 +525,12 @@
           </div>
         </div>
         <div class="flex items-center space-x-3">
+          <!-- NÚT XEM ĐÁP ÁN TOÀN BỘ CÂU -->
+          <button onclick="openAllAnswersOverviewModal()" class="bg-indigo-700 hover:bg-indigo-800 text-white px-4 py-2 text-xs font-bold rounded shadow transition flex items-center gap-1.5 cursor-pointer border border-indigo-800">
+            <i data-lucide="list-checks" class="w-4 h-4"></i>
+            <span>📋 Xem Đáp Án Đề BÀI</span>
+          </button>
+
           <button onclick="exportToWordDocx()" class="bg-emerald-600 hover:bg-emerald-700 text-white px-5 py-2 text-xs font-bold rounded shadow transition flex items-center gap-1.5 cursor-pointer border border-emerald-700">
             <i data-lucide="download" class="w-4 h-4"></i>
             <span>Tải File .DOCX</span>
@@ -554,42 +547,34 @@
         <!-- Cột Trái: Menu Dọc Số Câu (2/12) + Nội dung câu hỏi (5/12) -->
         <div class="lg:col-span-7 flex overflow-hidden border-r border-slate-300 bg-slate-50">
           
-          <!-- Thanh Menu dọc liệt kê số câu -->
           <div class="w-20 border-r border-slate-200 bg-slate-100/80 p-2 overflow-y-auto custom-scroll shrink-0 space-y-1.5">
             <span class="block text-[10px] font-bold text-slate-500 uppercase text-center mb-2">Số câu</span>
-            <div id="word-merge-nav-container" class="space-y-1.5">
-              <!-- Render các nút Câu 1, Câu 2... ở đây -->
-            </div>
+            <div id="word-merge-nav-container" class="space-y-1.5"></div>
           </div>
 
-          <!-- Khung chứa Nội dung các câu hỏi (cho phép click sửa text trực tiếp) -->
           <div class="flex-1 p-4 overflow-y-auto custom-scroll space-y-4">
             <h4 class="font-bold text-xs text-slate-700 uppercase tracking-wider flex items-center gap-1.5 border-b border-slate-200 pb-2 sticky top-0 bg-slate-50 z-10">
               <i data-lucide="list-tree" class="w-4 h-4 text-rose-700"></i>
-              <span>Nội Dung Đề Bài (Click trực tiếp vào box để chỉnh sửa)</span>
+              <span>Nội Dung Đề Bài (Click trực tiếp vào từng dòng để chỉnh sửa)</span>
             </h4>
-            <div id="word-merge-preview-container" class="space-y-4">
-              <!-- Render danh sách câu hỏi & ô Drop Zone ở đây -->
-            </div>
+            <div id="word-merge-preview-container" class="space-y-4"></div>
           </div>
 
         </div>
 
-        <!-- Cột Phải: Upload & Preview PDF (5/12) -->
+        <!-- Cột Phải: Display 5 ảnh mỗi hàng & Fit khít cả chiều dài lẫn chiều rộng -->
         <div class="lg:col-span-5 p-4 flex flex-col space-y-4 bg-white overflow-hidden">
           <h4 class="font-bold text-xs text-slate-700 uppercase tracking-wider flex items-center gap-1.5 border-b border-slate-200 pb-2 shrink-0">
             <i data-lucide="image" class="w-4 h-4 text-rose-700"></i>
             <span>Tải PDF & Chọn Ảnh</span>
           </h4>
 
-          <!-- Control PDF -->
           <div class="space-y-3 bg-slate-100 p-3 rounded border border-slate-300 shrink-0 text-xs">
             <div>
               <label class="block font-bold mb-1 text-slate-800">Chọn file PDF chứa hình vẽ:</label>
               <input type="file" id="modal-pdf-input" accept="application/pdf" class="w-full bg-white border border-slate-300 rounded p-1.5 text-xs text-slate-800">
             </div>
 
-            <!-- THANH TRUỢT DPI 1 - 3600 KÉO MƯỢT MÀ -->
             <div class="space-y-1">
               <div class="flex justify-between items-center font-bold">
                 <label class="text-slate-800">Độ phân giải (DPI):</label>
@@ -598,7 +583,6 @@
               <input type="range" id="modal-dpi-slider" min="1" max="3600" step="1" value="300" 
                      oninput="document.getElementById('modal-dpi-value').innerText = this.value + ' DPI'" 
                      class="w-full accent-rose-700 cursor-pointer">
-              <p class="text-[10px] text-slate-500">Tùy chỉnh độ phân giải mượt từ 1 DPI đến 3600 DPI (Chuẩn in ấn nét: 300 - 600 DPI).</p>
             </div>
 
             <button onclick="renderModalPdfImages()" class="w-full bg-rose-700 hover:bg-rose-800 text-white font-bold py-2 rounded transition flex items-center justify-center gap-1.5 border border-rose-800 cursor-pointer shadow-sm">
@@ -608,14 +592,38 @@
             <div id="modal-pdf-status" class="text-center font-bold text-[11px]"></div>
           </div>
 
-          <!-- Danh sách Ảnh preview từ PDF: FIT VỪA KHÍT NÉT CĂNG -->
-          <div id="modal-image-gallery" class="flex-1 overflow-y-auto custom-scroll flex flex-col space-y-3 p-2 bg-slate-50 border border-slate-200 rounded">
-            <div class="text-center text-xs text-slate-400 py-10">
+          <!-- GRID 5 CỘT HIỂN THỊ 5 ẢNH MỖI HÀNG FIT KHÍT -->
+          <div id="modal-image-gallery" class="flex-1 overflow-y-auto custom-scroll grid grid-cols-5 gap-2 p-2 bg-slate-50 border border-slate-200 rounded">
+            <div class="col-span-5 text-center text-xs text-slate-400 py-10">
               Vui lòng chọn file PDF và bấm "Xuất Danh Sách Ảnh"
             </div>
           </div>
         </div>
 
+      </div>
+    </div>
+  </div>
+
+  <!-- POPUP XEM TOÀN BỘ ĐÁP ÁN 38 CÂU -->
+  <div id="all-answers-modal" class="fixed inset-0 bg-slate-900/70 backdrop-blur-sm z-[10000] hidden flex items-center justify-center p-4">
+    <div class="bg-white border border-slate-300 rounded-lg shadow-2xl max-w-3xl w-full max-h-[80vh] flex flex-col overflow-hidden">
+      <div class="p-3.5 border-b border-slate-200 flex justify-between items-center bg-slate-100">
+        <div class="flex items-center space-x-2">
+          <i data-lucide="list-checks" class="w-5 h-5 text-indigo-700"></i>
+          <h3 class="font-bold text-sm text-slate-900">Bảng Đáp Án Chi Tiết Toàn Bộ Đề Bài</h3>
+        </div>
+        <button onclick="closeAllAnswersOverviewModal()" class="hover:bg-slate-200 p-1 rounded text-slate-500 hover:text-slate-800 transition cursor-pointer">
+          <i data-lucide="x" class="w-5 h-5"></i>
+        </button>
+      </div>
+
+      <div class="flex-1 overflow-y-auto p-4 custom-scroll">
+        <!-- Grid 6 cột liệt kê đáp án đẹp mắt -->
+        <div id="all-answers-grid" class="grid grid-cols-3 sm:grid-cols-6 gap-2.5"></div>
+      </div>
+
+      <div class="p-3 border-t border-slate-200 flex justify-end bg-slate-100">
+        <button onclick="closeAllAnswersOverviewModal()" class="bg-indigo-700 hover:bg-indigo-800 text-white px-5 py-1.5 text-xs font-bold rounded shadow transition cursor-pointer">Đóng</button>
       </div>
     </div>
   </div>
@@ -634,7 +642,7 @@
       </div>
 
       <div class="px-4 py-2 text-xs font-medium text-slate-600 border-b border-slate-100 bg-slate-50">
-        Tích chọn đáp án đúng cho từng câu bên dưới. Hệ thống sẽ tự động cập nhật lệnh <code class="font-mono bg-slate-200 px-1 py-0.5 rounded text-rose-700 font-bold">\True</code> vào ô Output ngay lập tức.
+        Tích chọn đáp án đúng cho từng câu bên dưới.
       </div>
 
       <div class="flex-1 overflow-y-auto p-4 custom-scroll">
