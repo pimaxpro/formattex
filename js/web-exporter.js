@@ -50,6 +50,22 @@ function extractMultipleBracedGroups(str, startIndex) {
 }
 
 /**
+ * Loại bỏ comment trong LaTeX (các đoạn bắt đầu bằng %), 
+ * bảo toàn các comment đáp án đặc biệt như %\ans{} và %\shortans{}
+ */
+function stripLatexComments(text) {
+  if (!text) return "";
+  return text.split('\n').map(line => {
+    // Nếu dòng chứa comment đáp án đặc biệt thì giữ nguyên
+    if (/%\s*\\ans\{/i.test(line) || /%\s*\\shortans\{/i.test(line)) {
+      return line;
+    }
+    // Ngược lại, xóa từ dấu % không được escaped (không phải \%) tới cuối dòng
+    return line.replace(/(^|[^\\])%.*/, '$1');
+  }).join('\n');
+}
+
+/**
  * Làm sạch văn bản: Loại bỏ môi trường tikz, center, immini, loigiai,
  * gỡ các lệnh định dạng text (\textbf, \textit, \texttt,...) nhưng giữ nguyên công thức toán.
  */
@@ -71,32 +87,47 @@ function cleanTextForWeb(text) {
     }
   }
 
-  // 2. Xóa các môi trường TikZ, Center, Immini
+  // 2. Xóa các môi trường TikZ, Center
   cleaned = cleaned.replace(/\\begin\{tikzpicture\}[\s\S]*?\\end\{tikzpicture\}/gi, '');
   cleaned = cleaned.replace(/\\begin\{center\}[\s\S]*?\\end\{center\}/gi, '');
-  cleaned = cleaned.replace(/\\begin\{immini\}[\s\S]*?\\end\{immini\}/gi, '');
 
-  // 3. Chuyển itemize thành danh sách gạch đầu dòng "-"
+  // 3. Xóa môi trường \begin{immini}...\end{immini} hoặc lệnh \immini{đề}{hình}
+  cleaned = cleaned.replace(/\\begin\{immini\}[\s\S]*?\\end\{immini\}/gi, '');
+  const imminiRegex = /\\immini\s*\{/g;
+  while ((match = imminiRegex.exec(cleaned)) !== null) {
+    // Lấy đối số 1 (Đề bài)
+    const arg1 = extractBracedGroup(cleaned, match.index + match[0].length - 1);
+    if (arg1) {
+      // Lấy đối số 2 (Hình)
+      const arg2 = extractBracedGroup(cleaned, arg1.endIndex + 1);
+      const endIndex = arg2 ? arg2.endIndex : arg1.endIndex;
+      cleaned = cleaned.substring(0, match.index) + arg1.content + cleaned.substring(endIndex + 1);
+      imminiRegex.lastIndex = match.index;
+    } else {
+      break;
+    }
+  }
+
+  // 4. Chuyển itemize thành danh sách gạch đầu dòng "-"
   cleaned = cleaned.replace(/\\begin\{itemize\}([\s\S]*?)\\end\{itemize\}/gi, (m, body) => {
-    return body.split('\\item')
+    return '\n' + body.split('\\item')
       .map(item => item.trim())
       .filter(item => item.length > 0)
       .map(item => `- ${item}`)
       .join('\n');
   });
 
-  // 4. Chuyển enumerate thành danh sách số "1., 2.,..."
+  // 5. Chuyển enumerate thành danh sách số "1., 2.,..."
   cleaned = cleaned.replace(/\\begin\{enumerate\}([\s\S]*?)\\end\{enumerate\}/gi, (m, body) => {
     let count = 1;
-    return body.split('\\item')
+    return '\n' + body.split('\\item')
       .map(item => item.trim())
       .filter(item => item.length > 0)
       .map(item => `${count++}. ${item}`)
       .join('\n');
   });
 
-  // 5. Gỡ bỏ các lệnh định dạng văn bản (\textbf, \textit, \texttt, \text, \mathrm khi ở ngoài công thức)
-  // Chỉ gỡ vỏ lệnh, giữ lại nội dung bên trong
+  // 6. Gỡ bỏ các lệnh định dạng văn bản (\textbf, \textit, \texttt, \text, \mathrm khi ở ngoài công thức)
   const textCmds = ['textbf', 'textit', 'texttt', 'textsl', 'textsc', 'textsf', 'text'];
   textCmds.forEach(cmd => {
     const regex = new RegExp(`\\\\${cmd}\\s*\\{`, 'g');
@@ -112,12 +143,12 @@ function cleanTextForWeb(text) {
     }
   });
 
-  // 6. Xóa các ký tự xuống dòng rác/dấu gạch nối LaTeX dư thừa (\vspace, \hspace, \\)
+  // 7. Xóa các ký tự xuống dòng rác/dấu gạch nối LaTeX dư thừa (\vspace, \hspace, \\)
   cleaned = cleaned.replace(/\\\\/g, '\n');
   cleaned = cleaned.replace(/\\vspace\{[^}]*\}/g, '');
   cleaned = cleaned.replace(/\\hspace\{[^}]*\}/g, '');
 
-  // 7. Thu gọn nhiều dòng trống liên tiếp
+  // 8. Thu gọn các dòng trống liên tiếp
   const lines = cleaned.split('\n')
     .map(l => l.trim())
     .filter(l => l.length > 0);
@@ -134,11 +165,14 @@ function processWebExporter() {
 
   if (!inputEl || !outputEl) return;
 
-  const rawText = inputEl.value;
+  let rawText = inputEl.value;
   if (!rawText.trim()) {
     alert('Vui lòng nhập mã LaTeX gốc vào ô Input!');
     return;
   }
+
+  // 0. Xóa sạch comment LaTeX cũ trước khi phân tích
+  rawText = stripLatexComments(rawText);
 
   // Tách từng câu \begin{ex}...\end{ex}
   const exRegex = /\\begin\{ex\}([\s\S]*?)\\end\{ex\}/gi;
@@ -149,7 +183,6 @@ function processWebExporter() {
   while ((exMatch = exRegex.exec(rawText)) !== null) {
     const exContent = exMatch[1];
     let processedQuestion = `Câu ${questionIndex}. `;
-    let hasError = false;
     let errorMessage = "";
 
     // -------------------------------------------------------------
@@ -168,7 +201,7 @@ function processWebExporter() {
       const choicesFormatted = [];
 
       groups.slice(0, 4).forEach((g, idx) => {
-        let text = g.trim();
+        let text = cleanTextForWeb(g.trim());
         if (text.startsWith('\\True')) {
           correctAnsLabel = labels[idx];
           text = text.replace(/^\\True\s*/, '').trim();
@@ -176,6 +209,7 @@ function processWebExporter() {
         choicesFormatted.push(`${labels[idx]}. ${text}`);
       });
 
+      // Xuống dòng giữa Đề bài và Phương án
       processedQuestion += stemClean + '\n' + choicesFormatted.join('\n');
       if (correctAnsLabel) {
         processedQuestion += `\nĐáp án TN: ${correctAnsLabel}`;
@@ -201,7 +235,7 @@ function processWebExporter() {
       const choicesFormatted = [];
 
       groups.slice(0, 4).forEach((g, idx) => {
-        let text = g.trim();
+        let text = cleanTextForWeb(g.trim());
         if (text.startsWith('\\True')) {
           tfResults.push('D');
           text = text.replace(/^\\True\s*/, '').trim();
@@ -211,6 +245,7 @@ function processWebExporter() {
         choicesFormatted.push(`${labels[idx]}) ${text}`);
       });
 
+      // Xuống dòng giữa Đề bài và Đáp án Đúng/Sai
       processedQuestion += stemClean + '\n' + choicesFormatted.join('\n');
       processedQuestion += `\nĐáp án DS: ${tfResults.join('|')}`;
     }
@@ -227,7 +262,7 @@ function processWebExporter() {
         const doaIdx = stemRaw.search(/\\doa\b/i);
         const { groups, endIndex } = extractMultipleBracedGroups(stemRaw, doaIdx + 4);
         if (groups.length > 0) {
-          doaString = groups.map(g => `$${g.trim()}$`).join(' @ ');
+          doaString = groups.map(g => `$${cleanTextForWeb(g.trim())}$`).join(' @ ');
         }
         // Gỡ đoạn \doa khỏi đề bài
         stemRaw = stemRaw.substring(endIndex);
@@ -249,14 +284,15 @@ function processWebExporter() {
 
       const stemClean = cleanTextForWeb(stemRaw);
 
-      processedQuestion += stemClean;
       if (doaString) {
-        processedQuestion = processedQuestion.replace(`Câu ${questionIndex}.`, `Câu ${questionIndex}.\n${doaString}`);
+        processedQuestion += doaString + '\n' + stemClean;
+      } else {
+        processedQuestion += stemClean;
       }
 
-      // Tạo dòng đáp án
+      // Đổi nhãn thành "Đáp án KT: "
       const formattedAns = ansList.map(a => `${a}>`).join('|');
-      processedQuestion += `\nĐáp án: ${formattedAns}`;
+      processedQuestion += `\nĐáp án KT: ${formattedAns}`;
 
       // Kiểm tra thiếu đáp án
       if (dienktCount !== ansList.length) {
