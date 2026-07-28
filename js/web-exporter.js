@@ -1,5 +1,5 @@
 /* =========================================================
-   FORMATTEX — WEB EXPORTER MODULE (SỬA TRIỆT ĐỂ LỖI \choice)
+   FORMATTEX — WEB EXPORTER MODULE (ĐÃ FIX LỖI BẮT \True TRONG \left\{ )
    ========================================================= */
 
 /** Trích xuất chính xác 1 nhóm ngoặc nhọn cân bằng {}, bỏ qua ngoặc thoát \{ và \} */
@@ -7,6 +7,7 @@ function extractBracedGroup(str, startIndex) {
   let depth = 0;
   let start = -1;
   for (let i = startIndex; i < str.length; i++) {
+    // Bỏ qua ký tự thoát \{ và \}
     if (str[i] === '\\' && (i + 1 < str.length) && (str[i + 1] === '{' || str[i + 1] === '}')) {
       i++;
       continue;
@@ -109,7 +110,7 @@ function cleanTextForWeb(text) {
   // 2. Gỡ khối TikZ
   cleaned = cleaned.replace(/\\begin\{tikzpicture\}[\s\S]*?\\end\{tikzpicture\}/gi, '');
 
-  // 3. Chỉ gỡ thẻ \begin{center} và \end{center}, giữ nội dung
+  // 3. Chỉ gỡ thẻ \begin{center} và \end{center}, giữ lại nội dung bên trong
   cleaned = cleaned.replace(/\\begin\{center\}/gi, '');
   cleaned = cleaned.replace(/\\end\{center\}/gi, '');
 
@@ -194,15 +195,11 @@ function processWebExporter() {
     let errorMessage = "";
     const needsImageNote = hasGraphicElement(exContent);
 
-    // CÂU HỎI TRẮC NGHIỆM \choice
     if (/\\choice\b/i.test(exContent)) {
-      const choiceMatch = exContent.match(/\\choice\b/i);
-      const choiceIdx = choiceMatch.index;
+      const choiceIdx = exContent.search(/\\choice\b/i);
       const stemRaw = exContent.substring(0, choiceIdx);
       const stemClean = cleanTextForWeb(stemRaw);
-      
-      // BẮT BẮT ĐẦU NÓI SAU LỆNH \choice CHUẨN XÁC VỊ TRÍ
-      const rest = exContent.substring(choiceIdx + choiceMatch[0].length);
+      const rest = exContent.substring(choiceIdx + 7);
       const { groups } = extractMultipleBracedGroups(rest, 0);
 
       const labels = ['A', 'B', 'C', 'D'];
@@ -231,12 +228,11 @@ function processWebExporter() {
         errorMessage = "Câu này thiếu đáp án";
       }
     } else if (/\\choiceTF[t]?\b/i.test(exContent)) {
-      const choiceMatch = exContent.match(/\\choiceTF[t]?\b/i);
-      const choiceIdx = choiceMatch.index;
+      const choiceIdx = exContent.search(/\\choiceTF[t]?\b/i);
       const stemRaw = exContent.substring(0, choiceIdx);
       const stemClean = cleanTextForWeb(stemRaw);
-      
-      const rest = exContent.substring(choiceIdx + choiceMatch[0].length);
+      const matchTF = exContent.match(/\\choiceTF[t]?\b/i);
+      const rest = exContent.substring(choiceIdx + matchTF[0].length);
       const { groups } = extractMultipleBracedGroups(rest, 0);
 
       const labels = ['a', 'b', 'c', 'd'];
@@ -268,8 +264,8 @@ function processWebExporter() {
       let stemRaw = exContent;
       let doaString = "";
       if (/\\doa\b/i.test(stemRaw)) {
-        const doaMatch = stemRaw.match(/\\doa\b/i);
-        const { groups, endIndex } = extractMultipleBracedGroups(stemRaw, doaMatch.index + doaMatch[0].length);
+        const doaIdx = stemRaw.search(/\\doa\b/i);
+        const { groups, endIndex } = extractMultipleBracedGroups(stemRaw, doaIdx + 4);
         if (groups.length > 0) {
           doaString = groups.map(g => {
             let cleanedItem = cleanTextForWeb(g.replace(/\\True\b/gi, '').trim());
@@ -366,6 +362,7 @@ function updateNavButtonState(qNumber, isImageRequired, hasImage) {
   }
 }
 
+/** ĐẨY KHUNG HÌNH VẼ CHÈN VÀO GIỮA CÁC DÒNG VĂN BẢN (UP/DOWN) */
 function moveDropZone(dropZoneId, direction) {
   const dropWrapper = document.getElementById(`wrapper-${dropZoneId}`);
   if (!dropWrapper) return;
@@ -472,6 +469,7 @@ function openWordMergeModal() {
     card.className = "q-card-item bg-white p-3.5 border border-slate-300 rounded shadow-sm space-y-2 text-xs font-mono text-slate-800 leading-relaxed transition hover:border-rose-400";
 
     const dropZoneId = `dropzone-${qIdx}`;
+
     const textLines = qText.replace('[Thêm hình vẽ vào đây]', '').split('\n').filter(l => l.trim().length > 0);
     
     let htmlContent = '';
@@ -536,6 +534,7 @@ function openWordMergeModal() {
   setupScrollSpy();
 }
 
+/** HIỂN THỊ CỬA SỔ POPUP XEM TOÀN BỘ ĐÁP ÁN 38 CÂU */
 function openAllAnswersOverviewModal() {
   const ansModal = document.getElementById('all-answers-modal');
   const ansGrid = document.getElementById('all-answers-grid');
@@ -675,6 +674,7 @@ function removeDroppedImage(e, dropZoneId) {
   if (window.lucide) lucide.createIcons();
 }
 
+/** RENDER CỘT BÊN PHẢI: DISPLAY 5 ẢNH MỖI HÀNG (GRID 5 CỘT) & FIT KHÍT CẢ DÀI LẪN RỘNG */
 async function renderModalPdfImages() {
   const fileInput = document.getElementById('modal-pdf-input');
   const gallery = document.getElementById('modal-image-gallery');
@@ -745,6 +745,7 @@ function loadImageAsync(src) {
   });
 }
 
+/** XUẤT FILE WORD .DOCX GIỮ NGUYÊN TỶ LỆ CHUẨN MẤT MÉO */
 async function exportToWordDocx() {
   if (typeof docx === 'undefined') {
     alert('Thư viện docx chưa tải xong. Vui lòng kiểm tra lại kết nối mạng!');
