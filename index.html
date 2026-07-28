@@ -23,9 +23,6 @@
       
       <!-- LOGO & BRANDING -->
       <div class="flex items-center space-x-3">
-        <!-- <div class="bg-rose-700 text-white p-2 rounded shadow-md">
-          <i data-lucide="sparkles" class="w-5 h-5"></i>
-        </div> -->
         <div>
           <h1 class="text-lg font-bold tracking-tight flex items-center gap-2 text-slate-900">
             Làm nhanh lên!
@@ -329,6 +326,26 @@
             <label class="block text-xs font-bold mb-1">Chọn file PDF:</label>
             <input type="file" id="pdf-input" accept="application/pdf" class="w-full text-xs bg-slate-100 border border-slate-300 rounded p-2.5 outline-none font-medium text-slate-800">
           </div>
+
+          <!-- OPTION CHỌN PHẠM VI TRANG -->
+          <div class="bg-slate-100 p-4 border border-slate-300 rounded space-y-3">
+            <label class="block text-xs font-bold text-slate-800">Chọn trang cần chuyển đổi:</label>
+            <div class="flex items-center space-x-6 text-xs font-semibold text-slate-700">
+              <label class="flex items-center space-x-2 cursor-pointer">
+                <input type="radio" name="page-range-option" value="all" checked class="text-rose-700 focus:ring-rose-500">
+                <span>Toàn bộ trang</span>
+              </label>
+              <label class="flex items-center space-x-2 cursor-pointer">
+                <input type="radio" name="page-range-option" value="custom" class="text-rose-700 focus:ring-rose-500">
+                <span>Trang tùy chọn</span>
+              </label>
+            </div>
+            <div id="custom-pages-box" class="hidden pt-1">
+              <input type="text" id="page-range-input" placeholder="VD: 1,2,3,4 hoặc 1-4,13-36" class="w-full bg-white border border-slate-300 rounded p-2 text-xs outline-none font-mono text-slate-800">
+              <p class="text-[11px] text-slate-500 mt-1">Cú pháp: Nhập các trang cách nhau bởi dấu phẩy (VD: <code class="font-bold text-slate-700">1,2,5</code>) hoặc phạm vi (VD: <code class="font-bold text-slate-700">1-4,13-36</code>).</p>
+            </div>
+          </div>
+
           <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
               <label class="block text-xs font-bold mb-1">Định dạng ảnh xuất:</label>
