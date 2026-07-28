@@ -313,12 +313,13 @@ function processWebExporter() {
 }
 
 /* =========================================================
-   LOGIC CỬA SỔ POPUP GỘP FILE WORD
+   LOGIC CỬA SỔ POPUP GỘP FILE WORD (BẢN TỐI ƯU TOÀN DIỆN)
    ========================================================= */
 
 let questionImagesMap = {};
+let scrollObserver = null;
 
-/** Cuộn mượt tới câu được chọn từ Menu dọc */
+/** Cuộn mượt tới câu được chọn */
 function scrollToQuestionCard(qIndex) {
   const card = document.getElementById(`q-card-${qIndex}`);
   if (card) {
@@ -326,7 +327,7 @@ function scrollToQuestionCard(qIndex) {
   }
 }
 
-/** Cập nhật trạng thái màu sắc cho nút Menu dọc (Đỏ: Thiếu hình | Xanh: Đã có hình | Xám: Không hình) */
+/** Cập nhật trạng thái màu sắc cho nút Menu dọc */
 function updateNavButtonState(qNumber, isImageRequired, hasImage) {
   const navBtn = document.getElementById(`q-nav-btn-${qNumber}`);
   if (!navBtn) return;
@@ -348,6 +349,59 @@ function updateNavButtonState(qNumber, isImageRequired, hasImage) {
   }
 }
 
+/** Đẩy khung hình vẽ Lên/Xuống giữa các đoạn văn */
+function moveDropZone(dropZoneId, direction) {
+  const dropWrapper = document.getElementById(`wrapper-${dropZoneId}`);
+  if (!dropWrapper) return;
+
+  if (direction === 'up') {
+    const prevNode = dropWrapper.previousElementSibling;
+    if (prevNode && prevNode.classList.contains('editable-content')) {
+      dropWrapper.parentNode.insertBefore(dropWrapper, prevNode);
+    }
+  } else if (direction === 'down') {
+    const nextNode = dropWrapper.nextElementSibling;
+    if (nextNode && nextNode.classList.contains('editable-content')) {
+      dropWrapper.parentNode.insertBefore(nextNode, dropWrapper);
+    }
+  }
+}
+
+/** Tải ảnh từ máy tính khi click vào Drop Zone */
+function handleFileInputImage(e, dropZoneId) {
+  const file = e.target.files[0];
+  if (!file) return;
+
+  const reader = new FileReader();
+  reader.onload = function(evt) {
+    const imgDataUrl = evt.target.result;
+    applyImageToDropZone(dropZoneId, imgDataUrl);
+  };
+  reader.readAsDataURL(file);
+}
+
+function applyImageToDropZone(dropZoneId, imgDataUrl) {
+  const dropZone = document.getElementById(dropZoneId);
+  if (!dropZone) return;
+
+  questionImagesMap[dropZoneId] = imgDataUrl;
+
+  const qNumber = dropZone.getAttribute('data-qnumber');
+  const isRequired = dropZone.getAttribute('data-required') === 'true';
+
+  if (qNumber) updateNavButtonState(qNumber, isRequired, true);
+
+  dropZone.innerHTML = `
+    <div class="relative group my-1 w-full">
+      <img src="${imgDataUrl}" id="img-${dropZoneId}" class="dropped-img max-h-60 max-w-full rounded border border-slate-300 shadow-sm mx-auto object-contain">
+      <button onclick="removeDroppedImage(event, '${dropZoneId}')" class="absolute top-1 right-1 bg-rose-700 text-white p-1 rounded-full opacity-80 hover:opacity-100 transition shadow cursor-pointer">
+        <i data-lucide="x" class="w-3.5 h-3.5"></i>
+      </button>
+    </div>
+  `;
+  if (window.lucide) lucide.createIcons();
+}
+
 function openWordMergeModal() {
   const outputEl = document.getElementById('output-web');
   const outputText = outputEl ? outputEl.value : '';
@@ -357,7 +411,7 @@ function openWordMergeModal() {
     return;
   }
 
-  // CHECK ĐÁP ÁN: KHÔNG CHO VÀO PHẦN GỘP FILE NẾU CÓ CÂU THIẾU ĐÁP ÁN
+  // CHECK ĐÁP ÁN: CHẶN KHÔNG CHO VÀO NẾU CÓ CÂU THIẾU ĐÁP ÁN
   const missingQuestions = [];
   const rawQuestions = outputText.split(/(?=Câu \d+\.)/g).filter(q => q.trim().length > 0);
 
@@ -390,52 +444,69 @@ function openWordMergeModal() {
     const qNumber = qIdx + 1;
     const isImageRequired = qText.includes('[Thêm hình vẽ vào đây]');
 
-    // 1. Tạo Nút Menu Dọc bên trái
+    // 1. Nút Menu Dọc bên trái
     const navBtn = document.createElement('button');
     navBtn.id = `q-nav-btn-${qNumber}`;
     navBtn.innerText = `Câu ${qNumber}`;
     navBtn.onclick = () => scrollToQuestionCard(qNumber);
     navContainer.appendChild(navBtn);
 
-    // Set màu ban đầu cho nút Menu
     updateNavButtonState(qNumber, isImageRequired, false);
 
-    // 2. Tạo Card Nội Dung
+    // 2. Card Nội Dung
     const card = document.createElement('div');
     card.id = `q-card-${qNumber}`;
-    card.className = "bg-white p-3.5 border border-slate-300 rounded shadow-sm space-y-2 text-xs font-mono text-slate-800 leading-relaxed transition hover:border-rose-400";
+    card.className = "q-card-item bg-white p-3.5 border border-slate-300 rounded shadow-sm space-y-2 text-xs font-mono text-slate-800 leading-relaxed transition hover:border-rose-400";
+
+    const dropZoneId = `dropzone-${qIdx}`;
 
     if (isImageRequired) {
       const parts = qText.split('[Thêm hình vẽ vào đây]');
-      const dropZoneId = `dropzone-${qIdx}`;
-
       card.innerHTML = `
         <div contenteditable="true" class="q-text-box editable-content focus:outline-none focus:ring-1 focus:ring-rose-400 p-1.5 rounded bg-slate-50/50 hover:bg-amber-50/30 whitespace-pre-wrap">${escapeHtml(parts[0].trim())}</div>
-        <div id="${dropZoneId}" 
-             data-qnumber="${qNumber}"
-             data-required="true"
-             ondragover="handleDragOver(event)" 
-             ondragleave="handleDragLeave(event)" 
-             ondrop="handleDropImage(event, '${dropZoneId}')"
-             class="border-2 border-dashed border-rose-300 bg-rose-50/40 hover:bg-rose-100/60 p-4 rounded text-center my-2 transition flex flex-col items-center justify-center min-h-[90px] cursor-pointer">
-           <i data-lucide="image-plus" class="w-6 h-6 text-rose-600 mb-1 pointer-events-none"></i>
-           <span class="text-[11px] text-rose-700 font-bold pointer-events-none">[Kéo thả hình vẽ từ cột phải vào đây]</span>
+        
+        <div id="wrapper-${dropZoneId}" class="my-2 border border-slate-200 p-2 rounded bg-slate-50">
+          <div class="flex justify-between items-center mb-1 pb-1 border-b border-slate-200">
+            <span class="text-[10px] font-bold text-rose-700 flex items-center gap-1"><i data-lucide="image" class="w-3 h-3"></i> Khung hình vẽ</span>
+            <div class="flex items-center space-x-1">
+              <button onclick="moveDropZone('${dropZoneId}', 'up')" class="bg-white hover:bg-slate-200 px-1.5 py-0.5 rounded border border-slate-300 text-[10px] font-bold shadow-sm" title="Đẩy khung lên dòng trên">⬆️ Lên</button>
+              <button onclick="moveDropZone('${dropZoneId}', 'down')" class="bg-white hover:bg-slate-200 px-1.5 py-0.5 rounded border border-slate-300 text-[10px] font-bold shadow-sm" title="Đẩy khung xuống dòng dưới">⬇️ Xuống</button>
+            </div>
+          </div>
+
+          <div id="${dropZoneId}" 
+               data-qnumber="${qNumber}"
+               data-required="true"
+               onclick="document.getElementById('file-${dropZoneId}').click()"
+               ondragover="handleDragOver(event)" 
+               ondragleave="handleDragLeave(event)" 
+               ondrop="handleDropImage(event, '${dropZoneId}')"
+               class="border-2 border-dashed border-rose-300 bg-rose-50/40 hover:bg-rose-100/60 p-4 rounded text-center transition flex flex-col items-center justify-center min-h-[90px] cursor-pointer">
+             <i data-lucide="image-plus" class="w-6 h-6 text-rose-600 mb-1 pointer-events-none"></i>
+             <span class="text-[11px] text-rose-700 font-bold pointer-events-none">[Kéo thả hoặc Bấm vào đây để Up Ảnh]</span>
+          </div>
+          <input type="file" id="file-${dropZoneId}" accept="image/*" class="hidden" onchange="handleFileInputImage(event, '${dropZoneId}')">
         </div>
+
         <div contenteditable="true" class="q-text-box editable-content focus:outline-none focus:ring-1 focus:ring-rose-400 p-1.5 rounded bg-slate-50/50 hover:bg-amber-50/30 whitespace-pre-wrap">${escapeHtml(parts[1].trim())}</div>
       `;
     } else {
-      const dropZoneId = `dropzone-optional-${qIdx}`;
       card.innerHTML = `
         <div contenteditable="true" class="q-text-box editable-content focus:outline-none focus:ring-1 focus:ring-rose-400 p-1.5 rounded bg-slate-50/50 hover:bg-amber-50/30 whitespace-pre-wrap">${escapeHtml(qText.trim())}</div>
-        <div id="${dropZoneId}" 
-             data-qnumber="${qNumber}"
-             data-required="false"
-             ondragover="handleDragOver(event)" 
-             ondragleave="handleDragLeave(event)" 
-             ondrop="handleDropImage(event, '${dropZoneId}')"
-             class="border border-dashed border-slate-300 bg-slate-50 hover:bg-rose-50 p-2 rounded text-center my-1 transition flex items-center justify-center gap-1.5 cursor-pointer text-[11px] text-slate-500">
-           <i data-lucide="image-plus" class="w-3.5 h-3.5 text-slate-400 pointer-events-none"></i>
-           <span class="pointer-events-none">[Thả ảnh vào đây nếu câu này có hình]</span>
+        
+        <div id="wrapper-${dropZoneId}" class="my-1">
+          <div id="${dropZoneId}" 
+               data-qnumber="${qNumber}"
+               data-required="false"
+               onclick="document.getElementById('file-${dropZoneId}').click()"
+               ondragover="handleDragOver(event)" 
+               ondragleave="handleDragLeave(event)" 
+               ondrop="handleDropImage(event, '${dropZoneId}')"
+               class="border border-dashed border-slate-300 bg-slate-50 hover:bg-rose-50 p-2 rounded text-center transition flex items-center justify-center gap-1.5 cursor-pointer text-[11px] text-slate-500">
+             <i data-lucide="image-plus" class="w-3.5 h-3.5 text-slate-400 pointer-events-none"></i>
+             <span class="pointer-events-none">[Bấm hoặc Kéo ảnh vào đây nếu câu này có hình]</span>
+          </div>
+          <input type="file" id="file-${dropZoneId}" accept="image/*" class="hidden" onchange="handleFileInputImage(event, '${dropZoneId}')">
         </div>
       `;
     }
@@ -446,6 +517,42 @@ function openWordMergeModal() {
   modal.classList.remove('hidden');
   modal.classList.add('flex');
   if (window.lucide) lucide.createIcons();
+
+  // 3. Khởi tạo ScrollSpy lắng nghe cuộn màn hình ở Cột Trái
+  setupScrollSpy();
+}
+
+/** Tự động Highlight Menu số câu khi Lướt/Cuộn màn hình */
+function setupScrollSpy() {
+  if (scrollObserver) scrollObserver.disconnect();
+
+  const scrollContainer = document.querySelector('#word-merge-modal .lg\\:col-span-7 .overflow-y-auto');
+  if (!scrollContainer) return;
+
+  const cards = document.querySelectorAll('.q-card-item');
+
+  scrollObserver = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        const id = entry.target.id;
+        const qNumber = id.replace('q-card-', '');
+
+        document.querySelectorAll('.q-nav-btn').forEach(btn => {
+          btn.classList.remove('ring-2', 'ring-rose-600', 'scale-105');
+        });
+
+        const activeBtn = document.getElementById(`q-nav-btn-${qNumber}`);
+        if (activeBtn) {
+          activeBtn.classList.add('ring-2', 'ring-rose-600', 'scale-105');
+        }
+      }
+    });
+  }, {
+    root: scrollContainer,
+    threshold: 0.4
+  });
+
+  cards.forEach(card => scrollObserver.observe(card));
 }
 
 function closeWordMergeModal() {
@@ -454,6 +561,7 @@ function closeWordMergeModal() {
     modal.classList.add('hidden');
     modal.classList.remove('flex');
   }
+  if (scrollObserver) scrollObserver.disconnect();
 }
 
 function escapeHtml(text) {
@@ -473,34 +581,33 @@ function handleDragLeave(e) {
 
 function handleDropImage(e, dropZoneId) {
   e.preventDefault();
+  e.stopPropagation();
+
   const dropZone = document.getElementById(dropZoneId);
   if (!dropZone) return;
 
   dropZone.classList.remove('border-rose-600', 'bg-rose-100');
-  const imgDataUrl = e.dataTransfer.getData('text/plain');
 
-  if (!imgDataUrl || !imgDataUrl.startsWith('data:image')) {
-    alert('Vui lòng kéo một hình ảnh hợp lệ từ danh sách bên phải!');
-    return;
+  // Ưu tiên lấy file kéo thả trực tiếp từ máy tính
+  if (e.dataTransfer.files && e.dataTransfer.files.length > 0) {
+    const file = e.dataTransfer.files[0];
+    if (file.type.startsWith('image/')) {
+      const reader = new FileReader();
+      reader.onload = function(evt) {
+        applyImageToDropZone(dropZoneId, evt.target.result);
+      };
+      reader.readAsDataURL(file);
+      return;
+    }
   }
 
-  questionImagesMap[dropZoneId] = imgDataUrl;
-
-  const qNumber = dropZone.getAttribute('data-qnumber');
-  const isRequired = dropZone.getAttribute('data-required') === 'true';
-
-  // Cập nhật nút Menu sang màu Xanh lá khi đã thêm hình
-  if (qNumber) updateNavButtonState(qNumber, isRequired, true);
-
-  dropZone.innerHTML = `
-    <div class="relative group my-1">
-      <img src="${imgDataUrl}" id="img-${dropZoneId}" class="dropped-img max-h-60 max-w-full rounded border border-slate-300 shadow-sm mx-auto object-contain">
-      <button onclick="removeDroppedImage(event, '${dropZoneId}')" class="absolute top-1 right-1 bg-rose-700 text-white p-1 rounded-full opacity-80 hover:opacity-100 transition shadow cursor-pointer">
-        <i data-lucide="x" class="w-3.5 h-3.5"></i>
-      </button>
-    </div>
-  `;
-  if (window.lucide) lucide.createIcons();
+  // Lấy Data URL từ danh sách Preview PDF bên phải
+  const imgDataUrl = e.dataTransfer.getData('text/plain');
+  if (imgDataUrl && imgDataUrl.startsWith('data:image')) {
+    applyImageToDropZone(dropZoneId, imgDataUrl);
+  } else {
+    alert('Vui lòng kéo một hình ảnh hợp lệ!');
+  }
 }
 
 function removeDroppedImage(e, dropZoneId) {
@@ -513,24 +620,23 @@ function removeDroppedImage(e, dropZoneId) {
   const qNumber = dropZone.getAttribute('data-qnumber');
   const isRequired = dropZone.getAttribute('data-required') === 'true';
 
-  // Trả màu nút Menu về trạng thái cũ khi xóa hình
   if (qNumber) updateNavButtonState(qNumber, isRequired, false);
 
   if (isRequired) {
     dropZone.innerHTML = `
        <i data-lucide="image-plus" class="w-6 h-6 text-rose-600 mb-1 pointer-events-none"></i>
-       <span class="text-[11px] text-rose-700 font-bold pointer-events-none">[Kéo thả hình vẽ từ cột phải vào đây]</span>
+       <span class="text-[11px] text-rose-700 font-bold pointer-events-none">[Kéo thả hoặc Bấm vào đây để Up Ảnh]</span>
     `;
   } else {
     dropZone.innerHTML = `
        <i data-lucide="image-plus" class="w-3.5 h-3.5 text-slate-400 pointer-events-none"></i>
-       <span class="pointer-events-none">[Thả ảnh vào đây nếu câu này có hình]</span>
+       <span class="pointer-events-none">[Bấm hoặc Kéo ảnh vào đây nếu câu này có hình]</span>
     `;
   }
   if (window.lucide) lucide.createIcons();
 }
 
-/** Render PDF thành danh sách ảnh dọc, ôm VỪA KHÍT khung ảnh không còn khoảng trống thừa */
+/** Render PDF thành danh sách ảnh dọc ôm VỪA KHÍT cả chiều ngang và chiều dọc */
 async function renderModalPdfImages() {
   const fileInput = document.getElementById('modal-pdf-input');
   const gallery = document.getElementById('modal-image-gallery');
@@ -570,12 +676,12 @@ async function renderModalPdfImages() {
       await page.render({ canvasContext: ctx, viewport: viewport }).promise;
       const imgDataUrl = canvas.toDataURL('image/png', 1.0);
 
-      // Card chứa ảnh: Dạng dọc ôm sát khít hình vẽ
+      // Card chứa ảnh: FIT KHÍT HOÀN TOÀN CẢ CHIỀU NGANG VÀ DỌC (max-h-[400px])
       const item = document.createElement('div');
       item.className = "bg-white p-2 border border-slate-300 rounded shadow-sm flex flex-col items-center space-y-1.5 cursor-grab active:cursor-grabbing hover:border-rose-500 transition shrink-0 w-full";
       item.innerHTML = `
         <span class="text-[11px] font-bold text-slate-600 bg-slate-100 px-2 py-0.5 rounded border border-slate-200">Trang ${i} (${Math.round(viewport.width)}x${Math.round(viewport.height)}px)</span>
-        <img src="${imgDataUrl}" draggable="true" ondragstart="handleImageDragStart(event)" class="w-full h-auto object-contain rounded border border-slate-200 shadow-sm">
+        <img src="${imgDataUrl}" draggable="true" ondragstart="handleImageDragStart(event)" class="max-h-[400px] w-full object-contain rounded border border-slate-200 shadow-sm">
       `;
       gallery.appendChild(item);
     }
@@ -600,7 +706,7 @@ function loadImageAsync(src) {
   });
 }
 
-/** XUẤT FILE WORD .DOCX CHỨA CẢ VĂN BẢN VÀ ẢNH GIỮ NGUYÊN TỶ LỆ GỐC MẤT MÉO */
+/** XUẤT FILE WORD .DOCX GIỮ NGUYÊN TỶ LỆ CHUẨN MẤT MÉO */
 async function exportToWordDocx() {
   if (typeof docx === 'undefined') {
     alert('Thư viện docx chưa tải xong. Vui lòng kiểm tra lại kết nối mạng!');
@@ -638,8 +744,8 @@ async function exportToWordDocx() {
           });
         }
       } 
-      else if (node.nodeType === Node.ELEMENT_NODE && node.id && node.id.startsWith('dropzone')) {
-        const dropZoneId = node.id;
+      else if (node.nodeType === Node.ELEMENT_NODE && node.id && node.id.startsWith('wrapper-dropzone')) {
+        const dropZoneId = node.id.replace('wrapper-', '');
         const imgDataUrl = questionImagesMap[dropZoneId];
 
         if (imgDataUrl) {
