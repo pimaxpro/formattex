@@ -576,18 +576,16 @@
               <input type="file" id="modal-pdf-input" accept="application/pdf" class="w-full bg-white border border-slate-300 rounded p-1.5 text-xs">
             </div>
 
-            <div class="grid grid-cols-2 gap-2">
-              <div>
-                <label class="block font-bold mb-1">Kiểu Scale:</label>
-                <select id="modal-mode-select" class="w-full bg-white border border-slate-300 rounded p-1.5">
-                  <option value="width">Cố định Chiều Rộng</option>
-                  <option value="height">Cố định Chiều Cao</option>
-                </select>
+            <!-- THANH TRUỢT DPI ĐỊNH DẠNG TỈ LỆ CHUẨN MẤT MÉO HÌNH -->
+            <div class="space-y-1">
+              <div class="flex justify-between items-center font-bold">
+                <label>Độ sắc nét / Mật độ DPI:</label>
+                <span id="modal-dpi-value" class="text-indigo-700 font-mono">300 DPI</span>
               </div>
-              <div>
-                <label class="block font-bold mb-1">Kích thước (px):</label>
-                <input type="number" id="modal-size-input" value="1200" class="w-full bg-white border border-slate-300 rounded p-1.5 font-mono">
-              </div>
+              <input type="range" id="modal-dpi-slider" min="100" max="600" step="50" value="300" 
+                     oninput="document.getElementById('modal-dpi-value').innerText = this.value + ' DPI'" 
+                     class="w-full accent-indigo-700 cursor-pointer">
+              <p class="text-[10px] text-slate-500">Giữ nguyên 100% tỉ lệ khung hình gốc (300 DPI là chuẩn in ấn cực nét).</p>
             </div>
 
             <button onclick="renderModalPdfImages()" class="w-full bg-indigo-700 hover:bg-indigo-800 text-white font-bold py-2 rounded transition flex items-center justify-center gap-1.5 border border-indigo-800">
