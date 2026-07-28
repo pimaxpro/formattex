@@ -399,10 +399,33 @@ function processWebExporter() {
 }
 
 /* =========================================================
-   LOGIC MỚI: CỬA SỔ POPUP GỘP FILE WORD & DRAG-DROP ẢNH (ĐÃ FIX HIỂN THỊ)
+   LOGIC POPUP GỘP WORD (DPI SCALE TỈ LỆ CHUẨN + CHECK ĐÁP ÁN)
    ========================================================= */
 
 let questionImagesMap = {};
+
+/**
+ * Kiểm tra các câu thiếu đáp án và bật thông báo
+ */
+function checkMissingAnswersInOutput(outputText) {
+  const missingQuestions = [];
+  const questions = outputText.split(/(?=Câu \d+\.)/g);
+
+  questions.forEach(qText => {
+    if (qText.includes("Câu này thiếu đáp án")) {
+      const matchNum = qText.match(/Câu (\d+)\./);
+      if (matchNum) {
+        missingQuestions.push(`Câu ${matchNum[1]}`);
+      }
+    }
+  });
+
+  if (missingQuestions.length > 0) {
+    alert(`⚠️ THÔNG BÁO: Phát hiện ${missingQuestions.length} câu CHƯA CÓ ĐÁP ÁN:\n👉 ${missingQuestions.join(', ')}\n\nVui lòng kiểm tra lại trước khi gộp file!`);
+  } else {
+    alert(`✅ TẤT CẢ CÁC CÂU HỎI ĐÃ CÓ ĐẦY ĐỦ ĐÁP ÁN! Sẵn sàng gộp file Word.`);
+  }
+}
 
 function openWordMergeModal() {
   const outputEl = document.getElementById('output-web');
@@ -412,6 +435,9 @@ function openWordMergeModal() {
     alert('Chưa có nội dung chuẩn hóa ở ô Output. Vui lòng bấm "Vứt Lên Web Ngay" trước!');
     return;
   }
+
+  // 1. KIỂM TRA ĐÁP ÁN VÀ THÔNG BÁO NGAY KHI BẤM GỘP FILE
+  checkMissingAnswersInOutput(outputText);
 
   const container = document.getElementById('word-merge-preview-container');
   const modal = document.getElementById('word-merge-modal');
@@ -468,7 +494,6 @@ function openWordMergeModal() {
     container.appendChild(card);
   });
 
-  // KÍCH HOẠT HIỂN THỊ MODAL BẰNG FLEX
   modal.classList.remove('hidden');
   modal.classList.add('flex');
 
@@ -545,10 +570,14 @@ function removeDroppedImage(e, dropZoneId) {
   if (window.lucide) lucide.createIcons();
 }
 
+/**
+ * Render PDF thành danh sách ảnh ở Cột Phải DỰA TRÊN MẬT ĐỘ DPI (TỈ LỆ TỰ NHIÊN CHUẨN KHOẢNG MÉO)
+ */
 async function renderModalPdfImages() {
   const fileInput = document.getElementById('modal-pdf-input');
   const gallery = document.getElementById('modal-image-gallery');
   const statusEl = document.getElementById('modal-pdf-status');
+  const dpiInput = document.getElementById('modal-dpi-slider');
 
   if (!fileInput || !fileInput.files || fileInput.files.length === 0) {
     alert('Vui lòng chọn file PDF!');
@@ -556,11 +585,12 @@ async function renderModalPdfImages() {
   }
 
   const file = fileInput.files[0];
-  const mode = document.getElementById('modal-mode-select').value;
-  const targetSize = parseInt(document.getElementById('modal-size-input').value) || 1200;
+  const targetDpi = parseInt(dpiInput?.value) || 300;
+  // Tỉ lệ scale = DPI / 72 (72 DPI là chuẩn PDF mặc định)
+  const scaleRatio = targetDpi / 72;
 
   gallery.innerHTML = '';
-  statusEl.innerHTML = `<span class="text-indigo-700">Đang đọc PDF...</span>`;
+  statusEl.innerHTML = `<span class="text-indigo-700">Đang xuất PDF ở độ phân giải ${targetDpi} DPI...</span>`;
 
   try {
     const arrayBuffer = await file.arrayBuffer();
@@ -570,16 +600,9 @@ async function renderModalPdfImages() {
     for (let i = 1; i <= totalPages; i++) {
       statusEl.innerHTML = `<span class="text-indigo-700">Đang xuất trang ${i} / ${totalPages}...</span>`;
       const page = await pdf.getPage(i);
-      const originalViewport = page.getViewport({ scale: 1.0 });
-
-      let scale = 1.0;
-      if (mode === 'width') {
-        scale = targetSize / originalViewport.width;
-      } else {
-        scale = targetSize / originalViewport.height;
-      }
-
-      const viewport = page.getViewport({ scale: scale });
+      
+      // Giữ đúng tỉ lệ chuẩn của trang PDF
+      const viewport = page.getViewport({ scale: scaleRatio });
       const canvas = document.createElement('canvas');
       const ctx = canvas.getContext('2d');
       canvas.width = viewport.width;
@@ -595,13 +618,13 @@ async function renderModalPdfImages() {
       const item = document.createElement('div');
       item.className = "bg-white p-2 border border-slate-300 rounded shadow-sm flex flex-col items-center space-y-1 cursor-grab active:cursor-grabbing hover:border-indigo-500 transition";
       item.innerHTML = `
-        <span class="text-[10px] font-bold text-slate-500">Trang ${i}</span>
+        <span class="text-[10px] font-bold text-slate-500">Trang ${i} (${Math.round(viewport.width)}x${Math.round(viewport.height)}px)</span>
         <img src="${imgDataUrl}" draggable="true" ondragstart="handleImageDragStart(event)" class="max-h-36 object-contain rounded border border-slate-100">
       `;
       gallery.appendChild(item);
     }
 
-    statusEl.innerHTML = `<span class="text-emerald-600">Đã xuất ${totalPages} ảnh sẵn sàng!</span>`;
+    statusEl.innerHTML = `<span class="text-emerald-600 font-bold">Đã xuất ${totalPages} ảnh chuẩn tỉ lệ (${targetDpi} DPI)!</span>`;
   } catch (err) {
     console.error(err);
     statusEl.innerHTML = `<span class="text-rose-600">Lỗi: ${err.message}</span>`;
