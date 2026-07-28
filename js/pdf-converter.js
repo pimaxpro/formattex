@@ -13,7 +13,6 @@ let currentPdfFileName = "PimaX_Images";
 document.addEventListener("DOMContentLoaded", () => {
   const convertBtn = document.getElementById('convert-btn');
   const modeSelect = document.getElementById('mode-select');
-  const pageRangeRadios = document.querySelectorAll('input[name="page-range-option"]');
 
   if (convertBtn) {
     convertBtn.addEventListener('click', startPdfConversion);
@@ -23,19 +22,20 @@ document.addEventListener("DOMContentLoaded", () => {
     modeSelect.addEventListener('change', handleModeChange);
   }
 
-  pageRangeRadios.forEach(radio => {
-    radio.addEventListener('change', handlePageRangeOptionChange);
-  });
+  togglePageRangeInput();
 });
 
-function handlePageRangeOptionChange() {
-  const selectedOption = document.querySelector('input[name="page-range-option"]:checked').value;
+// Hàm bật/tắt ô điền trang tùy chọn
+function togglePageRangeInput() {
+  const selectedOption = document.querySelector('input[name="page-range-option"]:checked')?.value;
   const customPagesBox = document.getElementById('custom-pages-box');
 
-  if (selectedOption === 'custom') {
-    customPagesBox.classList.remove('hidden');
-  } else {
-    customPagesBox.classList.add('hidden');
+  if (customPagesBox) {
+    if (selectedOption === 'custom') {
+      customPagesBox.classList.remove('hidden');
+    } else {
+      customPagesBox.classList.add('hidden');
+    }
   }
 }
 
@@ -116,8 +116,8 @@ async function startPdfConversion() {
   const targetWidth = parseInt(document.getElementById('width-input').value) || 1920;
   const targetHeight = parseInt(document.getElementById('height-input').value) || 1080;
 
-  const rangeOption = document.querySelector('input[name="page-range-option"]:checked').value;
-  const rangeInputVal = document.getElementById('page-range-input').value;
+  const rangeOption = document.querySelector('input[name="page-range-option"]:checked')?.value || 'all';
+  const rangeInputVal = document.getElementById('page-range-input')?.value || '';
 
   convertBtn.disabled = true;
   downloadContainer.classList.add('hidden');
