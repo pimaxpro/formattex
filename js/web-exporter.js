@@ -76,7 +76,7 @@ function extractMultipleBracedGroups(str, startIndex) {
 function cleanComments(text) {
   if (!text) return "";
   return text.split('\n').map(line => {
-    if (/%\s*\\ans\{/i.test(line) || /%\s*\\shortans\{/i.test(line)) {
+    if (/%\s*\\ans\{/i.test(line) || /%\s*\\shortans/i.test(line)) {
       return line;
     }
     return line.replace(/(^|[^\\])%.*/, '$1');
@@ -208,9 +208,9 @@ function cleanTextForWeb(text) {
     cleaned = cleaned.replace(r, '');
   });
 
-  // 9. Xóa comment đáp án rác
+  // 9. Xóa comment đáp án rác sót lại
   cleaned = cleaned.replace(/%\s*\\ans\{[^}]*\}/gi, '');
-  cleaned = cleaned.replace(/%\s*\\shortans(?:\[[^\]]*\])?\{[^}]*\}/gi, '');
+  cleaned = cleaned.replace(/(?:%|\s)*\\shortans(?:\[[^\]]*\])?\s*\{[^}]*\}/gi, '');
 
   // 10. Dọn khoảng trắng / vspace / hspace / \\
   cleaned = cleaned.replace(/\\\\/g, '\n');
@@ -356,14 +356,12 @@ function processWebExporter() {
     else if (/\\doa\b/i.test(exContent) || /\\dienkt\b/i.test(exContent)) {
       let stemRaw = exContent;
 
-      // 1. Trích xuất danh sách \doa{1}{2}{3}... và BỎ \True NẾU CÓ
       let doaString = "";
       if (/\\doa\b/i.test(stemRaw)) {
         const doaIdx = stemRaw.search(/\\doa\b/i);
         const { groups, endIndex } = extractMultipleBracedGroups(stemRaw, doaIdx + 4);
         if (groups.length > 0) {
           doaString = groups.map(g => {
-            // Lọc bỏ \True nếu có trong ngoặc của \doa
             let cleanedItem = g.replace(/\\True\b/gi, '').trim();
             cleanedItem = cleanTextForWeb(cleanedItem);
             if (cleanedItem.startsWith('$') && cleanedItem.endsWith('$')) {
@@ -375,14 +373,12 @@ function processWebExporter() {
         stemRaw = stemRaw.substring(endIndex);
       }
 
-      // 2. Trích xuất đáp án từ %\ans{C|A}
       let ansList = [];
       const ansMatch = exContent.match(/%\s*\\ans\{([^}]+)\}/i);
       if (ansMatch) {
         ansList = ansMatch[1].split('|').map(a => a.trim());
       }
 
-      // 3. Thay thế tất cả \dienkt thành <KT/>
       let dienktCount = 0;
       stemRaw = stemRaw.replace(/\\dienkt\b/g, () => {
         dienktCount++;
@@ -410,21 +406,21 @@ function processWebExporter() {
     }
 
     // -------------------------------------------------------------
-    // LOẠI 4: CÂU TRẢ LỜI NGẮN (\dienkq và %\shortans{})
+    // LOẠI 4: CÂU TRẢ LỜI NGẮN (\dienkq và \shortans)
     // -------------------------------------------------------------
     else if (/\\dienkq\b/i.test(exContent) || /\\shortans\b/i.test(exContent)) {
       let stemRaw = exContent;
 
-      stemRaw = stemRaw.replace(/\\dienkq\b/g, '__________');
-
-      // Bắt đáp án từ %\shortans[kindsA]{$9,24$} hoặc \shortans{$9,24$}
+      // 1. Trích xuất đáp án trực tiếp từ exContent gốc TRƯỚC KHI làm sạch
       let shortansVal = "";
-      const shortansMatch = exContent.match(/(?:%|\b)\\shortans(?:\s*\[[^\]]*\])?\s*\{([^}]+)\}/i);
+      const shortansMatch = exContent.match(/(?:%|\s|^)*\\shortans(?:\s*\[[^\]]*\])?\s*\{([^}]+)\}/i);
       if (shortansMatch) {
         shortansVal = shortansMatch[1].trim();
-        // Bỏ tất cả các dấu $ trong đáp án ngắn
-        shortansVal = shortansVal.replace(/\$/g, '').trim();
+        shortansVal = shortansVal.replace(/\$/g, '').trim(); // Bỏ dấu $
       }
+
+      // 2. Thay \dienkq thành 10 dấu gạch chân
+      stemRaw = stemRaw.replace(/\\dienkq\b/g, '__________');
 
       const stemClean = cleanTextForWeb(stemRaw);
 
