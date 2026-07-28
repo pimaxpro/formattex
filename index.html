@@ -47,6 +47,10 @@
             <i data-lucide="file-image" class="w-4 h-4"></i>
             <span>Chuyển PDF Thành Ảnh</span>
           </button>
+          <button id="nav-btn-4" onclick="switchMainMenu(4)" class="px-4 py-2 text-xs font-semibold rounded transition-all flex items-center space-x-2 bg-transparent text-slate-500 hover:text-slate-800 hover:bg-slate-200/50 border border-transparent cursor-pointer">
+            <i data-lucide="globe" class="w-4 h-4"></i>
+            <span>Vứt lên web</span>
+          </button>
         </nav>
       </div>
 
@@ -386,6 +390,107 @@
       </div>
     </section>
 
+    <!-- MENU 4: VỨT LÊN WEB -->
+    <section id="menu-section-4" class="hidden space-y-4">
+      <div class="bg-white p-4 border border-slate-300 rounded shadow-sm">
+        <p class="text-sm font-medium">Chuyển đổi file LaTeX gốc sang cấu trúc định dạng chuẩn để **Vứt lên Web** (Tự động đánh số câu, gỡ lời giải/TikZ, chuyển \dienkq, \dienkt, \choice, \choiceTF, kéo thả, v.v.).</p>
+      </div>
+
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <!-- Input Box Web -->
+        <div class="bg-white border border-slate-300 p-4 shadow-sm flex flex-col h-[640px] rounded">
+          <div class="flex justify-between items-center text-xs font-bold h-8 mb-3 pb-2 border-b border-slate-200 shrink-0">
+            <span class="flex items-center gap-1.5 text-slate-800"><i data-lucide="file-input" class="w-4 h-4 text-rose-700"></i> Code LaTeX gốc:</span>
+            <div class="flex items-center space-x-1.5">
+              <button id="btn-undo-input-web" onclick="undo('input-web')" disabled class="btn-history bg-slate-100 hover:bg-slate-200 px-2 h-7 flex items-center gap-1 border border-slate-300 rounded transition text-[11px]" title="Hoàn tác (Ctrl+Z)"><i data-lucide="undo-2" class="w-3.5 h-3.5"></i></button>
+              <button id="btn-redo-input-web" onclick="redo('input-web')" disabled class="btn-history bg-slate-100 hover:bg-slate-200 px-2 h-7 flex items-center gap-1 border border-slate-300 rounded transition text-[11px]" title="Làm lại (Ctrl+Y)"><i data-lucide="redo-2" class="w-3.5 h-3.5"></i></button>
+              <span class="opacity-20">|</span>
+              <label class="cursor-pointer bg-slate-100 hover:bg-slate-200 px-2.5 h-7 flex items-center transition border border-slate-300 rounded gap-1 text-xs font-semibold">
+                <i data-lucide="upload" class="w-3.5 h-3.5"></i> Tải file
+                <input type="file" accept=".tex,.txt" class="hidden" onchange="loadFile(event, 'input-web')">
+              </label>
+              <button onclick="clearText('input-web')" class="hover:underline h-7 px-1 flex items-center text-rose-700 font-medium">Xóa</button>
+            </div>
+          </div>
+          <div class="editor-container">
+            <div id="lines-input-web" class="line-numbers">1</div>
+            <div class="editor-area">
+              <textarea id="input-web" oninput="handleInput('input-web')" onkeydown="handleKeyDown(event, 'input-web')" onscroll="syncScroll('input-web')" class="code-input custom-scroll" placeholder="Dán các câu hỏi \begin{ex}...\end{ex} vào đây..."></textarea>
+              <div id="autocomplete-input-web" class="autocomplete-dropdown shadow-lg"></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Output Box Web -->
+        <div class="bg-white border border-slate-300 p-4 shadow-sm flex flex-col h-[640px] rounded">
+          <div class="flex justify-between items-center text-xs font-bold h-8 mb-2 pb-2 border-b border-slate-200 shrink-0">
+            <span class="flex items-center gap-1.5 text-slate-800"><i data-lucide="file-output" class="w-4 h-4 text-rose-700"></i> Nội dung chuẩn hóa Upweb:</span>
+            
+            <div class="flex items-center space-x-1">
+              <button id="btn-undo-output-web" onclick="undo('output-web')" disabled class="btn-history bg-slate-100 hover:bg-slate-200 p-1.5 h-7 w-7 rounded flex items-center justify-center border border-slate-300 transition" title="Hoàn tác (Ctrl+Z)">
+                <i data-lucide="undo-2" class="w-3.5 h-3.5"></i>
+              </button>
+              <button id="btn-redo-output-web" onclick="redo('output-web')" disabled class="btn-history bg-slate-100 hover:bg-slate-200 p-1.5 h-7 w-7 rounded flex items-center justify-center border border-slate-300 transition" title="Làm lại (Ctrl+Y)">
+                <i data-lucide="redo-2" class="w-3.5 h-3.5"></i>
+              </button>
+              <span class="opacity-20">|</span>
+              <button type="button" onclick="copyToClipboard('output-web')" class="bg-slate-200 hover:bg-slate-300 text-slate-800 p-1.5 h-7 w-7 rounded flex items-center justify-center border border-slate-300 transition shadow-sm cursor-pointer" title="Sao chép toàn bộ">
+                <i data-lucide="copy" class="w-4 h-4 pointer-events-none"></i>
+              </button>
+              <button type="button" onclick="downloadSingleText('output-web', 'vut_len_web.txt')" class="bg-rose-700 hover:bg-rose-800 text-white px-2.5 h-7 flex items-center gap-1 rounded transition font-semibold text-[11px] shadow-sm cursor-pointer" title="Tải file .txt">
+                <i data-lucide="download" class="w-3.5 h-3.5 pointer-events-none"></i>
+                <span>Tải .txt</span>
+              </button>
+            </div>
+          </div>
+
+          <!-- Tìm kiếm & thay thế -->
+          <div class="bg-slate-100 p-2 border border-slate-300 rounded mb-2 flex flex-col gap-2 text-xs shrink-0">
+            <div class="flex items-center gap-2 flex-wrap">
+              <div class="flex items-center space-x-1 flex-1 min-w-[150px]">
+                <i data-lucide="search" class="w-3.5 h-3.5 opacity-60"></i>
+                <input type="text" id="find-output-web" placeholder="Tìm kiếm..." oninput="findText('output-web')" class="w-full bg-white border border-slate-300 rounded px-2 py-1 outline-none text-slate-800">
+              </div>
+              <div class="flex items-center space-x-1 border border-slate-300 rounded bg-white px-1 py-0.5">
+                <button onclick="navigateSearch('output-web', -1)" class="hover:bg-slate-200 p-1 rounded"><i data-lucide="chevron-left" class="w-3.5 h-3.5"></i></button>
+                <span id="count-output-web" class="text-[11px] font-mono px-1 min-w-[50px] text-center font-bold">0/0</span>
+                <button onclick="navigateSearch('output-web', 1)" class="hover:bg-slate-200 p-1 rounded"><i data-lucide="chevron-right" class="w-3.5 h-3.5"></i></button>
+              </div>
+              <label class="flex items-center space-x-1 cursor-pointer select-none font-medium text-slate-700">
+                <input type="checkbox" id="match-case-output-web" onchange="findText('output-web')" class="rounded">
+                <span>Match case</span>
+              </label>
+            </div>
+            <div class="flex items-center gap-2">
+              <div class="flex items-center space-x-1 flex-1">
+                <i data-lucide="replace" class="w-3.5 h-3.5 opacity-60"></i>
+                <input type="text" id="replace-output-web" placeholder="Thay thế bằng..." class="w-full bg-white border border-slate-300 rounded px-2 py-1 outline-none text-slate-800">
+              </div>
+              <div class="flex items-center space-x-1">
+                <button onclick="replaceText('output-web', false)" class="bg-white hover:bg-slate-200 border border-slate-300 rounded px-2.5 py-1 font-semibold transition">Thay</button>
+                <button onclick="replaceText('output-web', true)" class="bg-rose-700 hover:bg-rose-800 text-white rounded px-2.5 py-1 font-semibold transition shadow-sm">Thay tất cả</button>
+              </div>
+            </div>
+          </div>
+
+          <div class="editor-container">
+            <div id="lines-output-web" class="line-numbers">1</div>
+            <div class="editor-area">
+              <textarea id="output-web" oninput="handleInput('output-web')" onkeydown="handleKeyDown(event, 'output-web')" onscroll="syncScroll('output-web')" class="code-input custom-scroll" placeholder="Kết quả sau khi vứt lên web sẽ ở đây..."></textarea>
+              <div id="autocomplete-output-web" class="autocomplete-dropdown shadow-lg"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="flex justify-end pt-2">
+        <button onclick="processWebExporter()" class="bg-rose-700 hover:bg-rose-800 text-white font-bold px-7 py-2.5 rounded transition flex items-center space-x-2 shadow-md cursor-pointer border border-rose-800">
+          <i data-lucide="globe" class="w-4 h-4"></i>
+          <span>Vứt Lên Web Ngay</span>
+        </button>
+      </div>
+    </section>
+
   </main>
 
   <!-- MODAL BẢNG TÍCH ĐÁP ÁN TRẮC NGHIỆM -->
@@ -430,6 +535,7 @@
   <script src="js/ex-processor.js?v=26.0"></script>
   <script src="js/tikz-extractor.js?v=26.0"></script>
   <script src="js/pdf-converter.js?v=26.0"></script>
+  <script src="js/web-exporter.js?v=26.0"></script>
   <script src="js/answer-modal.js?v=26.0"></script>
   <script src="js/app.js?v=26.0"></script>
 </body>
