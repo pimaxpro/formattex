@@ -412,10 +412,10 @@
               <button onclick="clearText('input-web')" class="hover:underline h-7 px-1 flex items-center text-rose-700 font-medium">Xóa</button>
             </div>
           </div>
-          <div class="editor-container">
-            <div id="lines-input-web" class="line-numbers">1</div>
-            <div class="editor-area">
-              <textarea id="input-web" oninput="handleInput('input-web')" onkeydown="handleKeyDown(event, 'input-web')" onscroll="syncScroll('input-web')" class="code-input custom-scroll" placeholder="Dán các câu hỏi \begin{ex}...\end{ex} vào đây..."></textarea>
+          <div class="editor-container relative flex-1 border border-slate-300 rounded overflow-hidden flex bg-white">
+            <div id="lines-input-web" class="line-numbers bg-slate-100 text-slate-400 p-2 text-right select-none font-mono text-xs border-r border-slate-200 min-w-[40px]">1</div>
+            <div class="editor-area relative flex-1 h-full">
+              <textarea id="input-web" oninput="handleInput('input-web')" onkeydown="handleKeyDown(event, 'input-web')" onscroll="syncScroll('input-web')" class="code-input w-full h-full p-2 font-mono text-xs border-none outline-none resize-none custom-scroll" placeholder="Dán các câu hỏi \begin{ex}...\end{ex} vào đây..."></textarea>
               <div id="autocomplete-input-web" class="autocomplete-dropdown shadow-lg"></div>
             </div>
           </div>
@@ -473,10 +473,10 @@
             </div>
           </div>
 
-          <div class="editor-container">
-            <div id="lines-output-web" class="line-numbers">1</div>
-            <div class="editor-area">
-              <textarea id="output-web" oninput="handleInput('output-web')" onkeydown="handleKeyDown(event, 'output-web')" onscroll="syncScroll('output-web')" class="code-input custom-scroll" placeholder="Kết quả sau khi vứt lên web sẽ ở đây..."></textarea>
+          <div class="editor-container relative flex-1 border border-slate-300 rounded overflow-hidden flex bg-white">
+            <div id="lines-output-web" class="line-numbers bg-slate-100 text-slate-400 p-2 text-right select-none font-mono text-xs border-r border-slate-200 min-w-[40px]">1</div>
+            <div class="editor-area relative flex-1 h-full">
+              <textarea id="output-web" oninput="handleInput('output-web')" onkeydown="handleKeyDown(event, 'output-web')" onscroll="syncScroll('output-web')" class="code-input w-full h-full p-2 font-mono text-xs border-none outline-none resize-none custom-scroll" placeholder="Kết quả sau khi vứt lên web sẽ ở đây..."></textarea>
               <div id="autocomplete-output-web" class="autocomplete-dropdown shadow-lg"></div>
             </div>
           </div>
