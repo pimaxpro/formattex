@@ -1,12 +1,17 @@
 /* =========================================================
-   FORMATTEX — WEB EXPORTER MODULE (ĐÃ FIX LỖI \True KHI CÓ CENTER/TIKZ)
+   FORMATTEX — WEB EXPORTER MODULE (ĐÃ FIX LỖI BẮT \True TRONG \left\{ )
    ========================================================= */
 
-/** Trích xuất nội dung bên trong cặp ngoặc nhọn cân bằng {} */
+/** Trích xuất chính xác 1 nhóm ngoặc nhọn cân bằng {}, bỏ qua ngoặc thoát \{ và \} */
 function extractBracedGroup(str, startIndex) {
   let depth = 0;
   let start = -1;
   for (let i = startIndex; i < str.length; i++) {
+    // Bỏ qua ký tự thoát \{ và \}
+    if (str[i] === '\\' && (i + 1 < str.length) && (str[i + 1] === '{' || str[i + 1] === '}')) {
+      i++;
+      continue;
+    }
     if (str[i] === '{') {
       if (depth === 0) start = i + 1;
       depth++;
@@ -36,6 +41,7 @@ function skipWhitespaceAndComments(str, startIndex) {
   return curr;
 }
 
+/** Trích xuất danh sách các nhóm ngoặc nhọn liên tiếp của \choice */
 function extractMultipleBracedGroups(str, startIndex) {
   const groups = [];
   let curr = startIndex;
@@ -101,10 +107,10 @@ function cleanTextForWeb(text) {
     } else break;
   }
 
-  // 2. Gỡ khối TikZ (Tránh xóa nhầm văn bản xung quanh)
+  // 2. Gỡ khối TikZ
   cleaned = cleaned.replace(/\\begin\{tikzpicture\}[\s\S]*?\\end\{tikzpicture\}/gi, '');
 
-  // 3. Chỉ bóc thẻ \begin{center} và \end{center}, GIỮ LẠI NỘI DUNG VĂN BẢN
+  // 3. Chỉ gỡ thẻ \begin{center} và \end{center}, giữ lại nội dung bên trong
   cleaned = cleaned.replace(/\\begin\{center\}/gi, '');
   cleaned = cleaned.replace(/\\end\{center\}/gi, '');
 
