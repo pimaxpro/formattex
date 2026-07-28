@@ -399,14 +399,15 @@ function processWebExporter() {
 }
 
 /* =========================================================
-   LOGIC MỚI: CỬA SỔ POPUP GỘP FILE WORD & DRAG-DROP ẢNH
+   LOGIC MỚI: CỬA SỔ POPUP GỘP FILE WORD & DRAG-DROP ẢNH (ĐÃ FIX HIỂN THỊ)
    ========================================================= */
 
-// Biến lưu trữ ảnh gắn vào từng câu: { dropZoneId: dataUrl }
 let questionImagesMap = {};
 
 function openWordMergeModal() {
-  const outputText = document.getElementById('output-web')?.value || '';
+  const outputEl = document.getElementById('output-web');
+  const outputText = outputEl ? outputEl.value : '';
+
   if (!outputText.trim()) {
     alert('Chưa có nội dung chuẩn hóa ở ô Output. Vui lòng bấm "Vứt Lên Web Ngay" trước!');
     return;
@@ -414,21 +415,25 @@ function openWordMergeModal() {
 
   const container = document.getElementById('word-merge-preview-container');
   const modal = document.getElementById('word-merge-modal');
-  if (!container || !modal) return;
+
+  if (!container || !modal) {
+    alert('Không tìm thấy khung Modal trong trang HTML!');
+    return;
+  }
 
   container.innerHTML = '';
-  questionImagesMap = {}; // Reset lại danh sách ảnh
+  questionImagesMap = {};
 
-  // Tách từng câu theo cấu trúc "Câu X."
-  const questions = outputText.split(/(?=Câu \d+\.)/g);
+  const questions = outputText.split(/(?=Câu \d+\.)/g).filter(q => q.trim().length > 0);
+
+  if (questions.length === 0) {
+    container.innerHTML = '<div class="text-center text-xs text-slate-500 py-10">Không tìm thấy câu hỏi nào!</div>';
+  }
 
   questions.forEach((qText, qIdx) => {
-    if (!qText.trim()) return;
-
     const card = document.createElement('div');
     card.className = "bg-white p-3.5 border border-slate-300 rounded shadow-sm space-y-2 text-xs font-mono text-slate-800 leading-relaxed";
 
-    // Phân tích nếu câu hỏi có cờ [Thêm hình vẽ vào đây]
     if (qText.includes('[Thêm hình vẽ vào đây]')) {
       const parts = qText.split('[Thêm hình vẽ vào đây]');
       const dropZoneId = `dropzone-${qIdx}`;
@@ -446,22 +451,42 @@ function openWordMergeModal() {
         <div class="whitespace-pre-wrap">${escapeHtml(parts[1].trim())}</div>
       `;
     } else {
-      card.innerHTML = `<div class="whitespace-pre-wrap">${escapeHtml(qText.trim())}</div>`;
+      const dropZoneId = `dropzone-optional-${qIdx}`;
+      card.innerHTML = `
+        <div class="whitespace-pre-wrap">${escapeHtml(qText.trim())}</div>
+        <div id="${dropZoneId}" 
+             ondragover="handleDragOver(event)" 
+             ondragleave="handleDragLeave(event)" 
+             ondrop="handleDropImage(event, '${dropZoneId}')"
+             class="border border-dashed border-slate-300 bg-slate-50 hover:bg-indigo-50 p-2 rounded text-center my-1 transition flex items-center justify-center gap-1.5 cursor-pointer text-[11px] text-slate-500">
+           <i data-lucide="image-plus" class="w-3.5 h-3.5 text-slate-400 pointer-events-none"></i>
+           <span class="pointer-events-none">[Thả ảnh vào đây nếu câu này có hình]</span>
+        </div>
+      `;
     }
 
     container.appendChild(card);
   });
 
+  // KÍCH HOẠT HIỂN THỊ MODAL BẰNG FLEX
   modal.classList.remove('hidden');
-  if (window.lucide) lucide.createIcons();
+  modal.classList.add('flex');
+
+  if (window.lucide) {
+    lucide.createIcons();
+  }
 }
 
 function closeWordMergeModal() {
   const modal = document.getElementById('word-merge-modal');
-  if (modal) modal.classList.add('hidden');
+  if (modal) {
+    modal.classList.add('hidden');
+    modal.classList.remove('flex');
+  }
 }
 
 function escapeHtml(text) {
+  if (!text) return "";
   return text
     .replace(/&/g, "&amp;")
     .replace(/</g, "&lt;")
@@ -470,7 +495,6 @@ function escapeHtml(text) {
     .replace(/'/g, "&#039;");
 }
 
-/* Drag and Drop Events */
 function handleDragOver(e) {
   e.preventDefault();
   e.currentTarget.classList.add('border-indigo-600', 'bg-indigo-100');
@@ -494,12 +518,10 @@ function handleDropImage(e, dropZoneId) {
     return;
   }
 
-  // Lưu Data URL ảnh
   questionImagesMap[dropZoneId] = imgDataUrl;
 
-  // Hiển thị ảnh ngay lập tức
   dropZone.innerHTML = `
-    <div class="relative group">
+    <div class="relative group my-1">
       <img src="${imgDataUrl}" class="max-h-48 max-w-full rounded border border-slate-300 shadow-sm mx-auto">
       <button onclick="removeDroppedImage(event, '${dropZoneId}')" class="absolute top-1 right-1 bg-rose-700 text-white p-1 rounded-full opacity-80 hover:opacity-100 transition shadow">
         <i data-lucide="x" class="w-3.5 h-3.5"></i>
@@ -517,13 +539,12 @@ function removeDroppedImage(e, dropZoneId) {
   if (!dropZone) return;
 
   dropZone.innerHTML = `
-     <i data-lucide="image-plus" class="w-6 h-6 text-indigo-500 mb-1 pointer-events-none"></i>
+     <i data-lucide="image-plus" class="w-5 h-5 text-indigo-500 mb-1 pointer-events-none"></i>
      <span class="text-[11px] text-indigo-700 font-bold pointer-events-none">[Kéo thả hình vẽ từ cột phải vào đây]</span>
   `;
   if (window.lucide) lucide.createIcons();
 }
 
-/* Render PDF thành danh sách ảnh ở Cột Phải */
 async function renderModalPdfImages() {
   const fileInput = document.getElementById('modal-pdf-input');
   const gallery = document.getElementById('modal-image-gallery');
@@ -539,7 +560,7 @@ async function renderModalPdfImages() {
   const targetSize = parseInt(document.getElementById('modal-size-input').value) || 1200;
 
   gallery.innerHTML = '';
-  statusEl.innerHTML = `<span class="text-indigo-700">Đang xuất trang PDF...</span>`;
+  statusEl.innerHTML = `<span class="text-indigo-700">Đang đọc PDF...</span>`;
 
   try {
     const arrayBuffer = await file.arrayBuffer();
@@ -571,7 +592,6 @@ async function renderModalPdfImages() {
 
       const imgDataUrl = canvas.toDataURL('image/png', 1.0);
 
-      // Tạo thẻ ảnh có thể kéo thả
       const item = document.createElement('div');
       item.className = "bg-white p-2 border border-slate-300 rounded shadow-sm flex flex-col items-center space-y-1 cursor-grab active:cursor-grabbing hover:border-indigo-500 transition";
       item.innerHTML = `
@@ -581,7 +601,7 @@ async function renderModalPdfImages() {
       gallery.appendChild(item);
     }
 
-    statusEl.innerHTML = `<span class="text-emerald-600">Đã xuất ${totalPages} ảnh sẵn sàng kéo thả!</span>`;
+    statusEl.innerHTML = `<span class="text-emerald-600">Đã xuất ${totalPages} ảnh sẵn sàng!</span>`;
   } catch (err) {
     console.error(err);
     statusEl.innerHTML = `<span class="text-rose-600">Lỗi: ${err.message}</span>`;
@@ -592,10 +612,9 @@ function handleImageDragStart(e) {
   e.dataTransfer.setData('text/plain', e.target.src);
 }
 
-/* XUẤT FILE WORD .DOCX CHỨA CẢ VĂN BẢN VÀ ẢNH CHẤT LƯỢNG CAO */
 async function exportToWordDocx() {
   if (typeof docx === 'undefined') {
-    alert('Thư viện xuất file Word chưa tải xong. Vui lòng thử lại sau vài giây!');
+    alert('Thư viện docx chưa tải xong. Vui lòng kiểm tra lại kết nối mạng!');
     return;
   }
 
@@ -613,7 +632,6 @@ async function exportToWordDocx() {
     const childNodes = card.childNodes;
 
     for (let node of childNodes) {
-      // Nếu là văn bản
       if (node.nodeType === Node.ELEMENT_NODE && node.classList.contains('whitespace-pre-wrap')) {
         const text = node.innerText.trim();
         if (text) {
@@ -631,13 +649,11 @@ async function exportToWordDocx() {
           });
         }
       } 
-      // Nếu là khung DropZone chứa ảnh
-      else if (node.nodeType === Node.ELEMENT_NODE && node.id && node.id.startsWith('dropzone-')) {
+      else if (node.nodeType === Node.ELEMENT_NODE && node.id && node.id.startsWith('dropzone')) {
         const dropZoneId = node.id;
         const imgDataUrl = questionImagesMap[dropZoneId];
 
         if (imgDataUrl) {
-          // Chuyển DataURL Base64 thành ArrayBuffer
           const base64Data = imgDataUrl.split(',')[1];
           const binaryString = window.atob(base64Data);
           const bytes = new Uint8Array(binaryString.length);
@@ -655,14 +671,13 @@ async function exportToWordDocx() {
                 },
               })
             ],
-            spacing: { before: 200, after: 200 }
+            spacing: { before: 180, after: 180 }
           }));
         }
       }
     }
 
-    // Cách dòng giữa các câu hỏi
-    docParagraphs.push(new Paragraph({ text: "", spacing: { after: 240 } }));
+    docParagraphs.push(new Paragraph({ text: "", spacing: { after: 200 } }));
   }
 
   const doc = new Document({
@@ -675,7 +690,7 @@ async function exportToWordDocx() {
   const blob = await Packer.toBlob(doc);
   const a = document.createElement('a');
   a.href = URL.createObjectURL(blob);
-  a.download = `FormatTex_FormatWeb_${Date.now()}.docx`;
+  a.download = `VutLenWeb_${Date.now()}.docx`;
   document.body.appendChild(a);
   a.click();
   document.body.removeChild(a);
