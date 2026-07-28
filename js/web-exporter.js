@@ -50,16 +50,15 @@ function extractMultipleBracedGroups(str, startIndex) {
 
 /**
  * Loại bỏ comment trong LaTeX (các đoạn bắt đầu bằng %)
+ * Ngoại trừ các dòng chứa %\ans{} và %\shortans{}
  */
 function stripLatexComments(text) {
   if (!text) return "";
   return text.split('\n').map(line => {
-    return line.replace(/(^|[^\\])%.*/, (m) => {
-      if (/%\s*\\ans\{/i.test(m) || /%\s*\\shortans\{/i.test(m)) {
-        return m;
-      }
-      return '';
-    });
+    if (/%\s*\\ans\{/i.test(line) || /%\s*\\shortans\{/i.test(line)) {
+      return line;
+    }
+    return line.replace(/(^|[^\\])%.*/, '$1');
   }).join('\n');
 }
 
@@ -70,13 +69,13 @@ function convertDisplayMathToInline(text) {
   if (!text) return "";
   let converted = text;
 
-  // 1. Chuyển \[...\] thành $...$
+  // 1. \[...\] -> $...$
   converted = converted.replace(/\\\[([\s\S]*?)\\\]/g, (m, math) => `$${math.trim()}$`);
 
-  // 2. Chuyển $$...$$ thành $...$
+  // 2. $$...$$ -> $...$
   converted = converted.replace(/\$\$([\s\S]*?)\$\$/g, (m, math) => `$${math.trim()}$`);
 
-  // 3. Chuyển \begin{equation}...\end{equation}, align, aligned, equation*
+  // 3. \begin{equation}...\end{equation}, align, gather,...
   const displayEnvs = ['equation', 'equation\\*', 'align', 'align\\*', 'gather', 'gather\\*'];
   displayEnvs.forEach(env => {
     const regex = new RegExp(`\\\\begin\\{${env}\\}([\\s\\S]*?)\\\\end\\{${env}\\}`, 'gi');
@@ -102,59 +101,8 @@ function ensureEndingDot(text) {
 }
 
 /**
- * XÓA TOÀN BỘ CÁC LỆNH LATEX NGOÀI CÔNG THỨC TOÁN
- * Giữ nguyên văn bản tiếng Việt thường và các đoạn nằm trong $...$
- */
-function stripOutsideLatexCommands(text) {
-  if (!text) return "";
-
-  // Tách văn bản thành các token: đoạn toán ($...$) và đoạn văn bản thường
-  const tokens = text.split(/(\$[^$]+\$)/g);
-
-  return tokens.map(token => {
-    // Nếu là công thức toán $...$ thì giữ NGUYÊN VẸN 100%
-    if (token.startsWith('$') && token.endsWith('$')) {
-      return token;
-    }
-
-    // Nếu là văn bản thường -> Xóa sạch mọi lệnh LaTeX
-    let cleaned = token;
-
-    // 1. Tháo vỏ các lệnh định dạng văn bản có ngoặc nhọn: \textbf{abc} -> abc, \immini{đề}{hình} -> đề
-    let cmdWithBraceRegex = /\\([a-zA-Z]+)\s*\{/g;
-    let match;
-    while ((match = cmdWithBraceRegex.exec(cleaned)) !== null) {
-      const cmdName = match[1];
-      const res1 = extractBracedGroup(cleaned, match.index + match[0].length - 1);
-      if (res1) {
-        // Nếu là \immini thì ăn tiếp ngoặc thứ 2 (hình) và chỉ giữ lại văn bản ở ngoặc thứ nhất
-        if (cmdName === 'immini') {
-          const res2 = extractBracedGroup(cleaned, res1.endIndex + 1);
-          const endIndex = res2 ? res2.endIndex : res1.endIndex;
-          cleaned = cleaned.substring(0, match.index) + res1.content + cleaned.substring(endIndex + 1);
-        } else {
-          // Các lệnh khác: \textbf, \textit, \texttt, \textsl,... chỉ lấy ruột
-          cleaned = cleaned.substring(0, match.index) + res1.content + cleaned.substring(res1.endIndex + 1);
-        }
-        cmdWithBraceRegex.lastIndex = match.index;
-      } else {
-        break;
-      }
-    }
-
-    // 2. Xóa các lệnh LaTeX đơn không ngoặc (VD: \noindent, \hfill, \vfill, \\, \cr,...)
-    cleaned = cleaned.replace(/\\([a-zA-Z]+)\b/g, '');
-    cleaned = cleaned.replace(/\\\\/g, '\n');
-
-    // 3. Xóa các ký tự đóng mở ngoặc nhọn mồ côi {}
-    cleaned = cleaned.replace(/[{}]/g, '');
-
-    return cleaned;
-  }).join('');
-}
-
-/**
- * Làm sạch văn bản tổng thể
+ * Làm sạch văn bản đề bài/phương án: Loại bỏ môi trường tikz, center, immini, loigiai,
+ * gỡ các lệnh định dạng text (\textbf, \textit, \texttt,...) nhưng giữ nguyên công thức toán.
  */
 function cleanTextForWeb(text) {
   if (!text) return "";
@@ -182,7 +130,23 @@ function cleanTextForWeb(text) {
   cleaned = cleaned.replace(/\\begin\{center\}[\s\S]*?\\end\{center\}/gi, '');
   cleaned = cleaned.replace(/\\begin\{immini\}[\s\S]*?\\end\{immini\}/gi, '');
 
-  // 4. Chuyển itemize thành danh sách gạch đầu dòng "-"
+  // 4. Xử lý lệnh \immini{văn bản}{hình} -> chỉ giữ lại văn bản
+  const imminiRegex = /\\immini\s*\{/g;
+  while ((match = imminiRegex.exec(cleaned)) !== null) {
+    const arg1 = extractBracedGroup(cleaned, match.index + match[0].length - 1);
+    if (arg1) {
+      const arg2 = extractBracedGroup(cleaned, arg1.endIndex + 1);
+      const endIndex = arg2 ? arg2.endIndex : arg1.endIndex;
+      cleaned = cleaned.substring(0, match.index) + arg1.content + cleaned.substring(endIndex + 1);
+      imminiRegex.lastIndex = match.index;
+    } else {
+      cleaned = cleaned.substring(0, match.index) + cleaned.substring(match.index + match[0].length);
+      imminiRegex.lastIndex = match.index;
+    }
+  }
+  cleaned = cleaned.replace(/\\immini\b/gi, '');
+
+  // 5. Chuyển itemize thành danh sách gạch đầu dòng "-"
   cleaned = cleaned.replace(/\\begin\{itemize\}([\s\S]*?)\\end\{itemize\}/gi, (m, body) => {
     return '\n' + body.split('\\item')
       .map(item => item.trim())
@@ -191,7 +155,7 @@ function cleanTextForWeb(text) {
       .join('\n');
   });
 
-  // 5. Chuyển enumerate thành danh sách số "1., 2.,..."
+  // 6. Chuyển enumerate thành danh sách số "1., 2.,..."
   cleaned = cleaned.replace(/\\begin\{enumerate\}([\s\S]*?)\\end\{enumerate\}/gi, (m, body) => {
     let count = 1;
     return '\n' + body.split('\\item')
@@ -201,14 +165,39 @@ function cleanTextForWeb(text) {
       .join('\n');
   });
 
-  // 6. Xóa triệt để các comment đáp án đặc biệt sót lại trong nội dung đề bài
+  // 7. Tháo vỏ các lệnh định dạng văn bản ngoài công thức toán
+  const textCmds = ['textbf', 'textit', 'texttt', 'textsl', 'textsc', 'textsf', 'text'];
+  textCmds.forEach(cmd => {
+    const regex = new RegExp(`\\\\${cmd}\\s*\\{`, 'g');
+    let m;
+    while ((m = regex.exec(cleaned)) !== null) {
+      const res = extractBracedGroup(cleaned, m.index + m[0].length - 1);
+      if (res) {
+        cleaned = cleaned.substring(0, m.index) + res.content + cleaned.substring(res.endIndex + 1);
+        regex.lastIndex = m.index;
+      } else {
+        break;
+      }
+    }
+  });
+
+  // 8. Xóa các lệnh căn chỉnh/trình bày rác ngoài công thức toán
+  const layoutCmds = ['noindent', 'hfill', 'vfill', 'centering', 'raggedright', 'raggedleft', 'clearpage', 'newpage'];
+  layoutCmds.forEach(cmd => {
+    const r = new RegExp(`\\\\${cmd}\\b`, 'gi');
+    cleaned = cleaned.replace(r, '');
+  });
+
+  // 9. Xóa comment đáp án rác sót lại trong nội dung
   cleaned = cleaned.replace(/%\s*\\ans\{[^}]*\}/gi, '');
   cleaned = cleaned.replace(/%\s*\\shortans\{[^}]*\}/gi, '');
 
-  // 7. QUÉT VÀ XÓA SACH TẤT CẢ LỆNH LATEX NGOÀI CÔNG THỨC TOÁN
-  cleaned = stripOutsideLatexCommands(cleaned);
+  // 10. Xóa các khoảng trắng/xuống dòng dư thừa (\vspace, \hspace, \\)
+  cleaned = cleaned.replace(/\\\\/g, '\n');
+  cleaned = cleaned.replace(/\\vspace\{[^}]*\}/gi, '');
+  cleaned = cleaned.replace(/\\hspace\{[^}]*\}/gi, '');
 
-  // 8. Thu gọn các dòng trống liên tiếp
+  // 11. Thu gọn các dòng trống
   const lines = cleaned.split('\n')
     .map(l => l.trim())
     .filter(l => l.length > 0);
@@ -240,7 +229,7 @@ function processWebExporter() {
     return;
   }
 
-  // 0. Xóa sạch comment LaTeX cũ trước khi phân tích
+  // 0. Xóa comment LaTeX thường (giữ lại %\ans{} và %\shortans{})
   rawText = stripLatexComments(rawText);
 
   // Tách từng câu \begin{ex}...\end{ex}
@@ -271,13 +260,19 @@ function processWebExporter() {
       const choicesFormatted = [];
 
       groups.slice(0, 4).forEach((g, idx) => {
-        let text = cleanTextForWeb(g.trim());
-        if (text.startsWith('\\True') || text.startsWith('True')) {
+        let rawGroupText = g.trim();
+        
+        // KIỂM TRA \True TRÊN CHUỖI GỐC TRƯỚC KHI LÀM SẠCH
+        let isTrue = false;
+        if (/^\\True\b/i.test(rawGroupText) || /\\True\b/i.test(rawGroupText)) {
+          isTrue = true;
           correctAnsLabel = labels[idx];
-          text = text.replace(/^(\\True|True)\s*/, '').trim();
+          rawGroupText = rawGroupText.replace(/\\True\b/gi, '').trim();
         }
-        text = ensureEndingDot(text);
-        choicesFormatted.push(`${labels[idx]}. ${text}`);
+
+        let textClean = cleanTextForWeb(rawGroupText);
+        textClean = ensureEndingDot(textClean);
+        choicesFormatted.push(`${labels[idx]}. ${textClean}`);
       });
 
       processedQuestion += stemClean;
@@ -312,16 +307,20 @@ function processWebExporter() {
       let hasAnyTrue = false;
 
       groups.slice(0, 4).forEach((g, idx) => {
-        let text = cleanTextForWeb(g.trim());
-        if (text.startsWith('\\True') || text.startsWith('True')) {
+        let rawGroupText = g.trim();
+
+        // KIỂM TRA \True TRÊN CHUỖI GỐC
+        if (/^\\True\b/i.test(rawGroupText) || /\\True\b/i.test(rawGroupText)) {
           tfResults.push('D');
           hasAnyTrue = true;
-          text = text.replace(/^(\\True|True)\s*/, '').trim();
+          rawGroupText = rawGroupText.replace(/\\True\b/gi, '').trim();
         } else {
           tfResults.push('S');
         }
-        text = ensureEndingDot(text);
-        choicesFormatted.push(`${labels[idx]}) ${text}`);
+
+        let textClean = cleanTextForWeb(rawGroupText);
+        textClean = ensureEndingDot(textClean);
+        choicesFormatted.push(`${labels[idx]}) ${textClean}`);
       });
 
       processedQuestion += stemClean;
@@ -439,7 +438,6 @@ function processWebExporter() {
   // Cập nhật lên thẻ textarea Output
   outputEl.value = results.join('\n\n');
 
-  // Cập nhật lại thanh line numbers nếu có dùng editor.js
   if (typeof handleInput === 'function') {
     handleInput('output-web');
   }
