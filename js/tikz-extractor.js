@@ -1,5 +1,5 @@
 /* =========================================================
-   PIMAX TOOL — TIKZ EXTRACTION ENGINE (UPGRADE)
+   PIMAX TOOL — TIKZ EXTRACTION ENGINE
    ========================================================= */
 
 /** Trích xuất 1 khối ngoặc nhọn cân bằng {} */
@@ -27,8 +27,6 @@ function extractBracedGroupTikz(str, startIndex) {
 function extractAllTikZToSingleFile() {
   const inputEl = document.getElementById('input-tikz');
   const outputMainEl = document.getElementById('output-main');
-  const outputSingleTikzEl = document.getElementById('output-tikz-single');
-  const containerSingle = document.getElementById('single-tikz-container');
   const badgeCount = document.getElementById('tikz-count-badge');
   const filterModeSelect = document.getElementById('tikz-filter-mode');
 
@@ -42,13 +40,15 @@ function extractAllTikZToSingleFile() {
 
   const mode = filterModeSelect ? filterModeSelect.value : 'all';
   const extractedTikz = [];
-  let cleanedMainText = rawText;
 
   // CHẾ ĐỘ 1: CHỈ LỌC TIKZ Ở ĐỀ BÀI ( BỎ QUA TIKZ TRONG \loigiai{} )
   if (mode === 'stem_only') {
     const exRegex = /\\begin\{ex\}([\s\S]*?)\\end\{ex\}/gi;
-    
-    cleanedMainText = cleanedMainText.replace(exRegex, (fullEx, exBody) => {
+    let exMatch;
+
+    while ((exMatch = exRegex.exec(rawText)) !== null) {
+      const exBody = exMatch[1];
+      
       // Xác định phạm vi \loigiai{}
       let loigiaiStart = -1;
       let loigiaiEnd = -1;
@@ -65,26 +65,19 @@ function extractAllTikZToSingleFile() {
       // Tìm các khối TikZ trong câu ex này
       const tikzRegex = /\\begin\{tikzpicture\}[\s\S]*?\\end\{tikzpicture\}/gi;
       let tikzMatch;
-      let newExBody = "";
-      let lastIndex = 0;
 
       while ((tikzMatch = tikzRegex.exec(exBody)) !== null) {
         const matchIdx = tikzMatch.index;
 
-        // Nếu TikZ nằm trong lời giải -> Giữ nguyên
+        // Nếu TikZ nằm trong lời giải -> Bỏ qua
         if (loigiaiStart !== -1 && matchIdx >= loigiaiStart && matchIdx <= loigiaiEnd) {
           continue;
         }
 
         // TikZ nằm ở phần đề bài -> Lọc ra
         extractedTikz.push(tikzMatch[0]);
-        newExBody += exBody.substring(lastIndex, matchIdx) + '% [ĐÃ TÁCH HÌNH TIKZ ĐỀ BÀI TẠI ĐÂY]';
-        lastIndex = tikzMatch.index + tikzMatch[0].length;
       }
-
-      newExBody += exBody.substring(lastIndex);
-      return `\\begin{ex}${newExBody}\\end{ex}`;
-    });
+    }
 
   } else {
     // CHẾ ĐỘ 2: LỌC TẤT CẢ TIKZ TRONG FILE
@@ -94,8 +87,6 @@ function extractAllTikZToSingleFile() {
     while ((match = tikzRegex.exec(rawText)) !== null) {
       extractedTikz.push(match[0]);
     }
-
-    cleanedMainText = rawText.replace(tikzRegex, '% [ĐÃ TÁCH HÌNH TIKZ TẠI ĐÂY]');
   }
 
   if (extractedTikz.length === 0) {
@@ -105,13 +96,7 @@ function extractAllTikZToSingleFile() {
     return;
   }
 
-  // 1. Cập nhật kết quả file gốc
-  if (outputMainEl) {
-    outputMainEl.value = cleanedMainText;
-    if (typeof handleInput === 'function') handleInput('output-main');
-  }
-
-  // 2. Gom tất cả khối TikZ nối tiếp vào ô kết quả TikZ tổng
+  // Gom toàn bộ khối TikZ đổ thẳng vào Editor cột bên phải (#output-main)
   let singleTikzContent = `% ==========================================\n`;
   singleTikzContent += `% TỔNG HỢP ${extractedTikz.length} HÌNH TIKZ TỪ FILE GỐC (${mode === 'stem_only' ? 'ĐỀ BÀI' : 'TOÀN BỘ'})\n`;
   singleTikzContent += `% Xuất từ PimaX Tool\n`;
@@ -122,16 +107,13 @@ function extractAllTikZToSingleFile() {
     singleTikzContent += tikzCode + `\n\n`;
   });
 
-  if (outputSingleTikzEl) {
-    outputSingleTikzEl.value = singleTikzContent.trim();
-    if (typeof handleInput === 'function') handleInput('output-tikz-single');
+  if (outputMainEl) {
+    outputMainEl.value = singleTikzContent.trim();
+    if (typeof handleInput === 'function') handleInput('output-main');
   }
 
-  // 3. Hiển thị khung kết quả & cập nhật số lượng hình
-  if (containerSingle) containerSingle.classList.remove('hidden');
+  // Cập nhật số lượng hình ở badge trên tiêu đề cột phải
   if (badgeCount) badgeCount.textContent = `${extractedTikz.length} hình TikZ`;
-
-  containerSingle?.scrollIntoView({ behavior: 'smooth' });
 }
 
 function getTikZFilename() {
