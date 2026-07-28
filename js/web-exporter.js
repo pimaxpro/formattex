@@ -49,16 +49,18 @@ function extractMultipleBracedGroups(str, startIndex) {
 }
 
 /**
- * Loại bỏ comment trong LaTeX (các đoạn bắt đầu bằng %), 
- * bảo toàn các comment đáp án đặc biệt như %\ans{} và %\shortans{}
+ * Loại bỏ comment trong LaTeX (các đoạn bắt đầu bằng %)
  */
 function stripLatexComments(text) {
   if (!text) return "";
   return text.split('\n').map(line => {
-    if (/%\s*\\ans\{/i.test(line) || /%\s*\\shortans\{/i.test(line)) {
-      return line;
-    }
-    return line.replace(/(^|[^\\])%.*/, '$1');
+    // Giữ tạm dòng comment chứa đáp án để trích xuất sau, nhưng xóa các comment thường
+    return line.replace(/(^|[^\\])%.*/, (m) => {
+      if (/%\s*\\ans\{/i.test(m) || /%\s*\\shortans\{/i.test(m)) {
+        return m;
+      }
+      return '';
+    });
   }).join('\n');
 }
 
@@ -80,13 +82,24 @@ function convertDisplayMathToInline(text) {
   displayEnvs.forEach(env => {
     const regex = new RegExp(`\\\\begin\\{${env}\\}([\\s\\S]*?)\\\\end\\{${env}\\}`, 'gi');
     converted = converted.replace(regex, (m, math) => {
-      // Làm sạch các dấu xuống dòng hoặc lệnh \\ trong công thức
       const cleanMath = math.replace(/\\\\/g, ' ').replace(/\s+/g, ' ').trim();
       return `$${cleanMath}$`;
     });
   });
 
   return converted;
+}
+
+/**
+ * Thêm dấu chấm vào cuối phương án nếu chưa có
+ */
+function ensureEndingDot(text) {
+  if (!text) return "";
+  let trimmed = text.trim();
+  if (!/[.!?]$/.test(trimmed)) {
+    trimmed += ".";
+  }
+  return trimmed;
 }
 
 /**
@@ -129,9 +142,14 @@ function cleanTextForWeb(text) {
       cleaned = cleaned.substring(0, match.index) + arg1.content + cleaned.substring(endIndex + 1);
       imminiRegex.lastIndex = match.index;
     } else {
-      break;
+      // Xóa bỏ cú pháp rác nếu không tìm thấy cặp ngoặc nhọn đầy đủ
+      cleaned = cleaned.substring(0, match.index) + cleaned.substring(match.index + match[0].length);
+      imminiRegex.lastIndex = match.index;
     }
   }
+
+  // Gỡ triệt để các tàn dư lệnh \immini nếu còn sót
+  cleaned = cleaned.replace(/\\immini\s*\{/gi, '');
 
   // 5. Chuyển itemize thành danh sách gạch đầu dòng "-"
   cleaned = cleaned.replace(/\\begin\{itemize\}([\s\S]*?)\\end\{itemize\}/gi, (m, body) => {
@@ -168,12 +186,16 @@ function cleanTextForWeb(text) {
     }
   });
 
-  // 8. Xóa các ký tự xuống dòng rác/dấu gạch nối LaTeX dư thừa (\vspace, \hspace, \\)
+  // 8. Xóa triệt để các comment đáp án đặc biệt sót lại trong nội dung đề bài
+  cleaned = cleaned.replace(/%\s*\\ans\{[^}]*\}/gi, '');
+  cleaned = cleaned.replace(/%\s*\\shortans\{[^}]*\}/gi, '');
+
+  // 9. Xóa các ký tự xuống dòng rác/dấu gạch nối LaTeX dư thừa (\vspace, \hspace, \\)
   cleaned = cleaned.replace(/\\\\/g, '\n');
   cleaned = cleaned.replace(/\\vspace\{[^}]*\}/g, '');
   cleaned = cleaned.replace(/\\hspace\{[^}]*\}/g, '');
 
-  // 9. Thu gọn các dòng trống liên tiếp
+  // 10. Thu gọn các dòng trống liên tiếp
   const lines = cleaned.split('\n')
     .map(l => l.trim())
     .filter(l => l.length > 0);
@@ -241,6 +263,7 @@ function processWebExporter() {
           correctAnsLabel = labels[idx];
           text = text.replace(/^\\True\s*/, '').trim();
         }
+        text = ensureEndingDot(text);
         choicesFormatted.push(`${labels[idx]}. ${text}`);
       });
 
@@ -284,6 +307,7 @@ function processWebExporter() {
         } else {
           tfResults.push('S');
         }
+        text = ensureEndingDot(text);
         choicesFormatted.push(`${labels[idx]}) ${text}`);
       });
 
@@ -345,7 +369,8 @@ function processWebExporter() {
       const formattedAns = ansList.map(a => `${a}>`).join('|');
       processedQuestion += `\nĐáp án KT: ${formattedAns}`;
 
-      if (ansList.length === 0 || dienktCount !== ansList.length) {
+      // Bắt lỗi nếu thiếu <KT/> hoặc không có đáp án %\ans{} hoặc không khớp số lượng
+      if (dienktCount === 0 || ansList.length === 0 || dienktCount !== ansList.length) {
         errorMessage = "Câu này thiếu đáp án";
       }
     }
