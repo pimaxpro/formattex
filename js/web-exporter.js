@@ -1,5 +1,5 @@
 /* =========================================================
-   FORMATTEX — WEB EXPORTER MODULE (SỬA LỖI DƯ THỪA { } CỦA IMMINI)
+   FORMATTEX — WEB EXPORTER MODULE (ĐÃ FIX TRIỆT ĐỂ LỖI DƯ THỪA { } CỦA IMMINI)
    ========================================================= */
 
 /** Trích xuất chính xác 1 nhóm ngoặc nhọn cân bằng {}, bỏ qua ngoặc thoát \{ và \} */
@@ -281,7 +281,8 @@ function processWebExporter() {
             return (cleanedItem.startsWith('$') && cleanedItem.endsWith('$')) ? cleanedItem : `$${cleanedItem}$`;
           }).join(' @ ');
         }
-        stemRaw = stemRaw.substring(endIndex);
+        // Sửa ở đây: Loại bỏ chính xác phần \doa{1}{2}{3}{4} khỏi stemRaw thay vì substring(endIndex)
+        stemRaw = stemRaw.substring(0, doaIdx) + stemRaw.substring(endIndex);
       }
 
       let ansList = [];
