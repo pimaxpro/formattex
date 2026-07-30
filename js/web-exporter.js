@@ -1,5 +1,5 @@
 /* =========================================================
-   FORMATTEX — WEB EXPORTER MODULE (ĐÃ FIX TRIỆT ĐỂ LỖI DƯ THỪA { } CỦA IMMINI)
+   FORMATTEX — WEB EXPORTER MODULE (ĐÃ TỐI ƯU & BỔ SUNG XUẤT JSON/JS ĐÁP ÁN)
    ========================================================= */
 
 /** Trích xuất chính xác 1 nhóm ngoặc nhọn cân bằng {}, bỏ qua ngoặc thoát \{ và \} */
@@ -281,7 +281,6 @@ function processWebExporter() {
             return (cleanedItem.startsWith('$') && cleanedItem.endsWith('$')) ? cleanedItem : `$${cleanedItem}$`;
           }).join(' @ ');
         }
-        // Sửa ở đây: Loại bỏ chính xác phần \doa{1}{2}{3}{4} khỏi stemRaw thay vì substring(endIndex)
         stemRaw = stemRaw.substring(0, doaIdx) + stemRaw.substring(endIndex);
       }
 
@@ -479,7 +478,6 @@ function openWordMergeModal() {
     card.className = "q-card-item bg-white p-3.5 border border-slate-300 rounded shadow-sm space-y-2 text-xs font-mono text-slate-800 leading-relaxed transition hover:border-rose-400";
 
     const dropZoneId = `dropzone-${qIdx}`;
-
     const textLines = qText.replace('[Thêm hình vẽ vào đây]', '').split('\n').filter(l => l.trim().length > 0);
     
     let htmlContent = '';
@@ -544,7 +542,7 @@ function openWordMergeModal() {
   setupScrollSpy();
 }
 
-/** HIỂN THỊ CỬA SỔ POPUP XEM TOÀN BỘ ĐÁP ÁN 38 CÂU */
+/** HIỂN THỊ CỬA SỔ POPUP XEM TOÀN BỘ ĐÁP ÁN */
 function openAllAnswersOverviewModal() {
   const ansModal = document.getElementById('all-answers-modal');
   const ansGrid = document.getElementById('all-answers-grid');
@@ -755,7 +753,7 @@ function loadImageAsync(src) {
   });
 }
 
-/** XUẤT FILE WORD .DOCX GIỮ NGUYÊN TỶ LỆ CHUẨN MẤT MÉO */
+/** XUẤT FILE WORD .DOCX GIỮ NGUYÊN TỶ LỆ CHUẨN MẤT MÉO (ĐÃ FIX GIỚI HẠN CỠ TỐI ĐA) */
 async function exportToWordDocx() {
   if (typeof docx === 'undefined') {
     alert('Thư viện docx chưa tải xong. Vui lòng kiểm tra lại kết nối mạng!');
@@ -803,7 +801,8 @@ async function exportToWordDocx() {
             const naturalW = loadedImg.naturalWidth || 400;
             const naturalH = loadedImg.naturalHeight || 300;
 
-            const wordTargetWidth = 450; 
+            const maxWordWidth = 450;
+            const wordTargetWidth = Math.min(naturalW, maxWordWidth);
             const wordTargetHeight = Math.round((wordTargetWidth * naturalH) / naturalW);
 
             const base64Data = imgDataUrl.split(',')[1];
@@ -846,6 +845,166 @@ async function exportToWordDocx() {
   const a = document.createElement('a');
   a.href = URL.createObjectURL(blob);
   a.download = `FormatTex_Export_${Date.now()}.docx`;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+}
+
+/* =========================================================
+   LOGIC XUẤT FILE JSON/JS ĐÁP ÁN THEO CẤU TRÚC ĐƠN ĐỀ HOẶC MULTI-SECTION
+   ========================================================= */
+
+/** Trích xuất tiêu đề Section nếu có trong mã LaTeX (ví dụ: \section{PHẦN I. ...}) */
+function extractSectionTitle(rawText) {
+  if (!rawText) return "";
+  let clean = rawText.replace(/(^|[^\\])%.*/g, '');
+  let m = clean.match(/\\section\*?\s*\{([^}]+)\}/i);
+  if (m) return m[1].trim();
+  m = clean.match(/\\part\*?\s*\{([^}]+)\}/i);
+  if (m) return m[1].trim();
+  return "";
+}
+
+/** Trích xuất đáp án từ một khối câu hỏi exContent */
+function extractAnswerFromEx(exContent) {
+  // 1. Trắc nghiệm 4 phương án \choice
+  if (/\\choice\b/i.test(exContent)) {
+    const choiceIdx = exContent.search(/\\choice\b/i);
+    const rest = exContent.substring(choiceIdx + 7);
+    const { groups } = extractMultipleBracedGroups(rest, 0);
+    const labels = ['A', 'B', 'C', 'D'];
+    let ans = "";
+    groups.slice(0, 4).forEach((g, idx) => {
+      if (/\\True\b/i.test(g)) ans = labels[idx];
+    });
+    return { type: 'TN', answer: ans };
+  }
+
+  // 2. Trắc nghiệm Đúng / Sai \choiceTF
+  if (/\\choiceTF[t]?\b/i.test(exContent)) {
+    const choiceIdx = exContent.search(/\\choiceTF[t]?\b/i);
+    const matchTF = exContent.match(/\\choiceTF[t]?\b/i);
+    const rest = exContent.substring(choiceIdx + matchTF[0].length);
+    const { groups } = extractMultipleBracedGroups(rest, 0);
+    const labels = ['a', 'b', 'c', 'd'];
+    const tfObj = {};
+    groups.slice(0, 4).forEach((g, idx) => {
+      const isTrue = /\\True\b/i.test(g);
+      tfObj[labels[idx]] = isTrue ? "Đúng" : "Sai";
+    });
+    return { type: 'DS', answer: tfObj };
+  }
+
+  // 3. Khai báo dạng \doa / \dienkt
+  if (/\\doa\b/i.test(exContent) || /\\dienkt\b/i.test(exContent)) {
+    const ansMatch = exContent.match(/%\s*\\ans\{([^}]+)\}/i);
+    let ans = ansMatch ? ansMatch[1].trim() : "";
+    return { type: 'KT', answer: ans };
+  }
+
+  // 4. Trả lời ngắn / Điền số \shortans
+  if (/\\dienkq\b/i.test(exContent) || /\\shortans\b/i.test(exContent)) {
+    const shortansMatch = exContent.match(/(?:%|\s|^)*\\shortans(?:\s*\[[^\]]*\])?\s*\{([^}]+)\}/i);
+    let ans = shortansMatch ? shortansMatch[1].trim().replace(/\$/g, '').trim() : "";
+    return { type: 'TLN', answer: ans };
+  }
+
+  return { type: 'UNKNOWN', answer: "" };
+}
+
+function exportAnswersToJSON() {
+  const inputEl = document.getElementById('input-web');
+  const rawText = inputEl ? inputEl.value : '';
+
+  if (!rawText.trim()) {
+    alert('Vui lòng nhập mã LaTeX vào ô Input trước!');
+    return;
+  }
+
+  // 1. Trích xuất mã đề (\made{...})
+  let examId = "EXAM_CODE";
+  const madeMatch = rawText.match(/\\def\\made\s*\{([^}]+)\}/i) || rawText.match(/\\made\s*\{([^}]+)\}/i);
+  if (madeMatch) {
+    examId = madeMatch[1].trim();
+  }
+
+  // 2. Trích xuất tên đề bài (\title{...} hoặc dùng examId)
+  let examTitle = examId;
+  const titleMatch = rawText.match(/\\title\s*\{([^}]+)\}/i);
+  if (titleMatch) {
+    examTitle = titleMatch[1].trim();
+  }
+
+  // 3. Phân tích các khối section / part
+  const sectionSplitRegex = /(?=\\section\*?\s*\{|\\part\*?\s*\{)/gi;
+  const rawSections = rawText.split(sectionSplitRegex).filter(s => s.trim().length > 0);
+
+  let outputJsContent = "";
+  const parsedSections = [];
+
+  rawSections.forEach((secStr) => {
+    const secTitle = extractSectionTitle(secStr);
+    const exRegex = /\\begin\{ex\}([\s\S]*?)\\end\{ex\}/gi;
+    let exMatch;
+    const secAnswers = {};
+    let qCount = 1;
+
+    while ((exMatch = exRegex.exec(secStr)) !== null) {
+      const res = extractAnswerFromEx(exMatch[1]);
+      secAnswers[qCount] = res.answer;
+      qCount++;
+    }
+
+    if (Object.keys(secAnswers).length > 0) {
+      parsedSections.push({
+        sectionName: secTitle || `Phần ${parsedSections.length + 1}`,
+        answers: secAnswers
+      });
+    }
+  });
+
+  if (parsedSections.length === 0) {
+    alert('Không tìm thấy bất kỳ câu hỏi \\begin{ex}...\\end{ex} nào!');
+    return;
+  }
+
+  // Nếu chỉ có 1 section (Đơn đề / Không chia phần)
+  if (parsedSections.length === 1 && !rawText.match(/\\section\*?\s*\{|\\part\*?\s*\{/i)) {
+    const singleAnswers = parsedSections[0].answers;
+    const jsData = {
+      examTitle: examTitle,
+      answers: singleAnswers
+    };
+
+    outputJsContent = `/* =========================================================
+   ĐÁP ÁN: ${examTitle.toUpperCase()} (Dạng Đơn Đề / Không chia phần)
+========================================================= */
+window.EXAM_ANSWERS_BANK = window.EXAM_ANSWERS_BANK || {};
+
+window.EXAM_ANSWERS_BANK[${JSON.stringify(examId)}] = ${JSON.stringify(jsData, null, 2)};
+`;
+  } else {
+    // Dạng Multi-Section
+    const jsData = {
+      examTitle: examTitle,
+      sections: parsedSections
+    };
+
+    outputJsContent = `/* =========================================================
+   ĐÁP ÁN: ${examTitle.toUpperCase()} (Dạng Multi-Section)
+========================================================= */
+window.EXAM_ANSWERS_BANK = window.EXAM_ANSWERS_BANK || {};
+
+window.EXAM_ANSWERS_BANK[${JSON.stringify(examId)}] = ${JSON.stringify(jsData, null, 2)};
+`;
+  }
+
+  // 4. Tải file .js về máy
+  const blob = new Blob([outputJsContent], { type: 'text/javascript;charset=utf-8' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  const safeFilename = examId.replace(/[^a-zA-Z0-9_\-]/g, '_');
+  a.download = `dapan_${safeFilename}.js`;
   document.body.appendChild(a);
   a.click();
   document.body.removeChild(a);
