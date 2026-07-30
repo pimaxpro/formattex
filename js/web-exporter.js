@@ -1,5 +1,5 @@
 /* =========================================================
-   FORMATTEX — WEB EXPORTER MODULE (ĐÃ TỐI ƯU & BỔ SUNG XUẤT JSON/JS ĐÁP ÁN)
+   FORMATTEX — WEB EXPORTER MODULE (ĐÃ TỐI ƯU & BỎ QUA CÂU HỎI COMMENT)
    ========================================================= */
 
 /** Trích xuất chính xác 1 nhóm ngoặc nhọn cân bằng {}, bỏ qua ngoặc thoát \{ và \} */
@@ -62,6 +62,18 @@ function cleanComments(text) {
   return text.split('\n').map(line => {
     if (/%\s*\\ans\{/i.test(line) || /%\s*\\shortans/i.test(line)) return line;
     return line.replace(/(^|[^\\])%.*/, '$1');
+  }).join('\n');
+}
+
+/** Bỏ qua hoàn toàn các dòng bị comment (bắt đầu bằng %) để không nhận nhầm câu hỏi bị ẩn */
+function removeCommentLinesAndBlocks(text) {
+  if (!text) return "";
+  return text.split('\n').filter(line => {
+    const trimmed = line.trim();
+    // Giữ lại nếu là comment chưa đáp án hệ thống
+    if (/^%\s*\\ans\{/i.test(trimmed) || /^%\s*\\shortans/i.test(trimmed)) return true;
+    // Bỏ qua dòng bị ẩn bằng comment
+    return !trimmed.startsWith('%');
   }).join('\n');
 }
 
@@ -187,7 +199,10 @@ function processWebExporter() {
   const outputEl = document.getElementById('output-web');
 
   if (!inputEl || !outputEl) return;
-  const rawText = inputEl.value;
+  
+  // Bỏ qua toàn bộ các dòng comment % trước khi tìm \begin{ex}
+  const rawText = removeCommentLinesAndBlocks(inputEl.value);
+
   if (!rawText.trim()) {
     alert('Vui lòng nhập mã LaTeX gốc vào ô Input!');
     return;
@@ -914,7 +929,9 @@ function extractAnswerFromEx(exContent) {
 
 function exportAnswersToJSON() {
   const inputEl = document.getElementById('input-web');
-  const rawText = inputEl ? inputEl.value : '';
+  
+  // Loại bỏ toàn bộ các dòng bị comment trước khi tách câu hỏi
+  const rawText = removeCommentLinesAndBlocks(inputEl ? inputEl.value : '');
 
   if (!rawText.trim()) {
     alert('Vui lòng nhập mã LaTeX vào ô Input trước!');
@@ -964,7 +981,7 @@ function exportAnswersToJSON() {
   });
 
   if (parsedSections.length === 0) {
-    alert('Không tìm thấy bất kỳ câu hỏi \\begin{ex}...\\end{ex} nào!');
+    alert('Không tìm thấy bất kỳ câu hỏi \\begin{ex}...\\end{ex} hợp lệ nào (hoặc tất cả đã bị comment)!');
     return;
   }
 
